@@ -18,8 +18,8 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
         InlineKeyboardButton(text="• ʜᴇʟᴘ •", callback_data="help"),
     )
     builder.row(
-        InlineKeyboardButton(text="🎬 ʜɪsᴛᴏʀʏ", callback_data="history"),
-        InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ • ↗", callback_data="support"),
+        InlineKeyboardButton(text="• ʜɪsᴛᴏʀʏ •", callback_data="history"),
+        InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ •", callback_data="support"),
     )
     builder.row(
         InlineKeyboardButton(
