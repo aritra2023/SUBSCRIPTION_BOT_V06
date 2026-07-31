@@ -1,45 +1,75 @@
-# [Project name]
+# Flix Verse Premium Bot
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A production-grade Telegram subscription bot for **Flix Verse** premium channels, built with Python + aiogram 3.x.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- **Bot workflow:** `cd bot && python main.py` (configured as "Flix Verse Telegram Bot")
+- **Bot username:** @PremiumVerse_Robot
+- **Restart bot:** Use the "Flix Verse Telegram Bot" workflow
 
 ## Stack
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- Python 3.11
+- aiogram 3.x (async Telegram bot framework)
+- Motor 3.x (async MongoDB driver)
+- python-dotenv (environment config)
+- MongoDB (database)
 
-## Where things live
+## Required Secrets
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+| Secret | Description |
+|--------|-------------|
+| `BOT_TOKEN` | Telegram bot token from BotFather |
+| `ADMIN_ID` | Admin's Telegram numeric user ID |
+| `MONGO_URI` | MongoDB Atlas connection string |
 
-## Architecture decisions
+## Where Things Live
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+```
+bot/
+├── handlers/       # Telegram handlers (start, subscription, wallet, history, admin)
+├── keyboards/      # Inline keyboards
+├── middlewares/    # DB injection middleware
+├── filters/        # Admin-only filter
+├── services/       # Business logic (users, plans, subscriptions, wallet)
+├── database/       # MongoDB connection & models
+├── utils/          # Helper functions
+├── config.py       # Loads env vars
+├── loader.py       # Bot + Dispatcher instances
+└── main.py         # Entry point
+```
 
-## Product
+## Admin Commands
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- `/admin` — Admin panel (stats, users, broadcast, set banner, manage plans)
+- `/addplan` — Add a new subscription plan (format: `name|Display Name|price|days|description`)
+- `/topup` — Top up a user's wallet balance
 
-## User preferences
+## User Features
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- `/start` — Welcome message with banner image + main menu
+- **BUY SUBSCRIPTION** — Browse and purchase plans
+- **VIEW PLAN** — Check active subscription
+- **HELP** — Bot usage guide
+- **HISTORY** — Transaction history
+- **SUPPORT** — Contact admin
+- **YOUR WALLET** — View wallet balance
+
+## First-Time Setup
+
+1. Start the bot with `/start`
+2. Set the banner image: `/admin` → 🖼 SET BANNER → send the anime image
+3. Use `/topup` to add balance to users' wallets before they can purchase
+
+## User Preferences
+
+- Python only (aiogram 3.x, no Node.js)
+- Exact UI clone from provided screenshot (blockquote formatting, exact button layout)
+- Modular structure following professional Telegram bot conventions
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
-
-## Pointers
-
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- After adding new plans, they appear immediately in the bot
+- Banner image is stored as a Telegram `file_id` in MongoDB (settings collection)
+- Wallet top-up is admin-only; users purchase with wallet balance

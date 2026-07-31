@@ -1,0 +1,1 @@
+- [Python bot setup](python-bot-setup.md) — Telegram bot uses Python 3.11 module + pip packages; workflow runs `cd bot && python main.py`
