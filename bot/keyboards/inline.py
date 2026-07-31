@@ -9,7 +9,7 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
 
     builder.row(
         InlineKeyboardButton(
-            text="⟳ BUY SUBSCRIPTION",
+            text="Ↄ BUY SUBSCRIPTION",
             callback_data="buy_subscription",
         )
     )
@@ -23,7 +23,7 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
     )
     builder.row(
         InlineKeyboardButton(
-            text="⟳ YOUR WALLET",
+            text="Ↄ YOUR WALLET",
             callback_data="wallet",
         )
     )

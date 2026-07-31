@@ -18,10 +18,10 @@ router = Router(name="start")
 def _build_welcome_text(user_id: int, first_name: str) -> str:
     mention = mention_html(user_id, first_name.upper())
     return (
-        f"<blockquote>HI THERE, {mention}! \u201d</blockquote>\n"
-        f"<blockquote>I AM <b>PREMIUM SUBSCRIPTION</b> BOT FOR <b>FLIX VERSE</b>. \u201d</blockquote>\n"
-        f'<blockquote><b>\u201cI CAN GET YOU INSTANT ACCESS TO OUR EXCLUSIVE PREMIUM CHANNELS RIGHT AWAY!!</b>\u201d</blockquote>\n'
-        f"<blockquote>— CLICK THE BUTTON TO SEE OUR PLANS! \u201d</blockquote>"
+        f"<blockquote expandable>HI THERE, {mention}!</blockquote>\n"
+        f"<blockquote expandable>I AM <b>PREMIUM SUBSCRIPTION</b> BOT FOR <b>FLIX VERSE</b>.</blockquote>\n"
+        f"<blockquote expandable><b>\u201cI CAN GET YOU INSTANT ACCESS TO OUR EXCLUSIVE PREMIUM CHANNELS RIGHT AWAY!!\u201d</b></blockquote>\n"
+        f"<blockquote expandable>— CLICK THE BUTTON TO SEE OUR PLANS!</blockquote>"
     )
 
 
