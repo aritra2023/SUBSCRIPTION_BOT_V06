@@ -4,6 +4,16 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 
+# Duration options available for plans (days, display label)
+DURATION_OPTIONS: list[tuple[int, str]] = [
+    (15,    "15 ᴅᴀʏs"),
+    (30,    "1 ᴍᴏɴᴛʜ"),
+    (90,    "3 ᴍᴏɴᴛʜs"),
+    (180,   "6 ᴍᴏɴᴛʜs"),
+    (36500, "ʟɪғᴇᴛɪᴍᴇ"),
+]
+
+
 def main_menu_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
@@ -35,9 +45,18 @@ def plans_keyboard(plans: list[dict]) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     for plan in plans:
+        durations = plan.get("durations", [])
+        if durations:
+            min_price = min(d["price"] for d in durations)
+            price_str = f"₹{min_price:.0f}+"
+        elif plan.get("price"):
+            price_str = f"₹{plan['price']}"
+        else:
+            price_str = ""
+
         builder.row(
             InlineKeyboardButton(
-                text=f"💎 {plan['display_name']} — ₹{plan['price']} / {plan['duration_days']}d",
+                text=f"💎 {plan['display_name']} — {price_str}",
                 callback_data=f"plan_select:{plan['name']}",
             )
         )
@@ -49,14 +68,36 @@ def plans_keyboard(plans: list[dict]) -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-def confirm_plan_keyboard(plan_name: str) -> InlineKeyboardMarkup:
+def duration_keyboard(plan_name: str, durations: list[dict]) -> InlineKeyboardMarkup:
+    """Shown to user after selecting a plan — pick a duration tier."""
+    builder = InlineKeyboardBuilder()
+
+    for tier in durations:
+        builder.row(
+            InlineKeyboardButton(
+                text=f"⏱ {tier['label']} — ₹{tier['price']:.0f}",
+                callback_data=f"plan_duration:{plan_name}:{tier['days']}",
+            )
+        )
+
+    builder.row(
+        InlineKeyboardButton(text="« BACK", callback_data="buy_subscription"),
+    )
+
+    return builder.as_markup()
+
+
+def confirm_plan_keyboard(plan_name: str, days: int) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     builder.row(
-        InlineKeyboardButton(text="✅ CONFIRM PURCHASE", callback_data=f"plan_confirm:{plan_name}"),
+        InlineKeyboardButton(
+            text="✅ CONFIRM PURCHASE",
+            callback_data=f"plan_confirm:{plan_name}:{days}",
+        ),
     )
     builder.row(
-        InlineKeyboardButton(text="« BACK", callback_data="buy_subscription"),
+        InlineKeyboardButton(text="« BACK", callback_data=f"plan_select:{plan_name}"),
     )
 
     return builder.as_markup()
@@ -115,4 +156,25 @@ def cancel_keyboard() -> InlineKeyboardMarkup:
     builder.row(
         InlineKeyboardButton(text="✖ CANCEL", callback_data="admin_cancel"),
     )
+    return builder.as_markup()
+
+
+def admin_duration_select_keyboard(selected: list[int]) -> InlineKeyboardMarkup:
+    """Multi-select keyboard for admin to choose which duration tiers to offer."""
+    builder = InlineKeyboardBuilder()
+
+    for days, label in DURATION_OPTIONS:
+        check = "✅" if days in selected else "☑️"
+        builder.row(
+            InlineKeyboardButton(
+                text=f"{check} {label}",
+                callback_data=f"adm_dur:{days}",
+            )
+        )
+
+    builder.row(
+        InlineKeyboardButton(text="✅ Done", callback_data="adm_dur_done"),
+        InlineKeyboardButton(text="✖ Cancel", callback_data="admin_cancel"),
+    )
+
     return builder.as_markup()

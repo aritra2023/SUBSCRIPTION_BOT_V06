@@ -75,7 +75,7 @@ async def auto_renew_loop() -> None:
                         uid,
                         f"✅ <b>ᴀᴜᴛᴏ-ʀᴇɴᴇᴡᴀʟ sᴜᴄᴄᴇssғᴜʟ</b>\n\n"
                         f"➲ ᴘʟᴀɴ : <b>{plan_name_sc}</b>\n"
-                        f"➲ ₹<b>{plan.get('price', 0):.2f}</b> ᴅᴇᴅᴜᴄᴛᴇᴅ ғʀᴏᴍ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ\n"
+                        f"➲ ₹<b>{r.get('price_paid', 0):.2f}</b> ᴅᴇᴅᴜᴄᴛᴇᴅ ғʀᴏᴍ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ\n"
                         f"➲ ᴠᴀʟɪᴅ ᴛɪʟʟ : <b>{end}</b>",
                         parse_mode="HTML",
                     )

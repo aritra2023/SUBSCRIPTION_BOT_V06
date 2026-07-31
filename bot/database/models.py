@@ -10,22 +10,37 @@ class UserDoc(TypedDict, total=False):
     first_name: str
     last_name: Optional[str]
     wallet_balance: float
+    referral_points: int
+    auto_renew: bool
     joined_at: datetime
     is_banned: bool
+
+
+class DurationTier(TypedDict):
+    days: int
+    label: str
+    price: float
 
 
 class PlanDoc(TypedDict, total=False):
     name: str
     display_name: str
+    description: str
+    demo_link: str
+    payment_proof_required: bool
+    durations: list[DurationTier]   # multiple duration tiers
+    channels: list[str]
+    is_active: bool
+    # Legacy single-tier fields (backward compat)
     price: float
     duration_days: int
-    description: str
-    is_active: bool
 
 
 class SubscriptionDoc(TypedDict, total=False):
     user_id: int
     plan_name: str
+    duration_days: int      # chosen tier
+    price_paid: float       # price paid for that tier
     start_date: datetime
     end_date: datetime
     is_active: bool
