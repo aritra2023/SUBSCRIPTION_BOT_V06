@@ -208,6 +208,82 @@ async def topup_wallet(user_id: int, amount: float, description: str = "Admin to
     await db.transactions.insert_one(dict(txn))
 
 
+# ── Auto-Renew ────────────────────────────────────────────────────────────────
+
+async def process_auto_renewals(bot_instance=None) -> list[dict]:
+    """
+    Find all expired subscriptions where the user has auto_renew=True,
+    attempt to charge their wallet and renew. Returns a list of result dicts
+    so the caller can notify users.
+    """
+    db = get_db()
+    now = now_utc()
+
+    # Fetch expired-but-active subscriptions
+    cursor = db.subscriptions.find({"is_active": True, "end_date": {"$lte": now}})
+    expired = await cursor.to_list(length=None)
+
+    results = []
+    for sub in expired:
+        user_id = sub["user_id"]
+        plan_name = sub.get("plan_name")
+
+        user = await get_user(user_id)
+        if user is None or not user.get("auto_renew", False):
+            # Mark subscription inactive so it doesn't keep showing up
+            await db.subscriptions.update_one(
+                {"user_id": user_id},
+                {"$set": {"is_active": False}},
+            )
+            continue
+
+        plan = await get_plan(plan_name) if plan_name else None
+        if plan is None or not plan.get("is_active", False):
+            await db.subscriptions.update_one(
+                {"user_id": user_id},
+                {"$set": {"is_active": False}},
+            )
+            results.append({"user_id": user_id, "status": "no_plan"})
+            continue
+
+        price = plan["price"]
+        balance = user.get("wallet_balance", 0.0)
+
+        if balance < price:
+            # Not enough funds — deactivate and notify
+            await db.subscriptions.update_one(
+                {"user_id": user_id},
+                {"$set": {"is_active": False}},
+            )
+            results.append({"user_id": user_id, "status": "insufficient_funds", "plan": plan})
+            logger.info("Auto-renew failed (low balance) for user %d", user_id)
+        else:
+            # Deduct and extend
+            end_date = now + timedelta(days=plan["duration_days"])
+            await db.users.update_one(
+                {"user_id": user_id},
+                {"$inc": {"wallet_balance": -price}},
+            )
+            await db.subscriptions.update_one(
+                {"user_id": user_id},
+                {"$set": {"plan_name": plan["name"], "start_date": now, "end_date": end_date, "is_active": True}},
+            )
+            txn: TransactionDoc = {
+                "user_id": user_id,
+                "amount": -price,
+                "type": "purchase",
+                "plan_name": plan["name"],
+                "description": f"Auto-renewal: {plan['display_name']}",
+                "created_at": now,
+                "status": "completed",
+            }
+            await db.transactions.insert_one(dict(txn))
+            results.append({"user_id": user_id, "status": "renewed", "plan": plan, "end_date": end_date})
+            logger.info("Auto-renewed plan %s for user %d", plan["name"], user_id)
+
+    return results
+
+
 # ── Settings ──────────────────────────────────────────────────────────────────
 
 async def get_setting(key: str) -> Optional[str]:
