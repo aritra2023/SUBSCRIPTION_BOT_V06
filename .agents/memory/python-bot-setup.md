@@ -1,10 +1,10 @@
 ---
 name: Python bot setup
-description: How Python is installed and the Telegram bot runs in this workspace
+description: Durable operational notes for the Flix Verse Telegram bot on Replit
 ---
 
-Python 3.11 is installed via the `installProgrammingLanguage` module. Packages (aiogram, motor, python-dotenv) installed via `installLanguagePackages`. The bot runs via a console workflow named "Flix Verse Telegram Bot" with command `cd bot && python main.py`.
+Packages must be installed via `installLanguagePackages({ language: "python", ... })` — direct pip calls fail due to Nix store permissions. The `.pythonlibs` directory is already on `sys.path` so user-installed packages are picked up automatically.
 
-**Why:** pnpm monorepo template doesn't include Python by default; it must be installed as a module before pip packages work.
+**Why:** The Nix store is read-only; pip with `--target` or without `PYTHONUSERBASE` override fails silently or errors. Only the Replit package manager callback writes to the correct user site-packages path.
 
-**How to apply:** Any future Python package installs use `installLanguagePackages({ language: "python", packages: [...] })`. Restart the "Flix Verse Telegram Bot" workflow after code changes.
+**How to apply:** Any future Python dependency changes should use `installLanguagePackages`. Node version must stay at nodejs-24 (or newer) to satisfy the pnpm workspace lockfile — do not downgrade it when adding Python support.
