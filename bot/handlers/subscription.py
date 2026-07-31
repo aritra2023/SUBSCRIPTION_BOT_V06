@@ -199,17 +199,14 @@ async def cb_view_plan(callback: CallbackQuery) -> None:
 @router.callback_query(lambda c: c.data == "help")
 async def cb_help(callback: CallbackQuery) -> None:
     text = (
-        "<blockquote><b>ℹ️ HELP — FLIX VERSE BOT</b></blockquote>\n\n"
-        "<b>⟳ BUY SUBSCRIPTION</b> — Browse and purchase premium plans.\n"
-        "<b>• VIEW PLAN •</b> — Check your current active plan.\n"
-        "<b>🎬 HISTORY</b> — View your transaction history.\n"
-        "<b>• SUPPORT •</b> — Contact our support team.\n"
-        "<b>⟳ YOUR WALLET</b> — View wallet balance.\n\n"
-        "<b>How it works:</b>\n"
-        "1. Top up your wallet via the admin or payment link.\n"
-        "2. Browse plans and confirm your purchase.\n"
-        "3. You get instant access to all premium channels!\n\n"
-        "For any issues, contact <b>Support</b>."
+        "<blockquote><b>ABOUT THIS BOT</b></blockquote>\n\n"
+        "I AM AN ADVANCED <b>PREMIUM MANAGEMENT BOT</b> DESIGNED TO GRANT "
+        "YOU INSTANT ACCESS TO EXCLUSIVE CHANNELS AND BOTS!\n\n"
+        "✦ HOW IT WORKS ✦\n\n"
+        "• SELECT YOUR FAVORITE BOTS OR CHOOSE A <b>COMBO PLAN</b> FOR MASSIVE DISCOUNTS.\n"
+        "• PAY VIA UPI/QR AND SEND THE SCREENSHOT USING /bought.\n"
+        "• ONCE VERIFIED, YOUR PREMIUM IS ACTIVATED AUTOMATICALLY ACROSS ALL SELECTED BOTS!!\n\n"
+        "◈ OWNER: ToBi"
     )
 
     try:
