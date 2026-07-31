@@ -62,6 +62,27 @@ def confirm_plan_keyboard(plan_name: str) -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
+def wallet_keyboard(auto_renew: bool = True) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+
+    builder.row(
+        InlineKeyboardButton(text="Ↄ ᴀᴅᴅ ʙᴀʟᴀɴᴄᴇ", callback_data="add_balance")
+    )
+    renew_label = "ᴏɴ" if auto_renew else "ᴏғғ"
+    builder.row(
+        InlineKeyboardButton(
+            text=f"🟢 ᴀᴜᴛᴏ-ʀᴇɴᴇᴡ: {renew_label}",
+            callback_data="toggle_auto_renew",
+        )
+    )
+    builder.row(
+        InlineKeyboardButton(text="‹ ʙᴀᴄᴋ", callback_data="back_main"),
+        InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ • ↗", callback_data="support"),
+    )
+
+    return builder.as_markup()
+
+
 def back_main_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(

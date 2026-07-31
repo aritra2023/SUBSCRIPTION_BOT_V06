@@ -22,6 +22,8 @@ async def get_or_create_user(user_id: int, first_name: str, username: Optional[s
             "first_name": first_name,
             "last_name": last_name,
             "wallet_balance": 0.0,
+            "referral_points": 0,
+            "auto_renew": True,
             "joined_at": now_utc(),
             "is_banned": False,
         }
@@ -147,6 +149,34 @@ async def purchase_subscription(user_id: int, plan: PlanDoc) -> bool:
 
 
 # ── Transactions ──────────────────────────────────────────────────────────────
+
+async def get_wallet_stats(user_id: int) -> tuple[float, int, float, int, float]:
+    """Returns (today_amount, today_count, total_dep_amount, total_dep_count, total_spent)."""
+    db = get_db()
+    now = now_utc()
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    # Today's top-ups
+    today_cursor = db.transactions.find(
+        {"user_id": user_id, "type": "topup", "created_at": {"$gte": today_start}}
+    )
+    today_txns = await today_cursor.to_list(length=None)
+    today_amount = sum(t.get("amount", 0.0) for t in today_txns)
+    today_count = len(today_txns)
+
+    # All-time top-ups
+    total_cursor = db.transactions.find({"user_id": user_id, "type": "topup"})
+    total_txns = await total_cursor.to_list(length=None)
+    total_dep_amount = sum(t.get("amount", 0.0) for t in total_txns)
+    total_dep_count = len(total_txns)
+
+    # Total spent (purchases)
+    spent_cursor = db.transactions.find({"user_id": user_id, "type": "purchase"})
+    spent_txns = await spent_cursor.to_list(length=None)
+    total_spent = sum(abs(t.get("amount", 0.0)) for t in spent_txns)
+
+    return today_amount, today_count, total_dep_amount, total_dep_count, total_spent
+
 
 async def get_user_transactions(user_id: int, limit: int = 10) -> list[TransactionDoc]:
     db = get_db()
