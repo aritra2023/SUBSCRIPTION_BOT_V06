@@ -32,15 +32,15 @@ async def cb_wallet(callback: CallbackQuery) -> None:
     name_sc = to_small_caps(first_name)
 
     text = (
-        f"Ↄ ɴᴀᴍᴇ : <b>{name_sc}</b>\n"
-        f"Ↄ ᴜsᴇʀ ɪᴅ : <a href=\"tg://user?id={user_id}\">{user_id}</a>\n"
-        f"Ↄ ʙᴀʟᴀɴᴄᴇ : <b>₹{balance:.2f}</b>\n"
-        f"Ↄ ʀᴇғᴇʀʀᴀʟ ᴘᴏɪɴᴛs : <b>{referral_points}</b>\n\n"
-        f"<blockquote expandable><b>Ↄ ᴛᴏᴅᴀʏ ʏᴏᴜ ᴅᴇᴘᴏsɪᴛᴇᴅ: ₹{today_amount:.2f}</b>\n"
+        f"➲ ɴᴀᴍᴇ : <b>{name_sc}</b>\n"
+        f"➲ ᴜsᴇʀ ɪᴅ : <a href=\"tg://user?id={user_id}\">{user_id}</a>\n"
+        f"➲ ʙᴀʟᴀɴᴄᴇ : <b>₹{balance:.2f}</b>\n"
+        f"➲ ʀᴇғᴇʀʀᴀʟ ᴘᴏɪɴᴛs : <b>{referral_points}</b>\n\n"
+        f"<blockquote expandable><b>➲ ᴛᴏᴅᴀʏ ʏᴏᴜ ᴅᴇᴘᴏsɪᴛᴇᴅ: ₹{today_amount:.2f}</b>\n"
         f"▸ ᴛʜʀᴏᴜɢʜ <b>{today_count}</b> ᴛʀᴀɴsᴀᴄᴛɪᴏɴs.</blockquote>\n"
-        f"<blockquote expandable><b>Ↄ ᴛᴏᴛᴀʟ ʏᴏᴜ ᴅᴇᴘᴏsɪᴛᴇᴅ: ₹{total_dep_amount:.2f}</b>\n"
+        f"<blockquote expandable><b>➲ ᴛᴏᴛᴀʟ ʏᴏᴜ ᴅᴇᴘᴏsɪᴛᴇᴅ: ₹{total_dep_amount:.2f}</b>\n"
         f"▸ ᴛʜʀᴏᴜɢʜ <b>{total_dep_count}</b> ᴛʀᴀɴsᴀᴄᴛɪᴏɴs.</blockquote>\n\n"
-        f"Ↄ ᴛᴏᴛᴀʟ ʏᴏᴜ sᴘᴇɴᴛ: ₹{total_spent:.2f}"
+        f"➲ ᴛᴏᴛᴀʟ ʏᴏᴜ sᴘᴇɴᴛ: ₹{total_spent:.2f}"
     )
 
     try:
@@ -86,15 +86,15 @@ async def cb_toggle_auto_renew(callback: CallbackQuery) -> None:
     name_sc = to_small_caps(first_name)
 
     text = (
-        f"Ↄ ɴᴀᴍᴇ : <b>{name_sc}</b>\n"
-        f"Ↄ ᴜsᴇʀ ɪᴅ : <a href=\"tg://user?id={user_id}\">{user_id}</a>\n"
-        f"Ↄ ʙᴀʟᴀɴᴄᴇ : <b>₹{balance:.2f}</b>\n"
-        f"Ↄ ʀᴇғᴇʀʀᴀʟ ᴘᴏɪɴᴛs : <b>{referral_points}</b>\n\n"
-        f"<blockquote expandable><b>Ↄ ᴛᴏᴅᴀʏ ʏᴏᴜ ᴅᴇᴘᴏsɪᴛᴇᴅ: ₹{today_amount:.2f}</b>\n"
+        f"➲ ɴᴀᴍᴇ : <b>{name_sc}</b>\n"
+        f"➲ ᴜsᴇʀ ɪᴅ : <a href=\"tg://user?id={user_id}\">{user_id}</a>\n"
+        f"➲ ʙᴀʟᴀɴᴄᴇ : <b>₹{balance:.2f}</b>\n"
+        f"➲ ʀᴇғᴇʀʀᴀʟ ᴘᴏɪɴᴛs : <b>{referral_points}</b>\n\n"
+        f"<blockquote expandable><b>➲ ᴛᴏᴅᴀʏ ʏᴏᴜ ᴅᴇᴘᴏsɪᴛᴇᴅ: ₹{today_amount:.2f}</b>\n"
         f"▸ ᴛʜʀᴏᴜɢʜ <b>{today_count}</b> ᴛʀᴀɴsᴀᴄᴛɪᴏɴs.</blockquote>\n"
-        f"<blockquote expandable><b>Ↄ ᴛᴏᴛᴀʟ ʏᴏᴜ ᴅᴇᴘᴏsɪᴛᴇᴅ: ₹{total_dep_amount:.2f}</b>\n"
+        f"<blockquote expandable><b>➲ ᴛᴏᴛᴀʟ ʏᴏᴜ ᴅᴇᴘᴏsɪᴛᴇᴅ: ₹{total_dep_amount:.2f}</b>\n"
         f"▸ ᴛʜʀᴏᴜɢʜ <b>{total_dep_count}</b> ᴛʀᴀɴsᴀᴄᴛɪᴏɴs.</blockquote>\n\n"
-        f"Ↄ ᴛᴏᴛᴀʟ ʏᴏᴜ sᴘᴇɴᴛ: ₹{total_spent:.2f}"
+        f"➲ ᴛᴏᴛᴀʟ ʏᴏᴜ sᴘᴇɴᴛ: ₹{total_spent:.2f}"
     )
 
     try:

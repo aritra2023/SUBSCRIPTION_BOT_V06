@@ -74,17 +74,17 @@ async def auto_renew_loop() -> None:
                     await bot.send_message(
                         uid,
                         f"✅ <b>ᴀᴜᴛᴏ-ʀᴇɴᴇᴡᴀʟ sᴜᴄᴄᴇssғᴜʟ</b>\n\n"
-                        f"Ↄ ᴘʟᴀɴ : <b>{plan_name_sc}</b>\n"
-                        f"Ↄ ₹<b>{plan.get('price', 0):.2f}</b> ᴅᴇᴅᴜᴄᴛᴇᴅ ғʀᴏᴍ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ\n"
-                        f"Ↄ ᴠᴀʟɪᴅ ᴛɪʟʟ : <b>{end}</b>",
+                        f"➲ ᴘʟᴀɴ : <b>{plan_name_sc}</b>\n"
+                        f"➲ ₹<b>{plan.get('price', 0):.2f}</b> ᴅᴇᴅᴜᴄᴛᴇᴅ ғʀᴏᴍ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ\n"
+                        f"➲ ᴠᴀʟɪᴅ ᴛɪʟʟ : <b>{end}</b>",
                         parse_mode="HTML",
                     )
                 elif status == "insufficient_funds":
                     await bot.send_message(
                         uid,
                         f"⚠️ <b>ᴀᴜᴛᴏ-ʀᴇɴᴇᴡᴀʟ ғᴀɪʟᴇᴅ</b>\n\n"
-                        f"Ↄ ᴘʟᴀɴ : <b>{plan_name_sc}</b>\n"
-                        f"Ↄ ɪɴsᴜғғɪᴄɪᴇɴᴛ ᴡᴀʟʟᴇᴛ ʙᴀʟᴀɴᴄᴇ.\n\n"
+                        f"➲ ᴘʟᴀɴ : <b>{plan_name_sc}</b>\n"
+                        f"➲ ɪɴsᴜғғɪᴄɪᴇɴᴛ ᴡᴀʟʟᴇᴛ ʙᴀʟᴀɴᴄᴇ.\n\n"
                         f"ᴘʟᴇᴀsᴇ ᴀᴅᴅ ғᴜɴᴅs ᴀɴᴅ ʀᴇɴᴇᴡ ᴍᴀɴᴜᴀʟʟʏ.",
                         parse_mode="HTML",
                     )

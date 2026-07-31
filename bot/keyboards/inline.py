@@ -9,7 +9,7 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
 
     builder.row(
         InlineKeyboardButton(
-            text="Ↄ ʙᴜʏ sᴜʙsᴄʀɪᴘᴛɪᴏɴ",
+            text="➲ ʙᴜʏ sᴜʙsᴄʀɪᴘᴛɪᴏɴ",
             callback_data="buy_subscription",
         )
     )
@@ -23,7 +23,7 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
     )
     builder.row(
         InlineKeyboardButton(
-            text="Ↄ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ",
+            text="➲ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ",
             callback_data="wallet",
         )
     )
@@ -66,7 +66,7 @@ def wallet_keyboard(auto_renew: bool = True) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     builder.row(
-        InlineKeyboardButton(text="Ↄ ᴀᴅᴅ ʙᴀʟᴀɴᴄᴇ", callback_data="add_balance")
+        InlineKeyboardButton(text="➲ ᴀᴅᴅ ʙᴀʟᴀɴᴄᴇ", callback_data="add_balance")
     )
     renew_emoji = "🟢" if auto_renew else "🔴"
     renew_label = "ᴏɴ" if auto_renew else "ᴏғғ"
