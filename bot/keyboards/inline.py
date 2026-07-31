@@ -9,21 +9,21 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
 
     builder.row(
         InlineKeyboardButton(
-            text="Ↄ BUY SUBSCRIPTION",
+            text="Ↄ ʙᴜʏ sᴜʙsᴄʀɪᴘᴛɪᴏɴ",
             callback_data="buy_subscription",
         )
     )
     builder.row(
-        InlineKeyboardButton(text="• VIEW PLAN •", callback_data="view_plan"),
-        InlineKeyboardButton(text="• HELP •", callback_data="help"),
+        InlineKeyboardButton(text="• ᴠɪᴇᴡ ᴘʟᴀɴ •", callback_data="view_plan"),
+        InlineKeyboardButton(text="• ʜᴇʟᴘ •", callback_data="help"),
     )
     builder.row(
-        InlineKeyboardButton(text="🎬 HISTORY", callback_data="history"),
-        InlineKeyboardButton(text="• SUPPORT • ↗", callback_data="support"),
+        InlineKeyboardButton(text="🎬 ʜɪsᴛᴏʀʏ", callback_data="history"),
+        InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ • ↗", callback_data="support"),
     )
     builder.row(
         InlineKeyboardButton(
-            text="Ↄ YOUR WALLET",
+            text="Ↄ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ",
             callback_data="wallet",
         )
     )
