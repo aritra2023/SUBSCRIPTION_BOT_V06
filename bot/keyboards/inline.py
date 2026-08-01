@@ -92,21 +92,27 @@ def plans_keyboard(plans: list[dict]) -> InlineKeyboardMarkup:
         )
 
     builder.row(
-        InlineKeyboardButton(text="« ʙᴀᴄᴋ", callback_data="buy_subscription", style="primary"),
+        InlineKeyboardButton(text="« ʙᴀᴄᴋ", callback_data="buy_subscription", style="danger"),
     )
 
     return builder.as_markup()
 
 
-def duration_keyboard(plan_name: str, durations: list[dict]) -> InlineKeyboardMarkup:
+def duration_keyboard(plan_name: str, durations: list[dict], demo_link: str = "") -> InlineKeyboardMarkup:
     """Shown after selecting a plan — pick a duration tier, 2 per row."""
     builder = InlineKeyboardBuilder()
+
+    # Demo channel link at top as red button
+    if demo_link:
+        builder.row(
+            InlineKeyboardButton(text="🎥 ᴅᴇᴍᴏ ᴄʜᴀɴɴᴇʟ", url=demo_link, style="danger"),
+        )
 
     buttons = [
         InlineKeyboardButton(
             text=tier["label"],
             callback_data=f"plan_duration:{plan_name}:{tier['days']}",
-            style="primary",
+            style="success",
         )
         for tier in durations
     ]
@@ -116,9 +122,26 @@ def duration_keyboard(plan_name: str, durations: list[dict]) -> InlineKeyboardMa
         builder.row(*buttons[i : i + 2])
 
     builder.row(
-        InlineKeyboardButton(text="« ʙᴀᴄᴋ", callback_data="buy_category_channel", style="primary"),
+        InlineKeyboardButton(text="« ʙᴀᴄᴋ", callback_data="buy_category_channel", style="danger"),
     )
 
+    return builder.as_markup()
+
+
+def subscription_activated_keyboard(channels: list[str]) -> InlineKeyboardMarkup:
+    """Shown after subscription is activated — green join buttons + back."""
+    builder = InlineKeyboardBuilder()
+    for i, link in enumerate(channels, 1):
+        builder.row(
+            InlineKeyboardButton(
+                text=f"➲ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ {i}" if len(channels) > 1 else "➲ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ",
+                url=link,
+                style="success",
+            )
+        )
+    builder.row(
+        InlineKeyboardButton(text="« ʙᴀᴄᴋ ᴛᴏ ᴍᴇɴᴜ", callback_data="back_main", style="primary"),
+    )
     return builder.as_markup()
 
 

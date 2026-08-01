@@ -18,6 +18,7 @@ from keyboards.inline import (
     help_keyboard,
     no_plan_keyboard,
     plans_keyboard,
+    subscription_activated_keyboard,
 )
 from services.subscription import (
     get_active_plans,
@@ -141,8 +142,9 @@ async def cb_plan_select(callback: CallbackQuery) -> None:
     text += footer
 
     # Duration keyboard if plan has tiers, else legacy single-tier confirm
+    demo_link = plan.get("demo_link", "") or ""
     if durations:
-        keyboard = duration_keyboard(plan_name, durations)
+        keyboard = duration_keyboard(plan_name, durations, demo_link=demo_link)
     else:
         keyboard = confirm_plan_keyboard(plan_name, plan.get("duration_days", 30))
 
@@ -249,10 +251,9 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
             f"<b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
             f"<b>ᴅᴜʀᴀᴛɪᴏɴ:</b> {duration_label}\n"
             f"<b>ᴀᴍᴏᴜɴᴛ ᴘᴀɪᴅ:</b> ₹{price:.0f}\n\n"
-            f"ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ <b>ғʟɪx ᴠᴇʀsᴇ</b> ᴘʀᴇᴍɪᴜᴍ! 🎉\n"
+            f"ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ <b>ғʟɪx ᴠᴇʀsᴇ</b> ᴘʀᴇᴍɪᴜᴍ! 🎉"
         )
-        if channel_links:
-            text += f"\n<b>ʏᴏᴜʀ ᴄʜᴀɴɴᴇʟs:</b>\n{channel_links}"
+        activated_keyboard = subscription_activated_keyboard(channels) if channels else back_main_keyboard()
 
         # Notify admin about the purchase
         fu = callback.from_user
@@ -281,14 +282,15 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
             "ᴘʟᴇᴀsᴇ ᴛᴏᴘ ᴜᴘ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ ᴀɴᴅ ᴛʀʏ ᴀɢᴀɪɴ."
         )
 
+    reply_kb = activated_keyboard if success else back_main_keyboard()
     try:
         if callback.message and callback.message.photo:
             await callback.message.edit_caption(
-                caption=text, parse_mode=ParseMode.HTML, reply_markup=back_main_keyboard()
+                caption=text, parse_mode=ParseMode.HTML, reply_markup=reply_kb
             )
         elif callback.message:
             await callback.message.edit_text(
-                text=text, parse_mode=ParseMode.HTML, reply_markup=back_main_keyboard()
+                text=text, parse_mode=ParseMode.HTML, reply_markup=reply_kb
             )
     except Exception:
         pass
