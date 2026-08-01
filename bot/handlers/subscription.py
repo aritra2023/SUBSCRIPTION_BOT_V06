@@ -10,6 +10,7 @@ from keyboards.inline import (
     back_main_keyboard,
     confirm_plan_keyboard,
     duration_keyboard,
+    help_keyboard,
     no_plan_keyboard,
     plans_keyboard,
 )
@@ -279,13 +280,16 @@ async def cb_view_plan(callback: CallbackQuery) -> None:
 @router.callback_query(lambda c: c.data == "help")
 async def cb_help(callback: CallbackQuery) -> None:
     text = (
-        "<blockquote expandable><b>ᴀʙᴏᴜᴛ ᴛʜɪs ʙᴏᴛ</b>\n\n"
+        "<blockquote><b>ᴀʙᴏᴜᴛ ᴛʜɪs ʙᴏᴛ</b>\n\n"
         "ɪ ᴀᴍ ᴀɴ ᴀᴅᴠᴀɴᴄᴇᴅ <b>ᴘʀᴇᴍɪᴜᴍ ᴍᴀɴᴀɢᴇᴍᴇɴᴛ ʙᴏᴛ</b> ᴅᴇsɪɢɴᴇᴅ ᴛᴏ ɢʀᴀɴᴛ "
         "ʏᴏᴜ ɪɴsᴛᴀɴᴛ ᴀᴄᴄᴇss ᴛᴏ ᴇxᴄʟᴜsɪᴠᴇ ᴄʜᴀɴɴᴇʟs ᴀɴᴅ ʙᴏᴛs!</blockquote>\n\n"
-        "<blockquote expandable>\" ʜᴏᴡ ɪᴛ ᴡᴏʀᴋs \"\n\n"
+        "<blockquote><b>\" ʜᴏᴡ ɪᴛ ᴡᴏʀᴋs \"</b>\n\n"
         "• sᴇʟᴇᴄᴛ ʏᴏᴜʀ ғᴀᴠᴏʀɪᴛᴇ ʙᴏᴛs ᴏʀ ᴄʜᴏᴏsᴇ ᴀ <b>ᴄᴏᴍʙᴏ ᴘʟᴀɴ</b> ғᴏʀ ᴍᴀssɪᴠᴇ ᴅɪsᴄᴏᴜɴᴛs.\n"
         "• ᴘᴀʏ ᴠɪᴀ ᴜᴘɪ/ǫʀ ᴀɴᴅ sᴇɴᴅ ᴛʜᴇ sᴄʀᴇᴇɴsʜᴏᴛ.\n"
         "• ᴏɴᴄᴇ ᴠᴇʀɪғɪᴇᴅ, ʏᴏᴜʀ ᴘʀᴇᴍɪᴜᴍ ɪs ᴀᴄᴛɪᴠᴀᴛᴇᴅ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴀᴄʀᴏss ᴀʟʟ sᴇʟᴇᴄᴛᴇᴅ ʙᴏᴛs ᴀɴᴅ ᴄʜᴀɴɴᴇʟs!!</blockquote>\n\n"
+        "<blockquote><b>\" ᴜsᴇғᴜʟ ᴄᴏᴍᴍᴀɴᴅs \"</b>\n\n"
+        "/start — ʀᴇsᴛᴀʀᴛ ᴛʜᴇ ʙᴏᴛ\n"
+        "/myplan — ᴄʜᴇᴄᴋ ʏᴏᴜʀ ᴀᴄᴛɪᴠᴇ sᴜʙsᴄʀɪᴘᴛɪᴏɴs ᴀɴᴅ ᴇxᴘɪʀʏ</blockquote>\n\n"
         "◈ ᴏᴡɴᴇʀ: ToBi"
     )
 
@@ -294,17 +298,29 @@ async def cb_help(callback: CallbackQuery) -> None:
             await callback.message.edit_caption(
                 caption=text,
                 parse_mode=ParseMode.HTML,
-                reply_markup=back_main_keyboard(),
+                reply_markup=help_keyboard(),
             )
         elif callback.message:
             await callback.message.edit_text(
                 text=text,
                 parse_mode=ParseMode.HTML,
-                reply_markup=back_main_keyboard(),
+                reply_markup=help_keyboard(),
             )
     except Exception:
         pass
 
+    await callback.answer()
+
+
+# ── Help Close ────────────────────────────────────────────────────────────────
+
+@router.callback_query(lambda c: c.data == "help_close")
+async def cb_help_close(callback: CallbackQuery) -> None:
+    try:
+        if callback.message:
+            await callback.message.delete()
+    except Exception:
+        pass
     await callback.answer()
 
 
