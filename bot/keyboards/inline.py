@@ -10,6 +10,7 @@ DURATION_OPTIONS: list[tuple[int, str]] = [
     (30,    "1 ᴍᴏɴᴛʜ"),
     (90,    "3 ᴍᴏɴᴛʜs"),
     (180,   "6 ᴍᴏɴᴛʜs"),
+    (365,   "12 ᴍᴏɴᴛʜs"),
     (36500, "ʟɪғᴇᴛɪᴍᴇ"),
 ]
 
@@ -234,6 +235,49 @@ def no_plan_keyboard() -> InlineKeyboardMarkup:
     )
     builder.row(
         InlineKeyboardButton(text="➲ ʙᴀᴄᴋ", callback_data="back_main", style="primary"),
+    )
+    return builder.as_markup()
+
+
+def admin_plan_list_keyboard(plans: list[dict]) -> InlineKeyboardMarkup:
+    """List all plans as buttons — tap to manage."""
+    builder = InlineKeyboardBuilder()
+    for plan in plans:
+        builder.row(
+            InlineKeyboardButton(
+                text=f"📦 {plan['display_name']}",
+                callback_data=f"admin_plan:manage:{plan['name']}",
+                style="primary",
+            )
+        )
+    builder.row(
+        InlineKeyboardButton(text="‹ ʙᴀᴄᴋ", callback_data="admin_back", style="danger"),
+    )
+    return builder.as_markup()
+
+
+def admin_plan_manage_keyboard(plan_name: str) -> InlineKeyboardMarkup:
+    """Per-plan menu: edit name, edit description, delete."""
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(text="✏️ ᴇᴅɪᴛ ɴᴀᴍᴇ", callback_data=f"admin_plan:edit_name:{plan_name}", style="primary"),
+        InlineKeyboardButton(text="📝 ᴇᴅɪᴛ ᴅᴇsᴄ", callback_data=f"admin_plan:edit_desc:{plan_name}", style="primary"),
+    )
+    builder.row(
+        InlineKeyboardButton(text="🗑 ᴅᴇʟᴇᴛᴇ ᴘʟᴀɴ", callback_data=f"admin_plan:delete:{plan_name}", style="danger"),
+    )
+    builder.row(
+        InlineKeyboardButton(text="‹ ʙᴀᴄᴋ", callback_data="admin_plans", style="primary"),
+    )
+    return builder.as_markup()
+
+
+def admin_plan_delete_confirm_keyboard(plan_name: str) -> InlineKeyboardMarkup:
+    """Confirm / cancel plan deletion."""
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(text="✅ ʏᴇs, ᴅᴇʟᴇᴛᴇ", callback_data=f"admin_plan:delete_confirm:{plan_name}", style="danger"),
+        InlineKeyboardButton(text="✖ ᴄᴀɴᴄᴇʟ", callback_data=f"admin_plan:manage:{plan_name}", style="primary"),
     )
     return builder.as_markup()
 

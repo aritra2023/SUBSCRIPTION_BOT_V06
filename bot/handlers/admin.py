@@ -20,6 +20,9 @@ from keyboards.inline import (
     DURATION_OPTIONS,
     admin_duration_select_keyboard,
     admin_panel_keyboard,
+    admin_plan_delete_confirm_keyboard,
+    admin_plan_list_keyboard,
+    admin_plan_manage_keyboard,
     back_to_admin_keyboard,
     broadcast_confirm_keyboard,
     cancel_keyboard,
@@ -27,15 +30,18 @@ from keyboards.inline import (
 from services.subscription import (
     create_plan,
     deduct_wallet,
+    delete_plan,
     get_active_plans,
     get_all_users,
     get_blocked_user_count,
     get_paid_user_count,
+    get_plan,
     get_user_count,
     mark_user_blocked,
     mark_user_unblocked,
     set_setting,
     topup_wallet,
+    update_plan_fields,
 )
 
 logger = logging.getLogger(__name__)
@@ -60,6 +66,9 @@ class AdminStates(StatesGroup):
     addplan_durations = State()
     addplan_pricing = State()
     addplan_channels = State()
+    # Edit plan flow
+    editplan_name = State()
+    editplan_desc = State()
 
 
 # ── Admin Panel ───────────────────────────────────────────────────────────────
@@ -247,21 +256,140 @@ async def cb_broadcast_confirm(callback: CallbackQuery, state: FSMContext) -> No
 @router.callback_query(lambda c: c.data == "admin_plans")
 async def cb_admin_plans(callback: CallbackQuery) -> None:
     plans = await get_active_plans()
-    lines = ["<blockquote><b>📦 ᴘʟᴀɴs</b></blockquote>\n"]
-    for p in plans:
-        durations = p.get("durations", [])
-        if durations:
-            tiers = ", ".join(f"{d['label']} ₹{d['price']:.0f}" for d in durations)
-        else:
-            tiers = f"₹{p.get('price', '?')} / {p.get('duration_days', '?')}d"
-        lines.append(f"• <b>{p['display_name']}</b>\n  {tiers}")
-    lines.append("\n<i>sᴇɴᴅ /addplan ᴛᴏ ᴀᴅᴅ ᴀ ɴᴇᴡ ᴘʟᴀɴ.</i>")
-
+    text = (
+        "<blockquote><b>📦 ᴍᴀɴᴀɢᴇ ᴘʟᴀɴs</b></blockquote>\n\n"
+        "ᴛᴀᴘ ᴀ ᴘʟᴀɴ ᴛᴏ ᴇᴅɪᴛ ᴏʀ ᴅᴇʟᴇᴛᴇ ɪᴛ.\n"
+        "<i>sᴇɴᴅ /addplan ᴛᴏ ᴀᴅᴅ ᴀ ɴᴇᴡ ᴘʟᴀɴ.</i>"
+    )
     if callback.message:
         await callback.message.edit_text(
-            "\n".join(lines), parse_mode=ParseMode.HTML, reply_markup=back_to_admin_keyboard()
+            text, parse_mode=ParseMode.HTML, reply_markup=admin_plan_list_keyboard(plans)
         )
     await callback.answer()
+
+
+# ── Per-Plan Management ───────────────────────────────────────────────────────
+
+@router.callback_query(lambda c: c.data and c.data.startswith("admin_plan:manage:"))
+async def cb_admin_plan_manage(callback: CallbackQuery) -> None:
+    plan_name = (callback.data or "").split(":", 2)[2]
+    plan = await get_plan(plan_name)
+    if not plan:
+        await callback.answer("ᴘʟᴀɴ ɴᴏᴛ ғᴏᴜɴᴅ.", show_alert=True)
+        return
+    durations = plan.get("durations", [])
+    tiers = ", ".join(f"{d['label']} ₹{d['price']:.0f}" for d in durations) or "—"
+    text = (
+        f"<blockquote><b>📦 {plan['display_name']}</b></blockquote>\n\n"
+        f"<b>ɪɴᴛᴇʀɴᴀʟ ɴᴀᴍᴇ:</b> <code>{plan['name']}</code>\n"
+        f"<b>ᴅᴜʀᴀᴛɪᴏɴs:</b> {tiers}\n\n"
+        "ᴄʜᴏᴏsᴇ ᴀɴ ᴀᴄᴛɪᴏɴ:"
+    )
+    if callback.message:
+        await callback.message.edit_text(
+            text, parse_mode=ParseMode.HTML, reply_markup=admin_plan_manage_keyboard(plan_name)
+        )
+    await callback.answer()
+
+
+@router.callback_query(lambda c: c.data and c.data.startswith("admin_plan:delete:") and not c.data.startswith("admin_plan:delete_confirm:"))
+async def cb_admin_plan_delete(callback: CallbackQuery) -> None:
+    plan_name = (callback.data or "").split(":", 2)[2]
+    plan = await get_plan(plan_name)
+    if not plan:
+        await callback.answer("ᴘʟᴀɴ ɴᴏᴛ ғᴏᴜɴᴅ.", show_alert=True)
+        return
+    text = (
+        f"<blockquote><b>🗑 ᴅᴇʟᴇᴛᴇ ᴘʟᴀɴ</b></blockquote>\n\n"
+        f"ᴀʀᴇ ʏᴏᴜ sᴜʀᴇ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴅᴇʟᴇᴛᴇ <b>{plan['display_name']}</b>?\n\n"
+        "<i>ᴛʜɪs ᴡɪʟʟ ᴅɪsᴀʙʟᴇ ᴛʜᴇ ᴘʟᴀɴ ᴀɴᴅ ʜɪᴅᴇ ɪᴛ ғʀᴏᴍ ᴜsᴇʀs.</i>"
+    )
+    if callback.message:
+        await callback.message.edit_text(
+            text, parse_mode=ParseMode.HTML, reply_markup=admin_plan_delete_confirm_keyboard(plan_name)
+        )
+    await callback.answer()
+
+
+@router.callback_query(lambda c: c.data and c.data.startswith("admin_plan:delete_confirm:"))
+async def cb_admin_plan_delete_confirm(callback: CallbackQuery) -> None:
+    plan_name = (callback.data or "").split(":", 2)[2]
+    plan = await get_plan(plan_name)
+    display = plan["display_name"] if plan else plan_name
+    await delete_plan(plan_name)
+    plans = await get_active_plans()
+    text = (
+        f"✅ <b>{display}</b> ᴅᴇʟᴇᴛᴇᴅ.\n\n"
+        "<blockquote><b>📦 ᴍᴀɴᴀɢᴇ ᴘʟᴀɴs</b></blockquote>\n\n"
+        "ᴛᴀᴘ ᴀ ᴘʟᴀɴ ᴛᴏ ᴇᴅɪᴛ ᴏʀ ᴅᴇʟᴇᴛᴇ ɪᴛ.\n"
+        "<i>sᴇɴᴅ /addplan ᴛᴏ ᴀᴅᴅ ᴀ ɴᴇᴡ ᴘʟᴀɴ.</i>"
+    )
+    if callback.message:
+        await callback.message.edit_text(
+            text, parse_mode=ParseMode.HTML, reply_markup=admin_plan_list_keyboard(plans)
+        )
+    await callback.answer("✅ ᴅᴇʟᴇᴛᴇᴅ.")
+
+
+@router.callback_query(lambda c: c.data and c.data.startswith("admin_plan:edit_name:"))
+async def cb_admin_plan_edit_name(callback: CallbackQuery, state: FSMContext) -> None:
+    plan_name = (callback.data or "").split(":", 2)[2]
+    await state.update_data(editing_plan=plan_name)
+    if callback.message:
+        await callback.message.edit_text(
+            "<blockquote><b>✏️ ᴇᴅɪᴛ ᴘʟᴀɴ ɴᴀᴍᴇ</b></blockquote>\n\n"
+            "sᴇɴᴅ ᴛʜᴇ ɴᴇᴡ <b>ᴅɪsᴘʟᴀʏ ɴᴀᴍᴇ</b>:",
+            parse_mode=ParseMode.HTML,
+            reply_markup=cancel_keyboard(),
+        )
+    await state.set_state(AdminStates.editplan_name)
+    await callback.answer()
+
+
+@router.message(StateFilter(AdminStates.editplan_name), F.text)
+async def handle_editplan_name(message: Message, state: FSMContext) -> None:
+    new_name = (message.text or "").strip()
+    if not new_name:
+        await message.answer("❌ ɴᴀᴍᴇ ᴄᴀɴɴᴏᴛ ʙᴇ ᴇᴍᴘᴛʏ.")
+        return
+    data = await state.get_data()
+    plan_name = data.get("editing_plan", "")
+    await update_plan_fields(plan_name, {"display_name": new_name})
+    await state.clear()
+    await message.answer(
+        f"✅ ᴘʟᴀɴ ɴᴀᴍᴇ ᴜᴘᴅᴀᴛᴇᴅ ᴛᴏ <b>{new_name}</b>.",
+        parse_mode=ParseMode.HTML,
+        reply_markup=admin_panel_keyboard(),
+    )
+
+
+@router.callback_query(lambda c: c.data and c.data.startswith("admin_plan:edit_desc:"))
+async def cb_admin_plan_edit_desc(callback: CallbackQuery, state: FSMContext) -> None:
+    plan_name = (callback.data or "").split(":", 2)[2]
+    await state.update_data(editing_plan=plan_name)
+    if callback.message:
+        await callback.message.edit_text(
+            "<blockquote><b>📝 ᴇᴅɪᴛ ᴅᴇsᴄʀɪᴘᴛɪᴏɴ</b></blockquote>\n\n"
+            "sᴇɴᴅ ᴛʜᴇ ɴᴇᴡ <b>ᴅᴇsᴄʀɪᴘᴛɪᴏɴ</b>:",
+            parse_mode=ParseMode.HTML,
+            reply_markup=cancel_keyboard(),
+        )
+    await state.set_state(AdminStates.editplan_desc)
+    await callback.answer()
+
+
+@router.message(StateFilter(AdminStates.editplan_desc), F.text)
+async def handle_editplan_desc(message: Message, state: FSMContext) -> None:
+    new_desc = (message.text or "").strip()
+    data = await state.get_data()
+    plan_name = data.get("editing_plan", "")
+    await update_plan_fields(plan_name, {"description": new_desc})
+    await state.clear()
+    await message.answer(
+        "✅ ᴘʟᴀɴ ᴅᴇsᴄʀɪᴘᴛɪᴏɴ ᴜᴘᴅᴀᴛᴇᴅ.",
+        parse_mode=ParseMode.HTML,
+        reply_markup=admin_panel_keyboard(),
+    )
 
 
 # ── Add Plan — Step 1: Name ───────────────────────────────────────────────────

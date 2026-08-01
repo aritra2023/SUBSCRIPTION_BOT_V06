@@ -368,6 +368,20 @@ async def process_auto_renewals(bot_instance=None) -> list[dict]:
     return results
 
 
+# ── Plan Management ───────────────────────────────────────────────────────────
+
+async def delete_plan(name: str) -> None:
+    """Soft-delete a plan by setting is_active=False."""
+    await get_db().plans.update_one({"name": name}, {"$set": {"is_active": False}})
+    logger.info("Plan deleted: %s", name)
+
+
+async def update_plan_fields(name: str, fields: dict) -> None:
+    """Update specific fields on a plan document."""
+    await get_db().plans.update_one({"name": name}, {"$set": fields})
+    logger.info("Plan %s updated: %s", name, list(fields.keys()))
+
+
 # ── Settings ──────────────────────────────────────────────────────────────────
 
 async def get_setting(key: str) -> Optional[str]:

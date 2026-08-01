@@ -23,7 +23,7 @@ from services.subscription import (
     get_user,
     purchase_subscription,
 )
-from utils.helpers import format_date, days_remaining
+from utils.helpers import format_date, days_remaining, to_small_caps
 
 logger = logging.getLogger(__name__)
 router = Router(name="subscription")
@@ -114,22 +114,27 @@ async def cb_plan_select(callback: CallbackQuery) -> None:
         return
 
     durations = plan.get("durations", [])
+    regular = [d for d in durations if d.get("days", 0) < 36500]
+    lifetime = next((d for d in durations if d.get("days", 0) >= 36500), None)
 
-    lines = [f"<blockquote><b>💎 {plan['display_name']}</b></blockquote>\n"]
-    if plan.get("description"):
-        lines.append(f"{plan['description']}\n")
-    if plan.get("demo_link"):
-        lines.append(f'📺 <a href="{plan["demo_link"]}">ᴠɪᴇᴡ ᴅᴇᴍᴏ ᴄʜᴀɴɴᴇʟ</a>\n')
+    # Header
+    text = "<blockquote>✦ <b>ᴘʀᴇᴍɪᴜᴍ ᴘʀɪᴄᴇs!!</b></blockquote>\n\n"
 
-    if durations:
-        lines.append("\n<b>ᴀᴠᴀɪʟᴀʙʟᴇ ᴅᴜʀᴀᴛɪᴏɴs:</b>")
-        for tier in durations:
-            lines.append(f"  ⏱ {tier['label']} — ₹{tier['price']:.0f}")
+    # Regular duration prices
+    if regular:
+        price_lines = "\n".join(f"◍ {d['label']}: ₹{d['price']:.0f}" for d in regular)
+        text += f"<blockquote>{price_lines}</blockquote>\n\n"
 
-    if plan.get("payment_proof_required", True):
-        lines.append("\n📸 <i>ᴘᴀʏᴍᴇɴᴛ ᴘʀᴏᴏғ ʀᴇǫᴜɪʀᴇᴅ ᴀғᴛᴇʀ ᴘᴜʀᴄʜᴀsᴇ.</i>")
+    # Lifetime (separate line)
+    if lifetime:
+        text += f"<blockquote>≡ ʟɪғᴇᴛɪᴍᴇ: ₹{lifetime['price']:.0f} (ᴘᴀʏ ᴏɴᴄᴇ, ᴜsᴇ ғᴏʀᴇᴠᴇʀ)</blockquote>\n\n"
 
-    text = "\n".join(lines)
+    # Payment methods & instructions
+    text += (
+        "<blockquote>⧗ ᴘᴀʏᴍᴇɴᴛ ᴍᴇᴛʜᴏᴅs: ᴘᴀʏᴛᴍ, ɢᴘᴀʏ, ᴘʜᴏɴᴇᴘᴇ, ᴜᴘɪ &amp; ǫʀ ᴄᴏᴅᴇ</blockquote>\n\n"
+        "<blockquote>◍ ᴘʀᴇᴍɪᴜᴍ ᴀᴅᴅᴇᴅ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴀғᴛᴇʀ ᴘᴀʏᴍᴇɴᴛ!\n"
+        "◍ ᴀғᴛᴇʀ ᴘᴀʏᴍᴇɴᴛ ᴘʟᴇᴀsᴇ sᴇɴᴅ ᴜs sᴄʀᴇᴇɴsʜᴏᴛ ᴜsɪɴɢ /bought (ʀᴇᴘʟʏ ᴛᴏ sᴄʀᴇᴇɴsʜᴏᴛ)</blockquote>"
+    )
 
     # Duration keyboard if plan has tiers, else legacy single-tier confirm
     if durations:
