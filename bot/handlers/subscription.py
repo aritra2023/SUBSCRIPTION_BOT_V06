@@ -279,13 +279,13 @@ async def cb_view_plan(callback: CallbackQuery) -> None:
 @router.callback_query(lambda c: c.data == "help")
 async def cb_help(callback: CallbackQuery) -> None:
     text = (
-        "<blockquote><b>ᴀʙᴏᴜᴛ ᴛʜɪs ʙᴏᴛ</b></blockquote>\n\n"
+        "<blockquote expandable><b>ᴀʙᴏᴜᴛ ᴛʜɪs ʙᴏᴛ</b>\n\n"
         "ɪ ᴀᴍ ᴀɴ ᴀᴅᴠᴀɴᴄᴇᴅ <b>ᴘʀᴇᴍɪᴜᴍ ᴍᴀɴᴀɢᴇᴍᴇɴᴛ ʙᴏᴛ</b> ᴅᴇsɪɢɴᴇᴅ ᴛᴏ ɢʀᴀɴᴛ "
-        "ʏᴏᴜ ɪɴsᴛᴀɴᴛ ᴀᴄᴄᴇss ᴛᴏ ᴇxᴄʟᴜsɪᴠᴇ ᴄʜᴀɴɴᴇʟs ᴀɴᴅ ʙᴏᴛs!\n\n"
-        "✦ ʜᴏᴡ ɪᴛ ᴡᴏʀᴋs ✦\n\n"
+        "ʏᴏᴜ ɪɴsᴛᴀɴᴛ ᴀᴄᴄᴇss ᴛᴏ ᴇxᴄʟᴜsɪᴠᴇ ᴄʜᴀɴɴᴇʟs ᴀɴᴅ ʙᴏᴛs!</blockquote>\n\n"
+        "<blockquote expandable>\" ʜᴏᴡ ɪᴛ ᴡᴏʀᴋs \"\n\n"
         "• sᴇʟᴇᴄᴛ ʏᴏᴜʀ ғᴀᴠᴏʀɪᴛᴇ ʙᴏᴛs ᴏʀ ᴄʜᴏᴏsᴇ ᴀ <b>ᴄᴏᴍʙᴏ ᴘʟᴀɴ</b> ғᴏʀ ᴍᴀssɪᴠᴇ ᴅɪsᴄᴏᴜɴᴛs.\n"
-        "• ᴘᴀʏ ᴠɪᴀ ᴜᴘɪ/ǫʀ ᴀɴᴅ sᴇɴᴅ ᴛʜᴇ sᴄʀᴇᴇɴsʜᴏᴛ ᴜsɪɴɢ /bought.\n"
-        "• ᴏɴᴄᴇ ᴠᴇʀɪғɪᴇᴅ, ʏᴏᴜʀ ᴘʀᴇᴍɪᴜᴍ ɪs ᴀᴄᴛɪᴠᴀᴛᴇᴅ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴀᴄʀᴏss ᴀʟʟ sᴇʟᴇᴄᴛᴇᴅ ʙᴏᴛs!!\n\n"
+        "• ᴘᴀʏ ᴠɪᴀ ᴜᴘɪ/ǫʀ ᴀɴᴅ sᴇɴᴅ ᴛʜᴇ sᴄʀᴇᴇɴsʜᴏᴛ.\n"
+        "• ᴏɴᴄᴇ ᴠᴇʀɪғɪᴇᴅ, ʏᴏᴜʀ ᴘʀᴇᴍɪᴜᴍ ɪs ᴀᴄᴛɪᴠᴀᴛᴇᴅ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴀᴄʀᴏss ᴀʟʟ sᴇʟᴇᴄᴛᴇᴅ ʙᴏᴛs ᴀɴᴅ ᴄʜᴀɴɴᴇʟs!!</blockquote>\n\n"
         "◈ ᴏᴡɴᴇʀ: ToBi"
     )
 
