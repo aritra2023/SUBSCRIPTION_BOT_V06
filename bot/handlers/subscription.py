@@ -117,24 +117,25 @@ async def cb_plan_select(callback: CallbackQuery) -> None:
     regular = [d for d in durations if d.get("days", 0) < 36500]
     lifetime = next((d for d in durations if d.get("days", 0) >= 36500), None)
 
-    # Header
-    text = "<blockquote>✦ <b>ᴘʀᴇᴍɪᴜᴍ ᴘʀɪᴄᴇs!!</b></blockquote>\n\n"
+    # Header — plan name
+    plan_name_sc = to_small_caps(plan['display_name'])
+    text = f"<blockquote>✦ <b>{plan_name_sc}</b></blockquote>\n\n"
 
     # Regular duration prices
     if regular:
         price_lines = "\n".join(f"◍ {d['label']}: ₹{d['price']:.0f}" for d in regular)
         text += f"<blockquote>{price_lines}</blockquote>\n\n"
 
-    # Lifetime (separate line)
+    # Lifetime + payment methods + instructions — no space between them
+    footer = ""
     if lifetime:
-        text += f"<blockquote>≡ ʟɪғᴇᴛɪᴍᴇ: ₹{lifetime['price']:.0f} (ᴘᴀʏ ᴏɴᴄᴇ, ᴜsᴇ ғᴏʀᴇᴠᴇʀ)</blockquote>\n\n"
-
-    # Payment methods & instructions
-    text += (
-        "<blockquote>⧗ ᴘᴀʏᴍᴇɴᴛ ᴍᴇᴛʜᴏᴅs: ᴘᴀʏᴛᴍ, ɢᴘᴀʏ, ᴘʜᴏɴᴇᴘᴇ, ᴜᴘɪ &amp; ǫʀ ᴄᴏᴅᴇ</blockquote>\n\n"
+        footer += f"<blockquote>≡ ʟɪғᴇᴛɪᴍᴇ: ₹{lifetime['price']:.0f} (ᴘᴀʏ ᴏɴᴄᴇ, ᴜsᴇ ғᴏʀᴇᴠᴇʀ)</blockquote>"
+    footer += (
+        "<blockquote>⧗ ᴘᴀʏᴍᴇɴᴛ ᴍᴇᴛʜᴏᴅs: ᴘᴀʏᴛᴍ, ɢᴘᴀʏ, ᴘʜᴏɴᴇᴘᴇ, ᴜᴘɪ &amp; ǫʀ ᴄᴏᴅᴇ</blockquote>"
         "<blockquote>◍ ᴘʀᴇᴍɪᴜᴍ ᴀᴅᴅᴇᴅ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴀғᴛᴇʀ ᴘᴀʏᴍᴇɴᴛ!\n"
         "◍ ᴀғᴛᴇʀ ᴘᴀʏᴍᴇɴᴛ ᴘʟᴇᴀsᴇ sᴇɴᴅ ᴜs sᴄʀᴇᴇɴsʜᴏᴛ ᴜsɪɴɢ /bought (ʀᴇᴘʟʏ ᴛᴏ sᴄʀᴇᴇɴsʜᴏᴛ)</blockquote>"
     )
+    text += footer
 
     # Duration keyboard if plan has tiers, else legacy single-tier confirm
     if durations:
