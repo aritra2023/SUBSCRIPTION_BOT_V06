@@ -34,8 +34,8 @@ router = Router(name="subscription")
 @router.callback_query(lambda c: c.data == "buy_subscription")
 async def cb_buy_subscription(callback: CallbackQuery) -> None:
     text = (
-        "<b>💎 ᴄʜᴏᴏsᴇ ᴀ ᴄᴀᴛᴇɢᴏʀʏ</b>\n\n"
-        "<b>sᴇʟᴇᴄᴛ ᴀ ᴄᴀᴛᴇɢᴏʀʏ ʙᴇʟᴏᴡ ᴛᴏ ᴠɪᴇᴡ ᴀᴠᴀɪʟᴀʙʟᴇ ᴘʟᴀɴs.</b>\n\n"
+        "<blockquote><b>💎 ᴄʜᴏᴏsᴇ ᴀ ᴄᴀᴛᴇɢᴏʀʏ</b>\n\n"
+        "<b>sᴇʟᴇᴄᴛ ᴀ ᴄᴀᴛᴇɢᴏʀʏ ʙᴇʟᴏᴡ ᴛᴏ ᴠɪᴇᴡ ᴀᴠᴀɪʟᴀʙʟᴇ ᴘʟᴀɴs.</b></blockquote>\n\n"
         "<blockquote>♡ <b>ᴘʀᴇᴍɪᴜᴍ ᴄʜᴀɴɴᴇʟ</b>\n"
         "ʏᴏᴜ ᴄᴀɴ ᴄʜᴇᴄᴋᴏᴜᴛ ᴏᴜʀ ᴇxᴄʟᴜsɪᴠᴇ ᴘʀᴇᴍɪᴜᴍ ᴄʜᴀɴɴᴇʟs ʜᴇʀᴇ. "
         "ᴛʜᴇʀᴇ ᴀʀᴇ ɴᴏ ᴀᴅs ᴀɴᴅ ʏᴏᴜ ɢᴇᴛ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴇss ᴛᴏ ᴀʟʟ ᴄᴏɴᴛᴇɴᴛ.</blockquote>\n\n"

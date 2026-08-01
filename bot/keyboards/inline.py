@@ -188,7 +188,7 @@ def no_plan_keyboard() -> InlineKeyboardMarkup:
         InlineKeyboardButton(
             text="➲ ᴄʜᴇᴄᴋᴏᴜᴛ ᴘʀᴇᴍɪᴜᴍ ᴘʟᴀɴs",
             callback_data="buy_subscription",
-            style="primary",
+            style="success",
         )
     )
     builder.row(
