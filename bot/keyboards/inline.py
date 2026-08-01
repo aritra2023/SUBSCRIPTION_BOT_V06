@@ -48,16 +48,16 @@ def buy_category_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(
         InlineKeyboardButton(
-            text="➲ ʙᴜʏ ᴄʜᴀɴɴᴇʟ ᴘʀᴇᴍɪᴜᴍ",
-            callback_data="buy_category_channel",
-            style="success",
+            text="➲ ʙᴜʏ ʙᴏᴛ ᴘʀᴇᴍɪᴜᴍ",
+            callback_data="buy_category_bot",
+            style="danger",
         )
     )
     builder.row(
         InlineKeyboardButton(
-            text="➲ ʙᴜʏ ʙᴏᴛ ᴘʀᴇᴍɪᴜᴍ",
-            callback_data="buy_category_bot",
-            style="danger",
+            text="➲ ʙᴜʏ ᴄʜᴀɴɴᴇʟ ᴘʀᴇᴍɪᴜᴍ",
+            callback_data="buy_category_channel",
+            style="success",
         )
     )
     builder.row(
