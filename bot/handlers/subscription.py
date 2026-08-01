@@ -194,24 +194,32 @@ async def cb_plan_duration(callback: CallbackQuery) -> None:
         f"➲ <b>ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ:</b> ₹{balance:.2f}\n\n"
     )
 
-    if balance >= price:
-        text += "✓ <b>sᴜғғɪᴄɪᴇɴᴛ ʙᴀʟᴀɴᴄᴇ.</b> ᴄᴏɴғɪʀᴍ ᴘᴜʀᴄʜᴀsᴇ ʙᴇʟᴏᴡ."
+    insufficient = balance < price
+    if not insufficient:
+        text += (
+            "<blockquote>✓ <i>\"sᴜғғɪᴄɪᴇɴᴛ ʙᴀʟᴀɴᴄᴇ ɪɴ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ. "
+            "ʏᴏᴜ ᴄᴀɴ ᴘᴜʀᴄʜᴀsᴇ ʙᴇʟᴏᴡ ʙʏ ᴄʟɪᴄᴋɪɴɢ ᴄᴏɴғɪʀᴍ ᴘᴜʀᴄʜᴀsᴇ.\"</i></blockquote>"
+        )
     else:
         shortfall = price - balance
-        text += f"⚠️ <b>ɪɴsᴜғғɪᴄɪᴇɴᴛ ʙᴀʟᴀɴᴄᴇ.</b> ʏᴏᴜ ɴᴇᴇᴅ ₹{shortfall:.2f} ᴍᴏʀᴇ.\nᴘʟᴇᴀsᴇ ᴛᴏᴘ ᴜᴘ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ ғɪʀsᴛ."
+        text += (
+            f"<blockquote>⚠️ <i>\"ɪɴsᴜғғɪᴄɪᴇɴᴛ ʙᴀʟᴀɴᴄᴇ ɪɴ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ. "
+            f"ʏᴏᴜ ɴᴇᴇᴅ ₹{shortfall:.2f} ᴍᴏʀᴇ ᴛᴏ ᴄᴏᴍᴘʟᴇᴛᴇ ᴛʜɪs ᴘᴜʀᴄʜᴀsᴇ. "
+            f"ᴘʟᴇᴀsᴇ ʀᴇᴄʜᴀʀɢᴇ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ ᴀɴᴅ ᴛʀʏ ᴀɢᴀɪɴ.\"</i></blockquote>"
+        )
 
     try:
         if callback.message and callback.message.photo:
             await callback.message.edit_caption(
                 caption=text,
                 parse_mode=ParseMode.HTML,
-                reply_markup=confirm_plan_keyboard(plan_name, days),
+                reply_markup=confirm_plan_keyboard(plan_name, days, insufficient=insufficient),
             )
         elif callback.message:
             await callback.message.edit_text(
                 text=text,
                 parse_mode=ParseMode.HTML,
-                reply_markup=confirm_plan_keyboard(plan_name, days),
+                reply_markup=confirm_plan_keyboard(plan_name, days, insufficient=insufficient),
             )
     except Exception:
         pass
