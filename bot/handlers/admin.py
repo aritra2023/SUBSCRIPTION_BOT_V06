@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import re
 
@@ -16,6 +17,7 @@ from keyboards.inline import (
     DURATION_OPTIONS,
     admin_duration_select_keyboard,
     admin_panel_keyboard,
+    broadcast_confirm_keyboard,
     cancel_keyboard,
 )
 from services.subscription import (
@@ -23,7 +25,11 @@ from services.subscription import (
     deduct_wallet,
     get_active_plans,
     get_all_users,
+    get_blocked_user_count,
+    get_paid_user_count,
     get_user_count,
+    mark_user_blocked,
+    mark_user_unblocked,
     set_setting,
     topup_wallet,
 )
@@ -37,6 +43,7 @@ router.callback_query.filter(IsAdmin())
 class AdminStates(StatesGroup):
     waiting_for_banner = State()
     waiting_for_broadcast = State()
+    waiting_for_broadcast_confirm = State()
     waiting_for_topup_user = State()
     waiting_for_topup_amount = State()
     waiting_for_penalty_user = State()
@@ -79,43 +86,18 @@ async def cb_admin_cancel(callback: CallbackQuery, state: FSMContext) -> None:
 
 @router.callback_query(lambda c: c.data == "admin_stats")
 async def cb_admin_stats(callback: CallbackQuery) -> None:
-    total_users = await get_user_count()
-    plans = await get_active_plans()
+    total_users, paid_users, blocked_users = await asyncio.gather(
+        get_user_count(),
+        get_paid_user_count(),
+        get_blocked_user_count(),
+    )
 
     text = (
         "<blockquote><b>📊 ʙᴏᴛ sᴛᴀᴛɪsᴛɪᴄs</b></blockquote>\n\n"
-        f"<b>ᴛᴏᴛᴀʟ ᴜsᴇʀs:</b> {total_users}\n"
-        f"<b>ᴀᴄᴛɪᴠᴇ ᴘʟᴀɴs:</b> {len(plans)}\n\n"
-        "<b>ᴘʟᴀɴs:</b>\n"
+        f"<b>👥 ᴛᴏᴛᴀʟ ᴜsᴇʀs:</b> {total_users}\n"
+        f"<b>💎 ᴘᴀɪᴅ ᴜsᴇʀs:</b> {paid_users}\n"
+        f"<b>🚫 ʙʟᴏᴄᴋᴇᴅ ʙᴏᴛ:</b> {blocked_users}\n"
     )
-    for plan in plans:
-        durations = plan.get("durations", [])
-        if durations:
-            price_range = f"₹{min(d['price'] for d in durations):.0f}–₹{max(d['price'] for d in durations):.0f}"
-        else:
-            price_range = f"₹{plan.get('price', 0)}"
-        text += f"  • {plan['display_name']} — {price_range}\n"
-
-    if callback.message:
-        await callback.message.edit_text(text, parse_mode=ParseMode.HTML, reply_markup=admin_panel_keyboard())
-    await callback.answer()
-
-
-# ── All Users ─────────────────────────────────────────────────────────────────
-
-@router.callback_query(lambda c: c.data == "admin_users")
-async def cb_admin_users(callback: CallbackQuery) -> None:
-    users = await get_all_users()
-    if not users:
-        text = "<blockquote><b>👥 ᴜsᴇʀs</b></blockquote>\n\nɴᴏ ᴜsᴇʀs ʏᴇᴛ."
-    else:
-        lines = [f"<blockquote><b>👥 ᴜsᴇʀs ({len(users)} ᴛᴏᴛᴀʟ)</b></blockquote>\n"]
-        for u in users[:20]:
-            uname = f"@{u['username']}" if u.get("username") else "—"
-            lines.append(f"• <b>{u['first_name']}</b> ({uname}) — ɪᴅ: <code>{u['user_id']}</code>")
-        if len(users) > 20:
-            lines.append(f"\n<i>...ᴀɴᴅ {len(users) - 20} ᴍᴏʀᴇ</i>")
-        text = "\n".join(lines)
 
     if callback.message:
         await callback.message.edit_text(text, parse_mode=ParseMode.HTML, reply_markup=admin_panel_keyboard())
@@ -165,25 +147,74 @@ async def cb_admin_broadcast(callback: CallbackQuery, state: FSMContext) -> None
     await callback.answer()
 
 
-@router.message(AdminStates.waiting_for_broadcast, F.text)
+@router.message(AdminStates.waiting_for_broadcast)
 async def handle_broadcast_message(message: Message, state: FSMContext) -> None:
-    from loader import bot
-    broadcast_text = message.text or ""
+    """Accept any message type (text, photo, forwarded, etc.) and ask for confirm."""
+    await state.update_data(
+        broadcast_from_chat_id=message.chat.id,
+        broadcast_message_id=message.message_id,
+    )
+    await state.set_state(AdminStates.waiting_for_broadcast_confirm)
+
     users = await get_all_users()
+    total = len(users)
+
+    await message.answer(
+        f"<blockquote><b>📢 ʙʀᴏᴀᴅᴄᴀsᴛ ᴄᴏɴғɪʀᴍ</b></blockquote>\n\n"
+        f"ᴀʙᴏᴠᴇ ᴍᴇssᴀɢᴇ ᴡɪʟʟ ʙᴇ sᴇɴᴛ <b>ᴇxᴀᴄᴛʟʏ ᴀs-ɪs</b> ᴛᴏ <b>{total}</b> ᴜsᴇʀs.\n\n"
+        "ᴀʀᴇ ʏᴏᴜ sᴜʀᴇ?",
+        parse_mode=ParseMode.HTML,
+        reply_markup=broadcast_confirm_keyboard(),
+    )
+
+
+@router.callback_query(
+    StateFilter(AdminStates.waiting_for_broadcast_confirm),
+    lambda c: c.data == "broadcast_confirm",
+)
+async def cb_broadcast_confirm(callback: CallbackQuery, state: FSMContext) -> None:
+    from loader import bot
+    from aiogram.exceptions import TelegramForbiddenError
+
+    data = await state.get_data()
+    from_chat_id = data.get("broadcast_from_chat_id")
+    msg_id = data.get("broadcast_message_id")
     await state.clear()
-    status_msg = await message.answer(f"📢 ʙʀᴏᴀᴅᴄᴀsᴛɪɴɢ ᴛᴏ {len(users)} ᴜsᴇʀs...")
-    sent, failed = 0, 0
+
+    users = await get_all_users()
+    if callback.message:
+        await callback.message.edit_text(
+            f"📢 ʙʀᴏᴀᴅᴄᴀsᴛɪɴɢ ᴛᴏ {len(users)} ᴜsᴇʀs...",
+            parse_mode=ParseMode.HTML,
+        )
+
+    sent, failed, blocked = 0, 0, 0
     for user in users:
+        user_id = user["user_id"]
         try:
-            await bot.send_message(chat_id=user["user_id"], text=broadcast_text, parse_mode=ParseMode.HTML)
+            await bot.copy_message(
+                chat_id=user_id,
+                from_chat_id=from_chat_id,
+                message_id=msg_id,
+            )
+            await mark_user_unblocked(user_id)
             sent += 1
+        except TelegramForbiddenError:
+            await mark_user_blocked(user_id)
+            blocked += 1
         except Exception:
             failed += 1
-    await status_msg.edit_text(
-        f"✅ ʙʀᴏᴀᴅᴄᴀsᴛ ᴄᴏᴍᴘʟᴇᴛᴇ.\n\n<b>sᴇɴᴛ:</b> {sent}\n<b>ғᴀɪʟᴇᴅ:</b> {failed}",
-        parse_mode=ParseMode.HTML,
-        reply_markup=admin_panel_keyboard(),
-    )
+
+    if callback.message:
+        await callback.message.edit_text(
+            f"✅ <b>ʙʀᴏᴀᴅᴄᴀsᴛ ᴄᴏᴍᴘʟᴇᴛᴇ</b>\n\n"
+            f"<b>sᴇɴᴛ:</b> {sent}\n"
+            f"<b>ʙʟᴏᴄᴋᴇᴅ:</b> {blocked}\n"
+            f"<b>ғᴀɪʟᴇᴅ:</b> {failed}",
+            parse_mode=ParseMode.HTML,
+            reply_markup=admin_panel_keyboard(),
+        )
+    await callback.answer()
 
 
 # ── Manage Plans ──────────────────────────────────────────────────────────────

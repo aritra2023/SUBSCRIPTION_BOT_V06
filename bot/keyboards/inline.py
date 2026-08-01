@@ -241,18 +241,18 @@ def no_plan_keyboard() -> InlineKeyboardMarkup:
 def admin_panel_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
-    builder.row(
-        InlineKeyboardButton(text="👥 ᴀʟʟ ᴜsᴇʀs", callback_data="admin_users", style="primary"),
-        InlineKeyboardButton(text="📊 sᴛᴀᴛs", callback_data="admin_stats", style="primary"),
-    )
-    builder.row(
-        InlineKeyboardButton(text="📢 ʙʀᴏᴀᴅᴄᴀsᴛ", callback_data="admin_broadcast", style="primary"),
-        InlineKeyboardButton(text="🖼 sᴇᴛ ʙᴀɴɴᴇʀ", callback_data="admin_set_banner", style="primary"),
-    )
-    builder.row(
-        InlineKeyboardButton(text="📦 ᴍᴀɴᴀɢᴇ ᴘʟᴀɴs", callback_data="admin_plans", style="primary"),
-    )
+    builder.row(InlineKeyboardButton(text="📊 sᴛᴀᴛs", callback_data="admin_stats", style="primary"))
+    builder.row(InlineKeyboardButton(text="📢 ʙʀᴏᴀᴅᴄᴀsᴛ", callback_data="admin_broadcast", style="primary"))
+    builder.row(InlineKeyboardButton(text="🖼 sᴇᴛ ʙᴀɴɴᴇʀ", callback_data="admin_set_banner", style="primary"))
+    builder.row(InlineKeyboardButton(text="📦 ᴍᴀɴᴀɢᴇ ᴘʟᴀɴs", callback_data="admin_plans", style="primary"))
 
+    return builder.as_markup()
+
+
+def broadcast_confirm_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.row(InlineKeyboardButton(text="✅ ʏᴇs, sᴇɴᴅ ᴛᴏ ᴀʟʟ", callback_data="broadcast_confirm", style="success"))
+    builder.row(InlineKeyboardButton(text="✖ ᴄᴀɴᴄᴇʟ", callback_data="admin_cancel", style="danger"))
     return builder.as_markup()
 
 

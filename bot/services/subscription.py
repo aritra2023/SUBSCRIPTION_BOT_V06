@@ -52,6 +52,26 @@ async def get_user_count() -> int:
     return await get_db().users.count_documents({})
 
 
+async def get_paid_user_count() -> int:
+    """Count users with a currently active subscription."""
+    from database.models import now_utc
+    now = now_utc()
+    return await get_db().subscriptions.count_documents({"is_active": True, "end_date": {"$gt": now}})
+
+
+async def get_blocked_user_count() -> int:
+    """Count users who have blocked the bot."""
+    return await get_db().users.count_documents({"is_blocked": True})
+
+
+async def mark_user_blocked(user_id: int) -> None:
+    await get_db().users.update_one({"user_id": user_id}, {"$set": {"is_blocked": True}})
+
+
+async def mark_user_unblocked(user_id: int) -> None:
+    await get_db().users.update_one({"user_id": user_id}, {"$set": {"is_blocked": False}})
+
+
 # ── Plans ─────────────────────────────────────────────────────────────────────
 
 async def get_active_plans() -> list[PlanDoc]:
