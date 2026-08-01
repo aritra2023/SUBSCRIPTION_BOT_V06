@@ -11,53 +11,60 @@ A production-grade Telegram bot for managing **Flix Verse** premium subscription
 
 ## How to run
 
-The bot runs via the **"Flix Verse Telegram Bot"** workflow:
+The bot lives in the `bot/` directory. The workflow `Flix Verse Telegram Bot` runs it:
 
-```
+```bash
 cd bot && python main.py
 ```
 
-## Required secrets
-
-Set these in Replit Secrets (already configured):
-
-| Secret      | Description                                      |
-|-------------|--------------------------------------------------|
-| `BOT_TOKEN` | Telegram bot token from @BotFather               |
-| `ADMIN_ID`  | Your numeric Telegram user ID                    |
-| `MONGO_URI` | MongoDB connection string (e.g. Atlas URI)       |
-
-## Project structure
-
-```
-bot/
-├── handlers/         # Telegram update handlers (start, subscription, wallet, history, admin)
-├── keyboards/        # Inline keyboards
-├── filters/          # Admin-only filter
-├── services/         # Business logic (subscriptions, Telegraph)
-├── database/         # MongoDB connection & models
-├── utils/            # Helper utilities
-├── config.py         # Loads env vars
-├── loader.py         # Bot & dispatcher instances
-└── main.py           # Entry point
-```
-
-## Admin commands
-
-| Command      | Description                         |
-|--------------|-------------------------------------|
-| `/admin`     | Open the admin panel                |
-| `/addplan`   | Add a new subscription plan         |
-| `/topup`     | Top up a user's wallet balance      |
-
-## Dependencies
-
-Install with:
+Dependencies are installed via:
 
 ```bash
 cd bot && pip install -r requirements.txt
 ```
 
-## User preferences
+## Required secrets
 
-<!-- Add any user-specific preferences here -->
+Set these in Replit Secrets (all three are required):
+
+| Secret      | Description                         |
+|-------------|-------------------------------------|
+| `BOT_TOKEN` | Telegram bot token (from BotFather) |
+| `ADMIN_ID`  | Your numeric Telegram user ID       |
+| `MONGO_URI` | MongoDB connection string           |
+
+## Project structure
+
+```
+bot/
+├── handlers/          # Telegram update handlers
+│   ├── start.py       # /start command & main menu
+│   ├── subscription.py # Buy, view plan, help, support
+│   ├── wallet.py      # Wallet balance
+│   ├── history.py     # Transaction history
+│   └── admin.py       # Admin panel
+├── keyboards/
+│   └── inline.py      # All inline keyboards
+├── filters/
+│   └── admin.py       # Admin-only filter
+├── services/
+│   └── subscription.py # Business logic layer
+├── database/
+│   ├── db.py          # MongoDB connection & indexes
+│   └── models.py      # TypedDict models
+├── utils/
+│   └── helpers.py     # Utility functions
+├── config.py          # Environment config
+├── loader.py          # Bot & dispatcher instances
+└── main.py            # Entry point
+```
+
+## Admin commands
+
+| Command      | Description                        |
+|--------------|------------------------------------|
+| `/admin`     | Open the admin panel               |
+| `/addplan`   | Add a new subscription plan        |
+| `/topup`     | Top up a user's wallet balance     |
+
+## User preferences
