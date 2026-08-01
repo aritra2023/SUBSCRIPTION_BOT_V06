@@ -195,7 +195,7 @@ async def cb_plan_duration(callback: CallbackQuery) -> None:
     )
 
     if balance >= price:
-        text += "✅ <b>sᴜғғɪᴄɪᴇɴᴛ ʙᴀʟᴀɴᴄᴇ.</b> ᴄᴏɴғɪʀᴍ ᴘᴜʀᴄʜᴀsᴇ ʙᴇʟᴏᴡ."
+        text += "✓ <b>sᴜғғɪᴄɪᴇɴᴛ ʙᴀʟᴀɴᴄᴇ.</b> ᴄᴏɴғɪʀᴍ ᴘᴜʀᴄʜᴀsᴇ ʙᴇʟᴏᴡ."
     else:
         shortfall = price - balance
         text += f"⚠️ <b>ɪɴsᴜғғɪᴄɪᴇɴᴛ ʙᴀʟᴀɴᴄᴇ.</b> ʏᴏᴜ ɴᴇᴇᴅ ₹{shortfall:.2f} ᴍᴏʀᴇ.\nᴘʟᴇᴀsᴇ ᴛᴏᴘ ᴜᴘ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ ғɪʀsᴛ."

@@ -144,7 +144,7 @@ def confirm_plan_keyboard(plan_name: str, days: int) -> InlineKeyboardMarkup:
     )
     builder.row(
         InlineKeyboardButton(
-            text="✓ ᴄᴏɴғɪʀᴍ ᴘᴜʀᴄʜᴀsᴇ",
+            text="ᴄᴏɴғɪʀᴍ ᴘᴜʀᴄʜᴀsᴇ ✓",
             callback_data=f"plan_confirm:{plan_name}:{days}",
             style="success",
         ),
