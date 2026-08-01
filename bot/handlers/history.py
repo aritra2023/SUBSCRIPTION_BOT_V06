@@ -7,56 +7,48 @@ from aiogram import Router
 from aiogram.enums import ParseMode
 from aiogram.types import CallbackQuery
 
-from keyboards.inline import history_prompt_keyboard, history_detail_keyboard, history_telegraph_keyboard
-from services.subscription import get_user_transactions, get_active_subscription
+from keyboards.inline import history_telegraph_keyboard, history_detail_keyboard, main_menu_keyboard
+from services.subscription import get_user_transactions, get_active_subscription, get_setting
 from services.telegraph import create_history_page
-from utils.helpers import format_date
+from utils.helpers import format_date, mention_html
 
 logger = logging.getLogger(__name__)
 router = Router(name="history")
 
 _TYPE_LABELS = {
     "purchase": "🛒 ᴘᴜʀᴄʜᴀsᴇ",
-    "topup": "💰 ᴛᴏᴘ-ᴜᴘ",
-    "refund": "↩️ ʀᴇғᴜɴᴅ",
+    "topup":    "💰 ᴛᴏᴘ-ᴜᴘ",
+    "refund":   "↩️ ʀᴇғᴜɴᴅ",
 }
 
 
 @router.callback_query(lambda c: c.data == "history")
 async def cb_history(callback: CallbackQuery) -> None:
-    """Edit the start message in-place to show the history prompt."""
-    text = (
-        "✅ <b>ʏᴏᴜʀ ᴄᴏᴍᴘʟᴇᴛᴇ ᴘᴜʀᴄʜᴀsᴇ ʜɪsᴛᴏʀʏ ɪs ʀᴇᴀᴅʏ!</b>\n\n"
-        "ᴄʟɪᴄᴋ ᴛʜᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ᴠɪᴇᴡ ᴀʟʟ ʏᴏᴜʀ ᴘʀᴇᴠɪᴏᴜs ᴘᴜʀᴄʜᴀsᴇs, "
-        "ᴀᴄᴛɪᴠᴇ sᴜʙsᴄʀɪᴘᴛɪᴏɴs, ᴀɴᴅ ᴇxᴘɪʀʏ ᴅᴀᴛᴇs."
-    )
+    """Show loading in-message, create Telegraph page, then show Open button."""
+    await callback.answer()  # ack immediately — no popup
+
+    loading_text = "⏳ <b>ɢᴇɴᴇʀᴀᴛɪɴɢ ʏᴏᴜʀ ʜɪsᴛᴏʀʏ ᴘᴀɢᴇ . . .</b>"
+
+    # Step 1 — show loading state in the message
     try:
         if callback.message and callback.message.photo:
             await callback.message.edit_caption(
-                caption=text,
+                caption=loading_text,
                 parse_mode=ParseMode.HTML,
-                reply_markup=history_prompt_keyboard(),
             )
         elif callback.message:
             await callback.message.edit_text(
-                text=text,
+                text=loading_text,
                 parse_mode=ParseMode.HTML,
-                reply_markup=history_prompt_keyboard(),
             )
     except Exception:
         pass
-    await callback.answer()
-
-
-@router.callback_query(lambda c: c.data == "view_history_detail")
-async def cb_view_history_detail(callback: CallbackQuery) -> None:
-    """Create a Telegraph page with the user's history and show an Open link button."""
-    await callback.answer("⏳ ɢᴇɴᴇʀᴀᴛɪɴɢ ʏᴏᴜʀ ʜɪsᴛᴏʀʏ ᴘᴀɢᴇ...")
 
     user = callback.from_user
     user_id = user.id if user else 0
     user_name = user.first_name if user else "User"
 
+    # Step 2 — fetch data + create Telegraph page
     transactions, active_sub = await asyncio.gather(
         get_user_transactions(user_id, limit=20),
         get_active_subscription(user_id),
@@ -69,16 +61,16 @@ async def cb_view_history_detail(callback: CallbackQuery) -> None:
             transactions=transactions,
             active_sub=active_sub,
         )
-        text = (
-            "📖 <b>ʏᴏᴜʀ ʜɪsᴛᴏʀʏ ᴘᴀɢᴇ ɪs ʀᴇᴀᴅʏ!</b>\n\n"
+        ready_text = (
+            "📖 <b>ʜɪsᴛᴏʀʏ ᴘᴀɢᴇ ɪs ʀᴇᴀᴅʏ!</b>\n\n"
             "ᴄʟɪᴄᴋ ᴛʜᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ᴏᴘᴇɴ ʏᴏᴜʀ ᴄᴏᴍᴘʟᴇᴛᴇ ᴘᴜʀᴄʜᴀsᴇ ʜɪsᴛᴏʀʏ."
         )
         keyboard = history_telegraph_keyboard(telegraph_url)
     except Exception as e:
         logger.error("Telegraph page creation failed: %s", e)
-        # Fallback to inline list
+        # Fallback — show inline list
         if not transactions:
-            text = (
+            ready_text = (
                 "<blockquote><b>🎬 ᴛʀᴀɴsᴀᴄᴛɪᴏɴ ʜɪsᴛᴏʀʏ</b></blockquote>\n\n"
                 "ɴᴏ ᴛʀᴀɴsᴀᴄᴛɪᴏɴs ғᴏᴜɴᴅ.\n\n"
                 "<i>ʏᴏᴜʀ ᴘᴜʀᴄʜᴀsᴇ ᴀɴᴅ ᴡᴀʟʟᴇᴛ ᴀᴄᴛɪᴠɪᴛʏ ᴡɪʟʟ ᴀᴘᴘᴇᴀʀ ʜᴇʀᴇ.</i>"
@@ -97,19 +89,20 @@ async def cb_view_history_detail(callback: CallbackQuery) -> None:
                     f"  {desc}\n"
                     f"  <i>{date_str}</i>\n"
                 )
-            text = "\n".join(lines)
+            ready_text = "\n".join(lines)
         keyboard = history_detail_keyboard()
 
+    # Step 3 — update message with result
     try:
         if callback.message and callback.message.photo:
             await callback.message.edit_caption(
-                caption=text,
+                caption=ready_text,
                 parse_mode=ParseMode.HTML,
                 reply_markup=keyboard,
             )
         elif callback.message:
             await callback.message.edit_text(
-                text=text,
+                text=ready_text,
                 parse_mode=ParseMode.HTML,
                 reply_markup=keyboard,
             )
@@ -120,10 +113,6 @@ async def cb_view_history_detail(callback: CallbackQuery) -> None:
 @router.callback_query(lambda c: c.data == "history_close")
 async def cb_history_close(callback: CallbackQuery) -> None:
     """Go back to the main menu from history."""
-    from keyboards.inline import main_menu_keyboard
-    from services.subscription import get_setting
-    from utils.helpers import mention_html
-
     user = callback.from_user
     if user is None:
         await callback.answer()
