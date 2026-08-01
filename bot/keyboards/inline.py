@@ -180,8 +180,9 @@ def history_telegraph_keyboard(url: str) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(
         InlineKeyboardButton(
-            text="📖 ᴏᴘᴇɴ ʜɪsᴛᴏʀʏ",
+            text="➲ ᴠɪᴇᴡ ʜɪsᴛᴏʀʏ",
             url=url,
+            style="primary",
         )
     )
     builder.row(
