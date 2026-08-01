@@ -61,8 +61,8 @@ def buy_category_keyboard() -> InlineKeyboardMarkup:
         )
     )
     builder.row(
-        InlineKeyboardButton(text="‹ ʙᴀᴄᴋ", callback_data="back_main", style="primary"),
-        InlineKeyboardButton(text="● ᴄʟᴏsᴇ ●", callback_data="help_close", style="danger"),
+        InlineKeyboardButton(text="‹ ʙᴀᴄᴋ", callback_data="back_main"),
+        InlineKeyboardButton(text="● ᴄʟᴏsᴇ ●", callback_data="help_close"),
     )
     return builder.as_markup()
 
