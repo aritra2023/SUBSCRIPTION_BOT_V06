@@ -43,6 +43,30 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
+def buy_category_keyboard() -> InlineKeyboardMarkup:
+    """Shown when user taps Buy Subscription — choose Bot or Channel."""
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(
+            text="➲ ʙᴜʏ ʙᴏᴛ ᴘʀᴇᴍɪᴜᴍ",
+            callback_data="buy_category_bot",
+            style="danger",
+        )
+    )
+    builder.row(
+        InlineKeyboardButton(
+            text="➲ ʙᴜʏ ᴄʜᴀɴɴᴇʟ ᴘʀᴇᴍɪᴜᴍ",
+            callback_data="buy_category_channel",
+            style="primary",
+        )
+    )
+    builder.row(
+        InlineKeyboardButton(text="‹ ʙᴀᴄᴋ", callback_data="back_main", style="primary"),
+        InlineKeyboardButton(text="● ᴄʟᴏsᴇ ●", callback_data="help_close", style="danger"),
+    )
+    return builder.as_markup()
+
+
 def plans_keyboard(plans: list[dict]) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
@@ -65,27 +89,31 @@ def plans_keyboard(plans: list[dict]) -> InlineKeyboardMarkup:
         )
 
     builder.row(
-        InlineKeyboardButton(text="« ʙᴀᴄᴋ", callback_data="back_main", style="primary"),
+        InlineKeyboardButton(text="« ʙᴀᴄᴋ", callback_data="buy_subscription", style="primary"),
     )
 
     return builder.as_markup()
 
 
 def duration_keyboard(plan_name: str, durations: list[dict]) -> InlineKeyboardMarkup:
-    """Shown to user after selecting a plan — pick a duration tier."""
+    """Shown after selecting a plan — pick a duration tier, 2 per row."""
     builder = InlineKeyboardBuilder()
 
-    for tier in durations:
-        builder.row(
-            InlineKeyboardButton(
-                text=f"⏱ {tier['label']} — ₹{tier['price']:.0f}",
-                callback_data=f"plan_duration:{plan_name}:{tier['days']}",
-                style="primary",
-            )
+    buttons = [
+        InlineKeyboardButton(
+            text=tier["label"],
+            callback_data=f"plan_duration:{plan_name}:{tier['days']}",
+            style="primary",
         )
+        for tier in durations
+    ]
+
+    # 2 buttons per row
+    for i in range(0, len(buttons), 2):
+        builder.row(*buttons[i : i + 2])
 
     builder.row(
-        InlineKeyboardButton(text="« ʙᴀᴄᴋ", callback_data="buy_subscription", style="primary"),
+        InlineKeyboardButton(text="« ʙᴀᴄᴋ", callback_data="buy_category_channel", style="primary"),
     )
 
     return builder.as_markup()

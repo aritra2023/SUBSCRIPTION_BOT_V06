@@ -9,6 +9,7 @@ from aiogram.types import CallbackQuery, Message
 
 from keyboards.inline import (
     back_main_keyboard,
+    buy_category_keyboard,
     confirm_plan_keyboard,
     duration_keyboard,
     help_keyboard,
@@ -28,10 +29,42 @@ logger = logging.getLogger(__name__)
 router = Router(name="subscription")
 
 
-# ── Buy Subscription ──────────────────────────────────────────────────────────
+# ── Buy Subscription — Category Selection ─────────────────────────────────────
 
 @router.callback_query(lambda c: c.data == "buy_subscription")
 async def cb_buy_subscription(callback: CallbackQuery) -> None:
+    text = (
+        "<blockquote><b>💎 ᴄʜᴏᴏsᴇ ʏᴏᴜʀ ᴄᴀᴛᴇɢᴏʀʏ</b></blockquote>\n\n"
+        "sᴇʟᴇᴄᴛ ᴀ ᴄᴀᴛᴇɢᴏʀʏ ʙᴇʟᴏᴡ ᴛᴏ ᴠɪᴇᴡ ᴀᴠᴀɪʟᴀʙʟᴇ ᴘʟᴀɴs."
+    )
+    try:
+        if callback.message and callback.message.photo:
+            await callback.message.edit_caption(
+                caption=text,
+                parse_mode=ParseMode.HTML,
+                reply_markup=buy_category_keyboard(),
+            )
+        elif callback.message:
+            await callback.message.edit_text(
+                text=text,
+                parse_mode=ParseMode.HTML,
+                reply_markup=buy_category_keyboard(),
+            )
+    except Exception:
+        pass
+    await callback.answer()
+
+
+@router.callback_query(lambda c: c.data == "buy_category_bot")
+async def cb_buy_category_bot(callback: CallbackQuery) -> None:
+    await callback.answer(
+        "🚧 ʙᴏᴛ ᴘʀᴇᴍɪᴜᴍ ɪs ᴜɴᴅᴇʀ ᴍᴀɪɴᴛᴇɴᴀɴᴄᴇ.\nᴘʟᴇᴀsᴇ ᴄʜᴇᴄᴋ ʙᴀᴄᴋ ʟᴀᴛᴇʀ.",
+        show_alert=True,
+    )
+
+
+@router.callback_query(lambda c: c.data == "buy_category_channel")
+async def cb_buy_category_channel(callback: CallbackQuery) -> None:
     plans = await get_active_plans()
 
     if not plans:
@@ -42,7 +75,6 @@ async def cb_buy_subscription(callback: CallbackQuery) -> None:
         "<blockquote><b>💎 ᴄʜᴏᴏsᴇ ʏᴏᴜʀ ᴘʟᴀɴ</b></blockquote>\n\n"
         "sᴇʟᴇᴄᴛ ᴀ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴘʟᴀɴ ʙᴇʟᴏᴡ ᴛᴏ ɢᴇᴛ ɪɴsᴛᴀɴᴛ ᴀᴄᴄᴇss ᴛᴏ ᴀʟʟ ᴘʀᴇᴍɪᴜᴍ ᴄʜᴀɴɴᴇʟs."
     )
-
     try:
         if callback.message and callback.message.photo:
             await callback.message.edit_caption(
@@ -58,7 +90,6 @@ async def cb_buy_subscription(callback: CallbackQuery) -> None:
             )
     except Exception:
         pass
-
     await callback.answer()
 
 
