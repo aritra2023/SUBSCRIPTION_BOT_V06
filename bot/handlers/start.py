@@ -43,14 +43,14 @@ async def cmd_start(message: Message) -> None:
     banner_file_id = await get_setting("banner_file_id")
 
     if banner_file_id:
-        await message.answer_photo(
+        await message.reply_photo(
             photo=banner_file_id,
             caption=text,
             parse_mode=ParseMode.HTML,
             reply_markup=keyboard,
         )
     else:
-        await message.answer(
+        await message.reply(
             text=text,
             parse_mode=ParseMode.HTML,
             reply_markup=keyboard,
