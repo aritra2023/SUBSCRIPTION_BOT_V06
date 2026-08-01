@@ -13,6 +13,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from config import ADMIN_ID
 from loader import bot
 
 from filters.admin import IsAdmin
@@ -36,6 +37,7 @@ from services.subscription import (
     get_blocked_user_count,
     get_paid_user_count,
     get_plan,
+    get_user,
     get_user_count,
     mark_user_blocked,
     mark_user_unblocked,
@@ -650,11 +652,27 @@ async def handle_topup_amount(message: Message, state: FSMContext) -> None:
     user_id = data.get("topup_user_id")
     await state.clear()
     await topup_wallet(user_id, amount, description=f"ᴀᴅᴍɪɴ ᴛᴏᴘ-ᴜᴘ ᴏғ ₹{amount}")
+    user_info = await get_user(user_id)
+    user_name = (user_info.get("first_name") or str(user_id)) if user_info else str(user_id)
+    username_tag = (f" (@{user_info['username']})" if user_info and user_info.get("username") else "")
+    new_balance = user_info.get("wallet_balance", 0.0) if user_info else 0.0
     await message.answer(
         f"✅ <b>ᴡᴀʟʟᴇᴛ ᴛᴏᴘᴘᴇᴅ ᴜᴘ!</b>\n\nᴜsᴇʀ <code>{user_id}</code> ʀᴇᴄᴇɪᴠᴇᴅ <b>₹{amount:.2f}</b>.",
         parse_mode=ParseMode.HTML,
         reply_markup=admin_panel_keyboard(),
     )
+    try:
+        await bot.send_message(
+            ADMIN_ID,
+            f"<blockquote>💰 <b>ᴡᴀʟʟᴇᴛ ᴄʀᴇᴅɪᴛ ᴀʟᴇʀᴛ</b></blockquote>\n\n"
+            f"👤 <b>ᴜsᴇʀ:</b> {user_name}{username_tag}\n"
+            f"🆔 <b>ɪᴅ:</b> <code>{user_id}</code>\n"
+            f"💵 <b>ᴄʀᴇᴅɪᴛᴇᴅ:</b> +₹{amount:.2f}\n"
+            f"💼 <b>ɴᴇᴡ ʙᴀʟᴀɴᴄᴇ:</b> ₹{new_balance:.2f}",
+            parse_mode=ParseMode.HTML,
+        )
+    except Exception:
+        pass
 
 
 # ── Penalty Wallet ────────────────────────────────────────────────────────────
@@ -699,8 +717,24 @@ async def handle_penalty_amount(message: Message, state: FSMContext) -> None:
     user_id = data.get("penalty_user_id")
     await state.clear()
     await deduct_wallet(user_id, amount, description=f"ᴀᴅᴍɪɴ ᴘᴇɴᴀʟᴛʏ ᴏғ ₹{amount}")
+    user_info = await get_user(user_id)
+    user_name = (user_info.get("first_name") or str(user_id)) if user_info else str(user_id)
+    username_tag = (f" (@{user_info['username']})" if user_info and user_info.get("username") else "")
+    new_balance = user_info.get("wallet_balance", 0.0) if user_info else 0.0
     await message.answer(
         f"✅ <b>ᴘᴇɴᴀʟᴛʏ ᴀᴘᴘʟɪᴇᴅ!</b>\n\n₹{amount:.2f} ᴅᴇᴅᴜᴄᴛᴇᴅ ғʀᴏᴍ ᴜsᴇʀ <code>{user_id}</code>'s ᴡᴀʟʟᴇᴛ.",
         parse_mode=ParseMode.HTML,
         reply_markup=admin_panel_keyboard(),
     )
+    try:
+        await bot.send_message(
+            ADMIN_ID,
+            f"<blockquote>⚠️ <b>ᴡᴀʟʟᴇᴛ ᴅᴇᴅᴜᴄᴛ ᴀʟᴇʀᴛ</b></blockquote>\n\n"
+            f"👤 <b>ᴜsᴇʀ:</b> {user_name}{username_tag}\n"
+            f"🆔 <b>ɪᴅ:</b> <code>{user_id}</code>\n"
+            f"💸 <b>ᴅᴇᴅᴜᴄᴛᴇᴅ:</b> -₹{amount:.2f}\n"
+            f"💼 <b>ɴᴇᴡ ʙᴀʟᴀɴᴄᴇ:</b> ₹{new_balance:.2f}",
+            parse_mode=ParseMode.HTML,
+        )
+    except Exception:
+        pass

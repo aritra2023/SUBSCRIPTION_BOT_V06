@@ -7,6 +7,9 @@ from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 
+from config import ADMIN_ID
+from loader import bot
+
 from keyboards.inline import (
     back_main_keyboard,
     buy_category_keyboard,
@@ -132,8 +135,8 @@ async def cb_plan_select(callback: CallbackQuery) -> None:
         footer += f"<blockquote>≡ ʟɪғᴇᴛɪᴍᴇ: ₹{lifetime['price']:.0f} (ᴘᴀʏ ᴏɴᴄᴇ, ᴜsᴇ ғᴏʀᴇᴠᴇʀ)</blockquote>\n"
     footer += (
         "<blockquote>⧗ ᴘᴀʏᴍᴇɴᴛ ᴍᴇᴛʜᴏᴅs: ᴘᴀʏᴛᴍ, ɢᴘᴀʏ, ᴘʜᴏɴᴇᴘᴇ, ᴜᴘɪ &amp; ǫʀ ᴄᴏᴅᴇ</blockquote>\n"
-        "<blockquote>◍ ᴘʀᴇᴍɪᴜᴍ ᴀᴅᴅᴇᴅ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴀғᴛᴇʀ ᴘᴀʏᴍᴇɴᴛ!</blockquote>\n"
-        "<blockquote>◍ ᴀғᴛᴇʀ ᴘᴀʏᴍᴇɴᴛ ᴘʟᴇᴀsᴇ sᴇɴᴅ ᴜs sᴄʀᴇᴇɴsʜᴏᴛ ᴜsɪɴɢ /bought (ʀᴇᴘʟʏ ᴛᴏ sᴄʀᴇᴇɴsʜᴏᴛ)</blockquote>"
+        "<blockquote>◍ ᴘʀᴇᴍɪᴜᴍ ᴀᴅᴅᴇᴅ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴀғᴛᴇʀ ᴘᴀʏᴍᴇɴᴛ!\n"
+        "◍ sᴇɴᴅ ᴜs ss ᴜsɪɴɢ /bought &amp; ɢᴇᴛ ᴜʀ ᴘʀᴇᴍɪᴜᴍ ᴄʜᴀɴɴᴇʟ ᴏʀ ʙᴏᴛ ᴀᴄᴄᴇss ɪɴsᴛᴀɴᴛʟʏ</blockquote>"
     )
     text += footer
 
@@ -250,6 +253,27 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
         )
         if channel_links:
             text += f"\n<b>ʏᴏᴜʀ ᴄʜᴀɴɴᴇʟs:</b>\n{channel_links}"
+
+        # Notify admin about the purchase
+        fu = callback.from_user
+        user_name = fu.first_name if fu else str(user_id)
+        username_tag = (f" (@{fu.username})" if fu and fu.username else "")
+        user_info = await get_user(user_id)
+        remaining_balance = user_info.get("wallet_balance", 0.0) if user_info else 0.0
+        try:
+            await bot.send_message(
+                ADMIN_ID,
+                f"<blockquote>🛒 <b>ɴᴇᴡ ᴘᴜʀᴄʜᴀsᴇ ᴀʟᴇʀᴛ</b></blockquote>\n\n"
+                f"👤 <b>ᴜsᴇʀ:</b> {user_name}{username_tag}\n"
+                f"🆔 <b>ɪᴅ:</b> <code>{user_id}</code>\n"
+                f"📦 <b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
+                f"⏱ <b>ᴅᴜʀᴀᴛɪᴏɴ:</b> {duration_label}\n"
+                f"💵 <b>ᴘᴀɪᴅ:</b> ₹{price:.0f}\n"
+                f"💼 <b>ʀᴇᴍᴀɪɴɪɴɢ ʙᴀʟᴀɴᴄᴇ:</b> ₹{remaining_balance:.2f}",
+                parse_mode=ParseMode.HTML,
+            )
+        except Exception:
+            pass
     else:
         text = (
             "<blockquote><b>❌ ᴘᴜʀᴄʜᴀsᴇ ғᴀɪʟᴇᴅ</b></blockquote>\n\n"
