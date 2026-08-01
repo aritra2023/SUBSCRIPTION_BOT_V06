@@ -188,10 +188,10 @@ async def cb_plan_duration(callback: CallbackQuery) -> None:
 
     text = (
         f"<blockquote><b>📋 ᴄᴏɴғɪʀᴍ ᴘᴜʀᴄʜᴀsᴇ</b></blockquote>\n\n"
-        f"<b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
-        f"<b>ᴅᴜʀᴀᴛɪᴏɴ:</b> {tier['label']}\n"
-        f"<b>ᴘʀɪᴄᴇ:</b> ₹{price:.0f}\n"
-        f"<b>ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ:</b> ₹{balance:.2f}\n\n"
+        f"➲ <b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
+        f"➲ <b>ᴅᴜʀᴀᴛɪᴏɴ:</b> {tier['label']}\n"
+        f"➲ <b>ᴘʀɪᴄᴇ:</b> ₹{price:.0f}\n"
+        f"➲ <b>ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ:</b> ₹{balance:.2f}\n\n"
     )
 
     if balance >= price:
