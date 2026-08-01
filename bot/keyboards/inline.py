@@ -139,6 +139,21 @@ def back_main_keyboard() -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
+def no_plan_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(
+            text="➲ ᴄʜᴇᴄᴋᴏᴜᴛ ᴘʀᴇᴍɪᴜᴍ ᴘʟᴀɴs",
+            callback_data="buy_subscription",
+            style="primary",
+        )
+    )
+    builder.row(
+        InlineKeyboardButton(text="➲ ʙᴀᴄᴋ", callback_data="back_main", style="primary"),
+    )
+    return builder.as_markup()
+
+
 def admin_panel_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 

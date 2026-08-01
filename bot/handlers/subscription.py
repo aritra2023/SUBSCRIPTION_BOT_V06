@@ -10,6 +10,7 @@ from keyboards.inline import (
     back_main_keyboard,
     confirm_plan_keyboard,
     duration_keyboard,
+    no_plan_keyboard,
     plans_keyboard,
 )
 from services.subscription import (
@@ -228,6 +229,7 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
 @router.callback_query(lambda c: c.data == "view_plan")
 async def cb_view_plan(callback: CallbackQuery) -> None:
     user_id = callback.from_user.id if callback.from_user else 0
+    first_name = callback.from_user.first_name if callback.from_user else "ᴛʜᴇʀᴇ"
     sub = await get_active_subscription(user_id)
 
     if sub:
@@ -248,21 +250,23 @@ async def cb_view_plan(callback: CallbackQuery) -> None:
         )
         if channel_links:
             text += f"\n<b>ʏᴏᴜʀ ᴄʜᴀɴɴᴇʟs:</b>\n{channel_links}"
+        keyboard = back_main_keyboard()
     else:
         text = (
-            "<blockquote><b>📋 ʏᴏᴜʀ ᴄᴜʀʀᴇɴᴛ ᴘʟᴀɴ</b></blockquote>\n\n"
-            "❌ <b>ɴᴏ ᴀᴄᴛɪᴠᴇ sᴜʙsᴄʀɪᴘᴛɪᴏɴ.</b>\n\n"
-            "ᴘᴜʀᴄʜᴀsᴇ ᴀ ᴘʟᴀɴ ᴛᴏ ɢᴇᴛ ɪɴsᴛᴀɴᴛ ᴀᴄᴄᴇss ᴛᴏ ᴇxᴄʟᴜsɪᴠᴇ ᴘʀᴇᴍɪᴜᴍ ᴄʜᴀɴɴᴇʟs."
+            f"<b>ʜᴇʏ {first_name},</b>\n\n"
+            "ʏᴏᴜ ᴅᴏɴ'ᴛ ʜᴀᴠᴇ ᴀɴ ᴀᴄᴛɪᴠᴇ ᴘʀᴇᴍɪᴜᴍ ᴘʟᴀɴ.\n"
+            "ʙᴜʏ ᴏᴜʀ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴛᴏ ᴇɴᴊᴏʏ ᴘʀᴇᴍɪᴜᴍ ʙᴇɴᴇғɪᴛs."
         )
+        keyboard = no_plan_keyboard()
 
     try:
         if callback.message and callback.message.photo:
             await callback.message.edit_caption(
-                caption=text, parse_mode=ParseMode.HTML, reply_markup=back_main_keyboard()
+                caption=text, parse_mode=ParseMode.HTML, reply_markup=keyboard
             )
         elif callback.message:
             await callback.message.edit_text(
-                text=text, parse_mode=ParseMode.HTML, reply_markup=back_main_keyboard()
+                text=text, parse_mode=ParseMode.HTML, reply_markup=keyboard
             )
     except Exception:
         pass
