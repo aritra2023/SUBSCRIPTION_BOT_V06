@@ -74,18 +74,9 @@ def plans_keyboard(plans: list[dict]) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     for plan in plans:
-        durations = plan.get("durations", [])
-        if durations:
-            min_price = min(d["price"] for d in durations)
-            price_str = f"₹{min_price:.0f}+"
-        elif plan.get("price"):
-            price_str = f"₹{plan['price']}"
-        else:
-            price_str = ""
-
         builder.row(
             InlineKeyboardButton(
-                text=f"💎 {to_small_caps(plan['display_name'])} — {price_str}",
+                text=f"💎 {to_small_caps(plan['display_name'])}",
                 callback_data=f"plan_select:{plan['name']}",
                 style="primary",
             )
@@ -102,10 +93,10 @@ def duration_keyboard(plan_name: str, durations: list[dict], demo_link: str = ""
     """Shown after selecting a plan — pick a duration tier, 2 per row."""
     builder = InlineKeyboardBuilder()
 
-    # Demo channel link at top as red button
+    # Demo channel link at top as blue button
     if demo_link:
         builder.row(
-            InlineKeyboardButton(text="🎥 ᴅᴇᴍᴏ ᴄʜᴀɴɴᴇʟ", url=demo_link, style="danger"),
+            InlineKeyboardButton(text="🎥 ᴅᴇᴍᴏ ᴄʜᴀɴɴᴇʟ", url=demo_link, style="primary"),
         )
 
     buttons = [
@@ -149,14 +140,14 @@ def confirm_plan_keyboard(plan_name: str, days: int) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     builder.row(
+        InlineKeyboardButton(text="« ʙᴀᴄᴋ", callback_data=f"plan_select:{plan_name}", style="danger"),
+    )
+    builder.row(
         InlineKeyboardButton(
-            text="✅ ᴄᴏɴғɪʀᴍ ᴘᴜʀᴄʜᴀsᴇ",
+            text="✓ ᴄᴏɴғɪʀᴍ ᴘᴜʀᴄʜᴀsᴇ",
             callback_data=f"plan_confirm:{plan_name}:{days}",
             style="success",
         ),
-    )
-    builder.row(
-        InlineKeyboardButton(text="« ʙᴀᴄᴋ", callback_data=f"plan_select:{plan_name}", style="primary"),
     )
 
     return builder.as_markup()
