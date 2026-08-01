@@ -160,7 +160,7 @@ def wallet_keyboard(auto_renew: bool = True) -> InlineKeyboardMarkup:
 
 
 def history_prompt_keyboard() -> InlineKeyboardMarkup:
-    """Shown as a reply to /start when user taps History — leads to detail view."""
+    """Shown when user taps History — leads to detail view."""
     builder = InlineKeyboardBuilder()
     builder.row(
         InlineKeyboardButton(
@@ -175,8 +175,23 @@ def history_prompt_keyboard() -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
+def history_telegraph_keyboard(url: str) -> InlineKeyboardMarkup:
+    """Shown after Telegraph page is created — open link + back."""
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(
+            text="📖 ᴏᴘᴇɴ ʜɪsᴛᴏʀʏ",
+            url=url,
+        )
+    )
+    builder.row(
+        InlineKeyboardButton(text="‹ ʙᴀᴄᴋ", callback_data="history_close"),
+    )
+    return builder.as_markup()
+
+
 def history_detail_keyboard() -> InlineKeyboardMarkup:
-    """Shown on the actual transaction list — back closes the reply message."""
+    """Fallback: shown on the inline transaction list."""
     builder = InlineKeyboardBuilder()
     builder.row(
         InlineKeyboardButton(text="‹ ʙᴀᴄᴋ", callback_data="history_close"),
