@@ -17,6 +17,7 @@ from keyboards.inline import (
     DURATION_OPTIONS,
     admin_duration_select_keyboard,
     admin_panel_keyboard,
+    back_to_admin_keyboard,
     broadcast_confirm_keyboard,
     cancel_keyboard,
 )
@@ -70,16 +71,31 @@ async def cmd_admin(message: Message, state: FSMContext) -> None:
     )
 
 
+_ADMIN_PANEL_TEXT = "<blockquote><b>⚙️ ᴀᴅᴍɪɴ ᴘᴀɴᴇʟ — ғʟɪx ᴠᴇʀsᴇ</b></blockquote>\n\nᴄʜᴏᴏsᴇ ᴀɴ ᴀᴄᴛɪᴏɴ:"
+
+
 @router.callback_query(lambda c: c.data == "admin_cancel")
 async def cb_admin_cancel(callback: CallbackQuery, state: FSMContext) -> None:
     await state.clear()
     if callback.message:
         await callback.message.edit_text(
-            "<blockquote><b>⚙️ ᴀᴅᴍɪɴ ᴘᴀɴᴇʟ — ғʟɪx ᴠᴇʀsᴇ</b></blockquote>\n\nᴄʜᴏᴏsᴇ ᴀɴ ᴀᴄᴛɪᴏɴ:",
+            _ADMIN_PANEL_TEXT,
             parse_mode=ParseMode.HTML,
             reply_markup=admin_panel_keyboard(),
         )
     await callback.answer("ᴄᴀɴᴄᴇʟʟᴇᴅ.")
+
+
+@router.callback_query(lambda c: c.data == "admin_back")
+async def cb_admin_back(callback: CallbackQuery, state: FSMContext) -> None:
+    await state.clear()
+    if callback.message:
+        await callback.message.edit_text(
+            _ADMIN_PANEL_TEXT,
+            parse_mode=ParseMode.HTML,
+            reply_markup=admin_panel_keyboard(),
+        )
+    await callback.answer()
 
 
 # ── Stats ─────────────────────────────────────────────────────────────────────
@@ -100,7 +116,7 @@ async def cb_admin_stats(callback: CallbackQuery) -> None:
     )
 
     if callback.message:
-        await callback.message.edit_text(text, parse_mode=ParseMode.HTML, reply_markup=admin_panel_keyboard())
+        await callback.message.edit_text(text, parse_mode=ParseMode.HTML, reply_markup=back_to_admin_keyboard())
     await callback.answer()
 
 
@@ -129,7 +145,7 @@ async def handle_banner_photo(message: Message, state: FSMContext) -> None:
     await message.answer(
         "✅ <b>ʙᴀɴɴᴇʀ ᴜᴘᴅᴀᴛᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ!</b>\n\nɴᴇᴡ /start ʙᴀɴɴᴇʀ ɪs ɴᴏᴡ ᴀᴄᴛɪᴠᴇ.",
         parse_mode=ParseMode.HTML,
-        reply_markup=admin_panel_keyboard(),
+        reply_markup=back_to_admin_keyboard(),
     )
 
 
@@ -150,9 +166,15 @@ async def cb_admin_broadcast(callback: CallbackQuery, state: FSMContext) -> None
 @router.message(AdminStates.waiting_for_broadcast)
 async def handle_broadcast_message(message: Message, state: FSMContext) -> None:
     """Accept any message type (text, photo, forwarded, etc.) and ask for confirm."""
+    # Save reply_markup so buttons are preserved when copying
+    reply_markup_data = None
+    if message.reply_markup:
+        reply_markup_data = message.reply_markup.model_dump(mode="json")
+
     await state.update_data(
         broadcast_from_chat_id=message.chat.id,
         broadcast_message_id=message.message_id,
+        broadcast_reply_markup=reply_markup_data,
     )
     await state.set_state(AdminStates.waiting_for_broadcast_confirm)
 
@@ -175,10 +197,13 @@ async def handle_broadcast_message(message: Message, state: FSMContext) -> None:
 async def cb_broadcast_confirm(callback: CallbackQuery, state: FSMContext) -> None:
     from loader import bot
     from aiogram.exceptions import TelegramForbiddenError
+    from aiogram.types import InlineKeyboardMarkup
 
     data = await state.get_data()
     from_chat_id = data.get("broadcast_from_chat_id")
     msg_id = data.get("broadcast_message_id")
+    reply_markup_data = data.get("broadcast_reply_markup")
+    reply_markup = InlineKeyboardMarkup.model_validate(reply_markup_data) if reply_markup_data else None
     await state.clear()
 
     users = await get_all_users()
@@ -196,6 +221,7 @@ async def cb_broadcast_confirm(callback: CallbackQuery, state: FSMContext) -> No
                 chat_id=user_id,
                 from_chat_id=from_chat_id,
                 message_id=msg_id,
+                reply_markup=reply_markup,
             )
             await mark_user_unblocked(user_id)
             sent += 1
@@ -212,7 +238,7 @@ async def cb_broadcast_confirm(callback: CallbackQuery, state: FSMContext) -> No
             f"<b>ʙʟᴏᴄᴋᴇᴅ:</b> {blocked}\n"
             f"<b>ғᴀɪʟᴇᴅ:</b> {failed}",
             parse_mode=ParseMode.HTML,
-            reply_markup=admin_panel_keyboard(),
+            reply_markup=back_to_admin_keyboard(),
         )
     await callback.answer()
 
@@ -234,7 +260,7 @@ async def cb_admin_plans(callback: CallbackQuery) -> None:
 
     if callback.message:
         await callback.message.edit_text(
-            "\n".join(lines), parse_mode=ParseMode.HTML, reply_markup=admin_panel_keyboard()
+            "\n".join(lines), parse_mode=ParseMode.HTML, reply_markup=back_to_admin_keyboard()
         )
     await callback.answer()
 
