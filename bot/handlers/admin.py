@@ -54,7 +54,7 @@ class AdminStates(StatesGroup):
 async def cmd_admin(message: Message, state: FSMContext) -> None:
     await state.clear()
     await message.answer(
-        "<blockquote><b>⚙️ ADMIN PANEL — FLIX VERSE</b></blockquote>\n\nChoose an action:",
+        "<blockquote><b>⚙️ ᴀᴅᴍɪɴ ᴘᴀɴᴇʟ — ғʟɪx ᴠᴇʀsᴇ</b></blockquote>\n\nᴄʜᴏᴏsᴇ ᴀɴ ᴀᴄᴛɪᴏɴ:",
         parse_mode=ParseMode.HTML,
         reply_markup=admin_panel_keyboard(),
     )
@@ -65,11 +65,11 @@ async def cb_admin_cancel(callback: CallbackQuery, state: FSMContext) -> None:
     await state.clear()
     if callback.message:
         await callback.message.edit_text(
-            "<blockquote><b>⚙️ ADMIN PANEL — FLIX VERSE</b></blockquote>\n\nChoose an action:",
+            "<blockquote><b>⚙️ ᴀᴅᴍɪɴ ᴘᴀɴᴇʟ — ғʟɪx ᴠᴇʀsᴇ</b></blockquote>\n\nᴄʜᴏᴏsᴇ ᴀɴ ᴀᴄᴛɪᴏɴ:",
             parse_mode=ParseMode.HTML,
             reply_markup=admin_panel_keyboard(),
         )
-    await callback.answer("Cancelled.")
+    await callback.answer("ᴄᴀɴᴄᴇʟʟᴇᴅ.")
 
 
 # ── Stats ─────────────────────────────────────────────────────────────────────
@@ -80,10 +80,10 @@ async def cb_admin_stats(callback: CallbackQuery) -> None:
     plans = await get_active_plans()
 
     text = (
-        "<blockquote><b>📊 BOT STATISTICS</b></blockquote>\n\n"
-        f"<b>Total Users:</b> {total_users}\n"
-        f"<b>Active Plans:</b> {len(plans)}\n\n"
-        "<b>Plans:</b>\n"
+        "<blockquote><b>📊 ʙᴏᴛ sᴛᴀᴛɪsᴛɪᴄs</b></blockquote>\n\n"
+        f"<b>ᴛᴏᴛᴀʟ ᴜsᴇʀs:</b> {total_users}\n"
+        f"<b>ᴀᴄᴛɪᴠᴇ ᴘʟᴀɴs:</b> {len(plans)}\n\n"
+        "<b>ᴘʟᴀɴs:</b>\n"
     )
     for plan in plans:
         durations = plan.get("durations", [])
@@ -104,14 +104,14 @@ async def cb_admin_stats(callback: CallbackQuery) -> None:
 async def cb_admin_users(callback: CallbackQuery) -> None:
     users = await get_all_users()
     if not users:
-        text = "<blockquote><b>👥 USERS</b></blockquote>\n\nNo users yet."
+        text = "<blockquote><b>👥 ᴜsᴇʀs</b></blockquote>\n\nɴᴏ ᴜsᴇʀs ʏᴇᴛ."
     else:
-        lines = [f"<blockquote><b>👥 USERS ({len(users)} total)</b></blockquote>\n"]
+        lines = [f"<blockquote><b>👥 ᴜsᴇʀs ({len(users)} ᴛᴏᴛᴀʟ)</b></blockquote>\n"]
         for u in users[:20]:
             uname = f"@{u['username']}" if u.get("username") else "—"
-            lines.append(f"• <b>{u['first_name']}</b> ({uname}) — ID: <code>{u['user_id']}</code>")
+            lines.append(f"• <b>{u['first_name']}</b> ({uname}) — ɪᴅ: <code>{u['user_id']}</code>")
         if len(users) > 20:
-            lines.append(f"\n<i>...and {len(users) - 20} more</i>")
+            lines.append(f"\n<i>...ᴀɴᴅ {len(users) - 20} ᴍᴏʀᴇ</i>")
         text = "\n".join(lines)
 
     if callback.message:
@@ -125,7 +125,7 @@ async def cb_admin_users(callback: CallbackQuery) -> None:
 async def cb_admin_set_banner(callback: CallbackQuery, state: FSMContext) -> None:
     if callback.message:
         await callback.message.edit_text(
-            "<blockquote><b>🖼 SET BANNER IMAGE</b></blockquote>\n\nSend a photo to use as the /start banner.",
+            "<blockquote><b>🖼 sᴇᴛ ʙᴀɴɴᴇʀ ɪᴍᴀɢᴇ</b></blockquote>\n\nsᴇɴᴅ ᴀ ᴘʜᴏᴛᴏ ᴛᴏ ᴜsᴇ ᴀs ᴛʜᴇ /start ʙᴀɴɴᴇʀ.",
             parse_mode=ParseMode.HTML,
             reply_markup=cancel_keyboard(),
         )
@@ -136,13 +136,13 @@ async def cb_admin_set_banner(callback: CallbackQuery, state: FSMContext) -> Non
 @router.message(AdminStates.waiting_for_banner, F.photo)
 async def handle_banner_photo(message: Message, state: FSMContext) -> None:
     if not message.photo:
-        await message.answer("Please send a photo.", reply_markup=cancel_keyboard())
+        await message.answer("ᴘʟᴇᴀsᴇ sᴇɴᴅ ᴀ ᴘʜᴏᴛᴏ.", reply_markup=cancel_keyboard())
         return
     file_id = message.photo[-1].file_id
     await set_setting("banner_file_id", file_id)
     await state.clear()
     await message.answer(
-        "✅ <b>Banner updated successfully!</b>\n\nNew /start banner is now active.",
+        "✅ <b>ʙᴀɴɴᴇʀ ᴜᴘᴅᴀᴛᴇᴅ sᴜᴄᴄᴇssғᴜʟʟʏ!</b>\n\nɴᴇᴡ /start ʙᴀɴɴᴇʀ ɪs ɴᴏᴡ ᴀᴄᴛɪᴠᴇ.",
         parse_mode=ParseMode.HTML,
         reply_markup=admin_panel_keyboard(),
     )
@@ -154,7 +154,7 @@ async def handle_banner_photo(message: Message, state: FSMContext) -> None:
 async def cb_admin_broadcast(callback: CallbackQuery, state: FSMContext) -> None:
     if callback.message:
         await callback.message.edit_text(
-            "<blockquote><b>📢 BROADCAST</b></blockquote>\n\nSend the message to broadcast to all users.",
+            "<blockquote><b>📢 ʙʀᴏᴀᴅᴄᴀsᴛ</b></blockquote>\n\nsᴇɴᴅ ᴛʜᴇ ᴍᴇssᴀɢᴇ ᴛᴏ ʙʀᴏᴀᴅᴄᴀsᴛ ᴛᴏ ᴀʟʟ ᴜsᴇʀs.",
             parse_mode=ParseMode.HTML,
             reply_markup=cancel_keyboard(),
         )
@@ -168,7 +168,7 @@ async def handle_broadcast_message(message: Message, state: FSMContext) -> None:
     broadcast_text = message.text or ""
     users = await get_all_users()
     await state.clear()
-    status_msg = await message.answer(f"📢 Broadcasting to {len(users)} users...")
+    status_msg = await message.answer(f"📢 ʙʀᴏᴀᴅᴄᴀsᴛɪɴɢ ᴛᴏ {len(users)} ᴜsᴇʀs...")
     sent, failed = 0, 0
     for user in users:
         try:
@@ -177,7 +177,7 @@ async def handle_broadcast_message(message: Message, state: FSMContext) -> None:
         except Exception:
             failed += 1
     await status_msg.edit_text(
-        f"✅ Broadcast complete.\n\n<b>Sent:</b> {sent}\n<b>Failed:</b> {failed}",
+        f"✅ ʙʀᴏᴀᴅᴄᴀsᴛ ᴄᴏᴍᴘʟᴇᴛᴇ.\n\n<b>sᴇɴᴛ:</b> {sent}\n<b>ғᴀɪʟᴇᴅ:</b> {failed}",
         parse_mode=ParseMode.HTML,
         reply_markup=admin_panel_keyboard(),
     )
@@ -188,7 +188,7 @@ async def handle_broadcast_message(message: Message, state: FSMContext) -> None:
 @router.callback_query(lambda c: c.data == "admin_plans")
 async def cb_admin_plans(callback: CallbackQuery) -> None:
     plans = await get_active_plans()
-    lines = ["<blockquote><b>📦 PLANS</b></blockquote>\n"]
+    lines = ["<blockquote><b>📦 ᴘʟᴀɴs</b></blockquote>\n"]
     for p in plans:
         durations = p.get("durations", [])
         if durations:
@@ -196,7 +196,7 @@ async def cb_admin_plans(callback: CallbackQuery) -> None:
         else:
             tiers = f"₹{p.get('price', '?')} / {p.get('duration_days', '?')}d"
         lines.append(f"• <b>{p['display_name']}</b>\n  {tiers}")
-    lines.append("\n<i>Send /addplan to add a new plan.</i>")
+    lines.append("\n<i>sᴇɴᴅ /addplan ᴛᴏ ᴀᴅᴅ ᴀ ɴᴇᴡ ᴘʟᴀɴ.</i>")
 
     if callback.message:
         await callback.message.edit_text(
@@ -211,9 +211,9 @@ async def cb_admin_plans(callback: CallbackQuery) -> None:
 async def cmd_add_plan(message: Message, state: FSMContext) -> None:
     await state.clear()
     await message.answer(
-        "<blockquote><b>➕ ADD PLAN — Step 1/6</b></blockquote>\n\n"
-        "Enter the plan <b>display name</b>:\n\n"
-        "<i>Example: FLIX PREMIUM</i>",
+        "<blockquote><b>➕ ᴀᴅᴅ ᴘʟᴀɴ — sᴛᴇᴘ 1/6</b></blockquote>\n\n"
+        "ᴇɴᴛᴇʀ ᴛʜᴇ ᴘʟᴀɴ <b>ᴅɪsᴘʟᴀʏ ɴᴀᴍᴇ</b>:\n\n"
+        "<i>ᴇxᴀᴍᴘʟᴇ: FLIX PREMIUM</i>",
         parse_mode=ParseMode.HTML,
         reply_markup=cancel_keyboard(),
     )
@@ -224,15 +224,15 @@ async def cmd_add_plan(message: Message, state: FSMContext) -> None:
 async def handle_addplan_name(message: Message, state: FSMContext) -> None:
     display_name = (message.text or "").strip()
     if not display_name:
-        await message.answer("❌ Name cannot be empty. Try again.")
+        await message.answer("❌ ɴᴀᴍᴇ ᴄᴀɴɴᴏᴛ ʙᴇ ᴇᴍᴘᴛʏ. ᴛʀʏ ᴀɢᴀɪɴ.")
         return
     internal_name = re.sub(r"[^a-z0-9_]", "", display_name.lower().replace(" ", "_"))
     if not internal_name:
         internal_name = "plan_" + str(abs(hash(display_name)))[:6]
     await state.update_data(display_name=display_name, name=internal_name)
     await message.answer(
-        "<blockquote><b>➕ ADD PLAN — Step 2/6</b></blockquote>\n\n"
-        "Enter the plan <b>description</b>:",
+        "<blockquote><b>➕ ᴀᴅᴅ ᴘʟᴀɴ — sᴛᴇᴘ 2/6</b></blockquote>\n\n"
+        "ᴇɴᴛᴇʀ ᴛʜᴇ ᴘʟᴀɴ <b>ᴅᴇsᴄʀɪᴘᴛɪᴏɴ</b>:",
         parse_mode=ParseMode.HTML,
         reply_markup=cancel_keyboard(),
     )
@@ -245,9 +245,9 @@ async def handle_addplan_name(message: Message, state: FSMContext) -> None:
 async def handle_addplan_description(message: Message, state: FSMContext) -> None:
     await state.update_data(description=(message.text or "").strip())
     await message.answer(
-        "<blockquote><b>➕ ADD PLAN — Step 3/6</b></blockquote>\n\n"
-        "Enter a <b>demo channel link</b> (e.g. <code>t.me/+xxx</code>):\n\n"
-        "<i>Send <code>skip</code> to leave empty.</i>",
+        "<blockquote><b>➕ ᴀᴅᴅ ᴘʟᴀɴ — sᴛᴇᴘ 3/6</b></blockquote>\n\n"
+        "ᴇɴᴛᴇʀ ᴀ <b>ᴅᴇᴍᴏ ᴄʜᴀɴɴᴇʟ ʟɪɴᴋ</b> (e.g. <code>t.me/+xxx</code>):\n\n"
+        "<i>sᴇɴᴅ <code>skip</code> ᴛᴏ ʟᴇᴀᴠᴇ ᴇᴍᴘᴛʏ.</i>",
         parse_mode=ParseMode.HTML,
         reply_markup=cancel_keyboard(),
     )
@@ -270,8 +270,8 @@ async def handle_addplan_demo_link(message: Message, state: FSMContext) -> None:
     builder.row(InlineKeyboardButton(text="✖ ᴄᴀɴᴄᴇʟ", callback_data="admin_cancel", style="danger"))
 
     await message.answer(
-        "<blockquote><b>➕ ADD PLAN — Step 4/6</b></blockquote>\n\n"
-        "Should users be required to send a <b>payment proof screenshot</b>?",
+        "<blockquote><b>➕ ᴀᴅᴅ ᴘʟᴀɴ — sᴛᴇᴘ 4/6</b></blockquote>\n\n"
+        "sʜᴏᴜʟᴅ ᴜsᴇʀs ʙᴇ ʀᴇǫᴜɪʀᴇᴅ ᴛᴏ sᴇɴᴅ ᴀ <b>ᴘᴀʏᴍᴇɴᴛ ᴘʀᴏᴏғ sᴄʀᴇᴇɴsʜᴏᴛ</b>?",
         parse_mode=ParseMode.HTML,
         reply_markup=builder.as_markup(),
     )
@@ -286,9 +286,9 @@ async def cb_addplan_payment_proof(callback: CallbackQuery, state: FSMContext) -
     await state.update_data(payment_proof_required=payment_proof, selected_durations=[])
     if callback.message:
         await callback.message.edit_text(
-            "<blockquote><b>➕ ADD PLAN — Step 5/6</b></blockquote>\n\n"
-            "Select which <b>duration options</b> to offer.\n"
-            "Tap to toggle ✅, then press <b>Done</b>:",
+            "<blockquote><b>➕ ᴀᴅᴅ ᴘʟᴀɴ — sᴛᴇᴘ 5/6</b></blockquote>\n\n"
+            "sᴇʟᴇᴄᴛ ᴡʜɪᴄʜ <b>ᴅᴜʀᴀᴛɪᴏɴ ᴏᴘᴛɪᴏɴs</b> ᴛᴏ ᴏғғᴇʀ.\n"
+            "ᴛᴀᴘ ᴛᴏ ᴛᴏɢɢʟᴇ ✅, ᴛʜᴇɴ ᴘʀᴇss <b>ᴅᴏɴᴇ</b>:",
             parse_mode=ParseMode.HTML,
             reply_markup=admin_duration_select_keyboard([]),
         )
@@ -318,7 +318,7 @@ async def cb_addplan_duration_done(callback: CallbackQuery, state: FSMContext) -
     data = await state.get_data()
     selected: list[int] = data.get("selected_durations", [])
     if not selected:
-        await callback.answer("⚠️ Select at least one duration!", show_alert=True)
+        await callback.answer("⚠️ sᴇʟᴇᴄᴛ ᴀᴛ ʟᴇᴀsᴛ ᴏɴᴇ ᴅᴜʀᴀᴛɪᴏɴ!", show_alert=True)
         return
 
     selected.sort()
@@ -330,8 +330,8 @@ async def cb_addplan_duration_done(callback: CallbackQuery, state: FSMContext) -
 
     if callback.message:
         await callback.message.edit_text(
-            f"<blockquote><b>➕ ADD PLAN — Step 6/6</b></blockquote>\n\n"
-            f"Enter price for <b>{first['label']}</b> (₹):",
+            f"<blockquote><b>➕ ᴀᴅᴅ ᴘʟᴀɴ — sᴛᴇᴘ 6/6</b></blockquote>\n\n"
+            f"ᴇɴᴛᴇʀ ᴘʀɪᴄᴇ ғᴏʀ <b>{first['label']}</b> (₹):",
             parse_mode=ParseMode.HTML,
             reply_markup=cancel_keyboard(),
         )
@@ -348,7 +348,7 @@ async def handle_addplan_pricing(message: Message, state: FSMContext) -> None:
         if price < 0:
             raise ValueError
     except ValueError:
-        await message.answer("❌ Invalid price. Send a positive number (e.g. 299).")
+        await message.answer("❌ ɪɴᴠᴀʟɪᴅ ᴘʀɪᴄᴇ. sᴇɴᴅ ᴀ ᴘᴏsɪᴛɪᴠᴇ ɴᴜᴍʙᴇʀ (e.g. 299).")
         return
 
     data = await state.get_data()
@@ -364,18 +364,18 @@ async def handle_addplan_pricing(message: Message, state: FSMContext) -> None:
         await state.update_data(duration_prices=duration_prices, pricing_index=idx)
         nxt = durations_to_price[idx]
         await message.answer(
-            f"<blockquote><b>➕ ADD PLAN — Pricing</b></blockquote>\n\n"
-            f"Enter price for <b>{nxt['label']}</b> (₹):",
+            f"<blockquote><b>➕ ᴀᴅᴅ ᴘʟᴀɴ — ᴘʀɪᴄɪɴɢ</b></blockquote>\n\n"
+            f"ᴇɴᴛᴇʀ ᴘʀɪᴄᴇ ғᴏʀ <b>{nxt['label']}</b> (₹):",
             parse_mode=ParseMode.HTML,
             reply_markup=cancel_keyboard(),
         )
     else:
         await state.update_data(duration_prices=duration_prices, pricing_index=idx, channels=[])
         await message.answer(
-            "<blockquote><b>➕ ADD PLAN — Channels</b></blockquote>\n\n"
-            "Send <b>channel invite link(s)</b> one by one.\n"
-            "When done, send <code>done</code>.\n\n"
-            "<i>Channels added: 0</i>",
+            "<blockquote><b>➕ ᴀᴅᴅ ᴘʟᴀɴ — ᴄʜᴀɴɴᴇʟs</b></blockquote>\n\n"
+            "sᴇɴᴅ <b>ᴄʜᴀɴɴᴇʟ ɪɴᴠɪᴛᴇ ʟɪɴᴋ(s)</b> ᴏɴᴇ ʙʏ ᴏɴᴇ.\n"
+            "ᴡʜᴇɴ ᴅᴏɴᴇ, sᴇɴᴅ <code>done</code>.\n\n"
+            "<i>ᴄʜᴀɴɴᴇʟs ᴀᴅᴅᴇᴅ: 0</i>",
             parse_mode=ParseMode.HTML,
             reply_markup=cancel_keyboard(),
         )
@@ -405,10 +405,10 @@ async def handle_addplan_channels(message: Message, state: FSMContext) -> None:
             f"  • {d['label']} — ₹{d['price']:.0f}" for d in data["duration_prices"]
         )
         await message.answer(
-            f"✅ <b>Plan created:</b> {data['display_name']}\n\n"
-            f"<b>Durations:</b>\n{tiers_text}\n\n"
-            f"<b>Channels:</b> {len(channels)}\n"
-            f"<b>Payment Proof:</b> {'Yes' if data.get('payment_proof_required') else 'No'}",
+            f"✅ <b>ᴘʟᴀɴ ᴄʀᴇᴀᴛᴇᴅ:</b> {data['display_name']}\n\n"
+            f"<b>ᴅᴜʀᴀᴛɪᴏɴs:</b>\n{tiers_text}\n\n"
+            f"<b>ᴄʜᴀɴɴᴇʟs:</b> {len(channels)}\n"
+            f"<b>ᴘᴀʏᴍᴇɴᴛ ᴘʀᴏᴏғ:</b> {'ʏᴇs' if data.get('payment_proof_required') else 'ɴᴏ'}",
             parse_mode=ParseMode.HTML,
             reply_markup=admin_panel_keyboard(),
         )
@@ -416,8 +416,8 @@ async def handle_addplan_channels(message: Message, state: FSMContext) -> None:
         channels.append(text)
         await state.update_data(channels=channels)
         await message.answer(
-            f"✅ Link added. <i>Channels added: {len(channels)}</i>\n\n"
-            "Send another link or <code>done</code> to finish.",
+            f"✅ ʟɪɴᴋ ᴀᴅᴅᴇᴅ. <i>ᴄʜᴀɴɴᴇʟs ᴀᴅᴅᴇᴅ: {len(channels)}</i>\n\n"
+            "sᴇɴᴅ ᴀɴᴏᴛʜᴇʀ ʟɪɴᴋ ᴏʀ <code>done</code> ᴛᴏ ғɪɴɪsʜ.",
             parse_mode=ParseMode.HTML,
             reply_markup=cancel_keyboard(),
         )
@@ -428,8 +428,8 @@ async def handle_addplan_channels(message: Message, state: FSMContext) -> None:
 @router.message(Command("topup"))
 async def cmd_topup(message: Message, state: FSMContext) -> None:
     await message.answer(
-        "<blockquote><b>💰 WALLET TOP-UP</b></blockquote>\n\n"
-        "Send the user ID to top up:",
+        "<blockquote><b>💰 ᴡᴀʟʟᴇᴛ ᴛᴏᴘ-ᴜᴘ</b></blockquote>\n\n"
+        "sᴇɴᴅ ᴛʜᴇ ᴜsᴇʀ ɪᴅ ᴛᴏ ᴛᴏᴘ ᴜᴘ:",
         parse_mode=ParseMode.HTML,
         reply_markup=cancel_keyboard(),
     )
@@ -441,11 +441,11 @@ async def handle_topup_user(message: Message, state: FSMContext) -> None:
     try:
         user_id = int(message.text or "")
     except ValueError:
-        await message.answer("❌ Invalid user ID. Send a numeric Telegram user ID.")
+        await message.answer("❌ ɪɴᴠᴀʟɪᴅ ᴜsᴇʀ ɪᴅ. sᴇɴᴅ ᴀ ɴᴜᴍᴇʀɪᴄ ᴛᴇʟᴇɢʀᴀᴍ ᴜsᴇʀ ɪᴅ.")
         return
     await state.update_data(topup_user_id=user_id)
     await message.answer(
-        f"User ID: <code>{user_id}</code>\n\nNow send the top-up amount (e.g. <code>500</code>):",
+        f"ᴜsᴇʀ ɪᴅ: <code>{user_id}</code>\n\nɴᴏᴡ sᴇɴᴅ ᴛʜᴇ ᴛᴏᴘ-ᴜᴘ ᴀᴍᴏᴜɴᴛ (e.g. <code>500</code>):",
         parse_mode=ParseMode.HTML,
         reply_markup=cancel_keyboard(),
     )
@@ -457,14 +457,14 @@ async def handle_topup_amount(message: Message, state: FSMContext) -> None:
     try:
         amount = float(message.text or "")
     except ValueError:
-        await message.answer("❌ Invalid amount. Send a number.")
+        await message.answer("❌ ɪɴᴠᴀʟɪᴅ ᴀᴍᴏᴜɴᴛ. sᴇɴᴅ ᴀ ɴᴜᴍʙᴇʀ.")
         return
     data = await state.get_data()
     user_id = data.get("topup_user_id")
     await state.clear()
-    await topup_wallet(user_id, amount, description=f"Admin top-up of ₹{amount}")
+    await topup_wallet(user_id, amount, description=f"ᴀᴅᴍɪɴ ᴛᴏᴘ-ᴜᴘ ᴏғ ₹{amount}")
     await message.answer(
-        f"✅ <b>Wallet topped up!</b>\n\nUser <code>{user_id}</code> received <b>₹{amount:.2f}</b>.",
+        f"✅ <b>ᴡᴀʟʟᴇᴛ ᴛᴏᴘᴘᴇᴅ ᴜᴘ!</b>\n\nᴜsᴇʀ <code>{user_id}</code> ʀᴇᴄᴇɪᴠᴇᴅ <b>₹{amount:.2f}</b>.",
         parse_mode=ParseMode.HTML,
         reply_markup=admin_panel_keyboard(),
     )

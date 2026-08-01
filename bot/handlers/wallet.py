@@ -119,6 +119,6 @@ async def cb_toggle_auto_renew(callback: CallbackQuery) -> None:
 @router.callback_query(lambda c: c.data == "add_balance")
 async def cb_add_balance(callback: CallbackQuery) -> None:
     await callback.answer(
-        "To add balance, please contact the admin or use the payment link.",
+        "ᴛᴏ ᴀᴅᴅ ʙᴀʟᴀɴᴄᴇ, ᴘʟᴇᴀsᴇ ᴄᴏɴᴛᴀᴄᴛ ᴛʜᴇ ᴀᴅᴍɪɴ ᴏʀ ᴜsᴇ ᴛʜᴇ ᴘᴀʏᴍᴇɴᴛ ʟɪɴᴋ.",
         show_alert=True,
     )
