@@ -78,8 +78,11 @@ async def cb_buy_category_channel(callback: CallbackQuery) -> None:
         return
 
     text = (
-        "<blockquote><b>💎 ᴄʜᴏᴏsᴇ ʏᴏᴜʀ ᴘʟᴀɴ</b></blockquote>\n\n"
-        "sᴇʟᴇᴄᴛ ᴀ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴘʟᴀɴ ʙᴇʟᴏᴡ ᴛᴏ ɢᴇᴛ ɪɴsᴛᴀɴᴛ ᴀᴄᴄᴇss ᴛᴏ ᴀʟʟ ᴘʀᴇᴍɪᴜᴍ ᴄʜᴀɴɴᴇʟs."
+        "<blockquote>◍ <b>sᴇʟᴇᴄᴛ ʙᴏᴛs ғᴏʀ ᴘʀᴇᴍɪᴜᴍ</b></blockquote>\n\n"
+        "<i>➣ ᴄʜᴏᴏsᴇ ᴛʜᴇ ʙᴏᴛs ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ sᴜʙsᴄʀɪʙᴇ ᴛᴏ:</i>\n\n"
+        "<i>ʜɪ ᴛʜᴇʀᴇ! ᴛʜᴇʀᴇ ᴀʀᴇ ǫᴜɪᴛᴇ ᴀ ғᴇᴡ ʙᴏᴛs ғᴏʀ ᴘʀᴇᴍɪᴜᴍ - ɢᴏ ᴀʜᴇᴀᴅ ᴀɴᴅ ᴘɪᴄᴋ ᴡʜᴀᴛ ʏᴏᴜ ᴀʀᴇ ɪɴᴛᴇʀᴇsᴛᴇᴅ ɪɴ.</i>\n\n"
+        "<blockquote>➲ <b>ᴛɪᴘ:</b> ᴄʜᴏᴏsᴇ <b>ᴄᴏᴍʙᴏ</b> ᴏʀ <b>ᴍᴜʟᴛɪᴘʟᴇ ʙᴏᴛs</b> ᴛᴏ ɢᴇᴛ ᴜᴘ ᴛᴏ <b>60% ᴏғғ!</b>\n"
+        "ᴇᴀʀɴ ᴘʀᴇᴠᴇʀsᴇ ᴘᴏɪɴᴛs ᴏɴ ᴇᴠᴇʀʏ ᴘᴜʀᴄʜᴀsᴇ!</blockquote>"
     )
     try:
         if callback.message and callback.message.photo:
