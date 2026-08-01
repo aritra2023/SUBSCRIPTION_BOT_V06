@@ -303,7 +303,7 @@ async def cb_help(callback: CallbackQuery) -> None:
         "<blockquote><b>\" ᴜsᴇғᴜʟ ᴄᴏᴍᴍᴀɴᴅs \"</b>\n\n"
         "/start — ʀᴇsᴛᴀʀᴛ ᴛʜᴇ ʙᴏᴛ\n"
         "/myplan — ᴄʜᴇᴄᴋ ʏᴏᴜʀ ᴀᴄᴛɪᴠᴇ sᴜʙsᴄʀɪᴘᴛɪᴏɴs ᴀɴᴅ ᴇxᴘɪʀʏ</blockquote>\n\n"
-        '◈ ᴏᴡɴᴇʀ: <a href="https://t.me/Anonymous"><b>ANONYMOUS</b></a>'
+        '◈ ᴏᴡɴᴇʀ: <a href="https://t.me/Anonymous"><b>ᴀɴᴏɴʏᴍᴏᴜs</b></a>'
     )
 
     try:
