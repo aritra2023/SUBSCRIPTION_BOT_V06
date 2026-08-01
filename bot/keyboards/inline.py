@@ -112,15 +112,15 @@ def wallet_keyboard(auto_renew: bool = True) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     builder.row(
-        InlineKeyboardButton(text="➲ ᴀᴅᴅ ʙᴀʟᴀɴᴄᴇ", callback_data="add_balance", style="success")
+        InlineKeyboardButton(text="➲ ᴀᴅᴅ ʙᴀʟᴀɴᴄᴇ", callback_data="add_balance", style="primary")
     )
-    renew_emoji = "🟢" if auto_renew else "🔴"
     renew_label = "ᴏɴ" if auto_renew else "ᴏғғ"
+    renew_style = "success" if auto_renew else "danger"
     builder.row(
         InlineKeyboardButton(
-            text=f"{renew_emoji} ᴀᴜᴛᴏ-ʀᴇɴᴇᴡ: {renew_label}",
+            text=f"ᴀᴜᴛᴏ-ʀᴇɴᴇᴡ: {renew_label}",
             callback_data="toggle_auto_renew",
-            style="primary",
+            style=renew_style,
         )
     )
     builder.row(
