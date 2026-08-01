@@ -34,8 +34,12 @@ router = Router(name="subscription")
 @router.callback_query(lambda c: c.data == "buy_subscription")
 async def cb_buy_subscription(callback: CallbackQuery) -> None:
     text = (
-        "<blockquote><b>💎 ᴄʜᴏᴏsᴇ ʏᴏᴜʀ ᴄᴀᴛᴇɢᴏʀʏ</b></blockquote>\n\n"
-        "sᴇʟᴇᴄᴛ ᴀ ᴄᴀᴛᴇɢᴏʀʏ ʙᴇʟᴏᴡ ᴛᴏ ᴠɪᴇᴡ ᴀᴠᴀɪʟᴀʙʟᴇ ᴘʟᴀɴs."
+        "<b>💎 sᴇʟᴇᴄᴛ ᴀ ᴄᴀᴛᴇɢᴏʀʏ</b>\n\n"
+        "<blockquote>📺 <b>ᴘʀᴇᴍɪᴜᴍ ᴄʜᴀɴɴᴇʟ</b>\n"
+        "ʏᴏᴜ ᴄᴀɴ ᴄʜᴇᴄᴋᴏᴜᴛ ᴏᴜʀ ᴇxᴄʟᴜsɪᴠᴇ ᴘʀᴇᴍɪᴜᴍ ᴄʜᴀɴɴᴇʟs ʜᴇʀᴇ. "
+        "ᴛʜᴇʀᴇ ᴀʀᴇ ɴᴏ ᴀᴅs ᴀɴᴅ ʏᴏᴜ ɢᴇᴛ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴇss ᴛᴏ ᴀʟʟ ᴄᴏɴᴛᴇɴᴛ.</blockquote>\n\n"
+        "<blockquote>🤖 <b>ᴘʀᴇᴍɪᴜᴍ ʙᴏᴛs</b>\n"
+        "ᴇɴᴊᴏʏ ᴏᴜʀ ᴘᴏᴡᴇʀғᴜʟ ᴘʀᴇᴍɪᴜᴍ ʙᴏᴛs — ᴄᴏᴍᴘʟᴇᴛᴇʟʏ ᴀᴅs-ғʀᴇᴇ ᴡɪᴛʜ ᴜɴʟɪᴍɪᴛᴇᴅ ᴜsᴀɢᴇ ᴀɴᴅ ᴇxᴄʟᴜsɪᴠᴇ ғᴇᴀᴛᴜʀᴇs.</blockquote>"
     )
     try:
         if callback.message and callback.message.photo:
