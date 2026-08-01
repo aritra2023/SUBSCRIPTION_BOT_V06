@@ -36,7 +36,7 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
         InlineKeyboardButton(
             text="➲ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ",
             callback_data="wallet",
-            style="success",
+            style="danger",
         )
     )
 
