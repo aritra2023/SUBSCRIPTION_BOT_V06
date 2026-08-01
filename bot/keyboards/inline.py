@@ -143,8 +143,9 @@ def help_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(
         InlineKeyboardButton(
-            text="📺 ᴡᴀᴛᴄʜ ᴛᴜᴛᴏʀɪᴀʟ",
+            text="ᴡᴀᴛᴄʜ ᴛᴜᴛᴏʀɪᴀʟ",
             url="https://t.me/FlixVersePremium",
+            style="danger",
         )
     )
     builder.row(
