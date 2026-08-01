@@ -251,8 +251,7 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
             f"<b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
             f"<b>ᴅᴜʀᴀᴛɪᴏɴ:</b> {duration_label}\n"
             f"<b>ᴀᴍᴏᴜɴᴛ ᴘᴀɪᴅ:</b> ₹{price:.0f}\n\n"
-            f"ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ <b>ғʟɪx ᴠᴇʀsᴇ</b> ᴘʀᴇᴍɪᴜᴍ! 🎉\n\n"
-            f"<blockquote>⌬ <i>\"ᴛʜɪs ɪɴᴠɪᴛᴇ ʟɪɴᴋ ᴄᴀɴ ᴏɴʟʏ ʙᴇ ᴊᴏɪɴᴇᴅ ᴏɴᴄᴇ. ᴏɴᴄᴇ ʏᴏᴜ ʜᴀᴠᴇ ᴊᴏɪɴᴇᴅ, ᴛʜᴇ ʟɪɴᴋ ᴡɪʟʟ ᴇxᴘɪʀᴇ ᴀɴᴅ ᴄᴀɴɴᴏᴛ ʙᴇ ᴜsᴇᴅ ᴀɢᴀɪɴ.\"</i></blockquote>"
+            f"<blockquote>⚠️ <i>ᴛʜɪs ɪɴᴠɪᴛᴇ ʟɪɴᴋ ᴄᴀɴ ᴏɴʟʏ ʙᴇ ᴊᴏɪɴᴇᴅ ᴏɴᴄᴇ. ᴏɴᴄᴇ ʏᴏᴜ ʜᴀᴠᴇ ᴊᴏɪɴᴇᴅ, ᴛʜᴇ ʟɪɴᴋ ᴡɪʟʟ ᴇxᴘɪʀᴇ ᴀɴᴅ ᴄᴀɴɴᴏᴛ ʙᴇ ᴜsᴇᴅ ᴀɢᴀɪɴ.</i></blockquote>"
         )
         activated_keyboard = subscription_activated_keyboard(channels) if channels else back_main_keyboard()
 
