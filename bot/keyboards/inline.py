@@ -21,20 +21,22 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
         InlineKeyboardButton(
             text="➲ ʙᴜʏ sᴜʙsᴄʀɪᴘᴛɪᴏɴ",
             callback_data="buy_subscription",
+            style="primary",
         )
     )
     builder.row(
-        InlineKeyboardButton(text="• ᴠɪᴇᴡ ᴘʟᴀɴ •", callback_data="view_plan"),
-        InlineKeyboardButton(text="• ʜᴇʟᴘ •", callback_data="help"),
+        InlineKeyboardButton(text="• ᴠɪᴇᴡ ᴘʟᴀɴ •", callback_data="view_plan", style="primary"),
+        InlineKeyboardButton(text="• ʜᴇʟᴘ •", callback_data="help", style="primary"),
     )
     builder.row(
-        InlineKeyboardButton(text="• ʜɪsᴛᴏʀʏ •", callback_data="history"),
-        InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ •", callback_data="support"),
+        InlineKeyboardButton(text="• ʜɪsᴛᴏʀʏ •", callback_data="history", style="primary"),
+        InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ •", callback_data="support", style="primary"),
     )
     builder.row(
         InlineKeyboardButton(
             text="➲ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ",
             callback_data="wallet",
+            style="primary",
         )
     )
 
@@ -58,11 +60,12 @@ def plans_keyboard(plans: list[dict]) -> InlineKeyboardMarkup:
             InlineKeyboardButton(
                 text=f"💎 {plan['display_name']} — {price_str}",
                 callback_data=f"plan_select:{plan['name']}",
+                style="primary",
             )
         )
 
     builder.row(
-        InlineKeyboardButton(text="« BACK", callback_data="back_main"),
+        InlineKeyboardButton(text="« ʙᴀᴄᴋ", callback_data="back_main", style="primary"),
     )
 
     return builder.as_markup()
@@ -77,11 +80,12 @@ def duration_keyboard(plan_name: str, durations: list[dict]) -> InlineKeyboardMa
             InlineKeyboardButton(
                 text=f"⏱ {tier['label']} — ₹{tier['price']:.0f}",
                 callback_data=f"plan_duration:{plan_name}:{tier['days']}",
+                style="primary",
             )
         )
 
     builder.row(
-        InlineKeyboardButton(text="« BACK", callback_data="buy_subscription"),
+        InlineKeyboardButton(text="« ʙᴀᴄᴋ", callback_data="buy_subscription", style="primary"),
     )
 
     return builder.as_markup()
@@ -92,12 +96,13 @@ def confirm_plan_keyboard(plan_name: str, days: int) -> InlineKeyboardMarkup:
 
     builder.row(
         InlineKeyboardButton(
-            text="✅ CONFIRM PURCHASE",
+            text="✅ ᴄᴏɴғɪʀᴍ ᴘᴜʀᴄʜᴀsᴇ",
             callback_data=f"plan_confirm:{plan_name}:{days}",
+            style="success",
         ),
     )
     builder.row(
-        InlineKeyboardButton(text="« BACK", callback_data=f"plan_select:{plan_name}"),
+        InlineKeyboardButton(text="« ʙᴀᴄᴋ", callback_data=f"plan_select:{plan_name}", style="primary"),
     )
 
     return builder.as_markup()
@@ -107,7 +112,7 @@ def wallet_keyboard(auto_renew: bool = True) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     builder.row(
-        InlineKeyboardButton(text="➲ ᴀᴅᴅ ʙᴀʟᴀɴᴄᴇ", callback_data="add_balance")
+        InlineKeyboardButton(text="➲ ᴀᴅᴅ ʙᴀʟᴀɴᴄᴇ", callback_data="add_balance", style="success")
     )
     renew_emoji = "🟢" if auto_renew else "🔴"
     renew_label = "ᴏɴ" if auto_renew else "ᴏғғ"
@@ -115,11 +120,12 @@ def wallet_keyboard(auto_renew: bool = True) -> InlineKeyboardMarkup:
         InlineKeyboardButton(
             text=f"{renew_emoji} ᴀᴜᴛᴏ-ʀᴇɴᴇᴡ: {renew_label}",
             callback_data="toggle_auto_renew",
+            style="primary",
         )
     )
     builder.row(
-        InlineKeyboardButton(text="‹ ʙᴀᴄᴋ", callback_data="back_main"),
-        InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ •", callback_data="support"),
+        InlineKeyboardButton(text="‹ ʙᴀᴄᴋ", callback_data="back_main", style="primary"),
+        InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ •", callback_data="support", style="primary"),
     )
 
     return builder.as_markup()
@@ -128,7 +134,7 @@ def wallet_keyboard(auto_renew: bool = True) -> InlineKeyboardMarkup:
 def back_main_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(
-        InlineKeyboardButton(text="« BACK TO MENU", callback_data="back_main"),
+        InlineKeyboardButton(text="« ʙᴀᴄᴋ ᴛᴏ ᴍᴇɴᴜ", callback_data="back_main", style="primary"),
     )
     return builder.as_markup()
 
@@ -137,15 +143,15 @@ def admin_panel_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     builder.row(
-        InlineKeyboardButton(text="👥 ALL USERS", callback_data="admin_users"),
-        InlineKeyboardButton(text="📊 STATS", callback_data="admin_stats"),
+        InlineKeyboardButton(text="👥 ᴀʟʟ ᴜsᴇʀs", callback_data="admin_users", style="primary"),
+        InlineKeyboardButton(text="📊 sᴛᴀᴛs", callback_data="admin_stats", style="primary"),
     )
     builder.row(
-        InlineKeyboardButton(text="📢 BROADCAST", callback_data="admin_broadcast"),
-        InlineKeyboardButton(text="🖼 SET BANNER", callback_data="admin_set_banner"),
+        InlineKeyboardButton(text="📢 ʙʀᴏᴀᴅᴄᴀsᴛ", callback_data="admin_broadcast", style="primary"),
+        InlineKeyboardButton(text="🖼 sᴇᴛ ʙᴀɴɴᴇʀ", callback_data="admin_set_banner", style="primary"),
     )
     builder.row(
-        InlineKeyboardButton(text="📦 MANAGE PLANS", callback_data="admin_plans"),
+        InlineKeyboardButton(text="📦 ᴍᴀɴᴀɢᴇ ᴘʟᴀɴs", callback_data="admin_plans", style="primary"),
     )
 
     return builder.as_markup()
@@ -154,7 +160,7 @@ def admin_panel_keyboard() -> InlineKeyboardMarkup:
 def cancel_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(
-        InlineKeyboardButton(text="✖ CANCEL", callback_data="admin_cancel"),
+        InlineKeyboardButton(text="✖ ᴄᴀɴᴄᴇʟ", callback_data="admin_cancel", style="danger"),
     )
     return builder.as_markup()
 
@@ -169,12 +175,13 @@ def admin_duration_select_keyboard(selected: list[int]) -> InlineKeyboardMarkup:
             InlineKeyboardButton(
                 text=f"{check} {label}",
                 callback_data=f"adm_dur:{days}",
+                style="primary",
             )
         )
 
     builder.row(
-        InlineKeyboardButton(text="✅ Done", callback_data="adm_dur_done"),
-        InlineKeyboardButton(text="✖ Cancel", callback_data="admin_cancel"),
+        InlineKeyboardButton(text="✅ ᴅᴏɴᴇ", callback_data="adm_dur_done", style="success"),
+        InlineKeyboardButton(text="✖ ᴄᴀɴᴄᴇʟ", callback_data="admin_cancel", style="danger"),
     )
 
     return builder.as_markup()

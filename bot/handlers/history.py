@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 router = Router(name="history")
 
 _TYPE_LABELS = {
-    "purchase": "🛒 Purchase",
-    "topup": "💰 Top-up",
-    "refund": "↩️ Refund",
+    "purchase": "🛒 ᴘᴜʀᴄʜᴀsᴇ",
+    "topup": "💰 ᴛᴏᴘ-ᴜᴘ",
+    "refund": "↩️ ʀᴇғᴜɴᴅ",
 }
 
 
@@ -27,21 +27,21 @@ async def cb_history(callback: CallbackQuery) -> None:
 
     if not transactions:
         text = (
-            "<blockquote><b>🎬 TRANSACTION HISTORY</b></blockquote>\n\n"
-            "No transactions found.\n\n"
-            "<i>Your purchase and wallet activity will appear here.</i>"
+            "<blockquote><b>🎬 ᴛʀᴀɴsᴀᴄᴛɪᴏɴ ʜɪsᴛᴏʀʏ</b></blockquote>\n\n"
+            "ɴᴏ ᴛʀᴀɴsᴀᴄᴛɪᴏɴs ғᴏᴜɴᴅ.\n\n"
+            "<i>ʏᴏᴜʀ ᴘᴜʀᴄʜᴀsᴇ ᴀɴᴅ ᴡᴀʟʟᴇᴛ ᴀᴄᴛɪᴠɪᴛʏ ᴡɪʟʟ ᴀᴘᴘᴇᴀʀ ʜᴇʀᴇ.</i>"
         )
     else:
-        lines = ["<blockquote><b>🎬 TRANSACTION HISTORY</b></blockquote>\n"]
+        lines = ["<blockquote><b>🎬 ᴛʀᴀɴsᴀᴄᴛɪᴏɴ ʜɪsᴛᴏʀʏ</b></blockquote>\n"]
         for txn in transactions:
-            label = _TYPE_LABELS.get(txn.get("type", ""), "📄 Transaction")
+            label = _TYPE_LABELS.get(txn.get("type", ""), "📄 ᴛʀᴀɴsᴀᴄᴛɪᴏɴ")
             amount = txn.get("amount", 0.0)
             sign = "+" if amount > 0 else ""
             date_str = format_date(txn["created_at"]) if txn.get("created_at") else "—"
             desc = txn.get("description", "")
             lines.append(
                 f"<b>{label}</b>\n"
-                f"  Amount: {sign}₹{abs(amount):.2f}\n"
+                f"  ᴀᴍᴏᴜɴᴛ: {sign}₹{abs(amount):.2f}\n"
                 f"  {desc}\n"
                 f"  <i>{date_str}</i>\n"
             )

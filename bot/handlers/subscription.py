@@ -32,12 +32,12 @@ async def cb_buy_subscription(callback: CallbackQuery) -> None:
     plans = await get_active_plans()
 
     if not plans:
-        await callback.answer("⚠️ No plans available right now.", show_alert=True)
+        await callback.answer("⚠️ ɴᴏ ᴘʟᴀɴs ᴀᴠᴀɪʟᴀʙʟᴇ ʀɪɢʜᴛ ɴᴏᴡ.", show_alert=True)
         return
 
     text = (
-        "<blockquote><b>💎 CHOOSE YOUR PLAN</b></blockquote>\n\n"
-        "Select a subscription plan below to get instant access to all premium channels."
+        "<blockquote><b>💎 ᴄʜᴏᴏsᴇ ʏᴏᴜʀ ᴘʟᴀɴ</b></blockquote>\n\n"
+        "sᴇʟᴇᴄᴛ ᴀ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴘʟᴀɴ ʙᴇʟᴏᴡ ᴛᴏ ɢᴇᴛ ɪɴsᴛᴀɴᴛ ᴀᴄᴄᴇss ᴛᴏ ᴀʟʟ ᴘʀᴇᴍɪᴜᴍ ᴄʜᴀɴɴᴇʟs."
     )
 
     try:
@@ -67,7 +67,7 @@ async def cb_plan_select(callback: CallbackQuery) -> None:
     plan = await get_plan(plan_name)
 
     if not plan:
-        await callback.answer("Plan not found.", show_alert=True)
+        await callback.answer("ᴘʟᴀɴ ɴᴏᴛ ғᴏᴜɴᴅ.", show_alert=True)
         return
 
     durations = plan.get("durations", [])
@@ -76,15 +76,15 @@ async def cb_plan_select(callback: CallbackQuery) -> None:
     if plan.get("description"):
         lines.append(f"{plan['description']}\n")
     if plan.get("demo_link"):
-        lines.append(f'📺 <a href="{plan["demo_link"]}">View Demo Channel</a>\n')
+        lines.append(f'📺 <a href="{plan["demo_link"]}">ᴠɪᴇᴡ ᴅᴇᴍᴏ ᴄʜᴀɴɴᴇʟ</a>\n')
 
     if durations:
-        lines.append("\n<b>Available Durations:</b>")
+        lines.append("\n<b>ᴀᴠᴀɪʟᴀʙʟᴇ ᴅᴜʀᴀᴛɪᴏɴs:</b>")
         for tier in durations:
             lines.append(f"  ⏱ {tier['label']} — ₹{tier['price']:.0f}")
 
     if plan.get("payment_proof_required", True):
-        lines.append("\n📸 <i>Payment proof required after purchase.</i>")
+        lines.append("\n📸 <i>ᴘᴀʏᴍᴇɴᴛ ᴘʀᴏᴏғ ʀᴇǫᴜɪʀᴇᴅ ᴀғᴛᴇʀ ᴘᴜʀᴄʜᴀsᴇ.</i>")
 
     text = "\n".join(lines)
 
@@ -118,13 +118,13 @@ async def cb_plan_duration(callback: CallbackQuery) -> None:
     plan = await get_plan(plan_name)
 
     if not plan:
-        await callback.answer("Plan not found.", show_alert=True)
+        await callback.answer("ᴘʟᴀɴ ɴᴏᴛ ғᴏᴜɴᴅ.", show_alert=True)
         return
 
     durations = plan.get("durations", [])
     tier = next((d for d in durations if d["days"] == days), None)
     if not tier:
-        await callback.answer("Duration not found.", show_alert=True)
+        await callback.answer("ᴅᴜʀᴀᴛɪᴏɴ ɴᴏᴛ ғᴏᴜɴᴅ.", show_alert=True)
         return
 
     user_id = callback.from_user.id if callback.from_user else 0
@@ -133,18 +133,18 @@ async def cb_plan_duration(callback: CallbackQuery) -> None:
     price = tier["price"]
 
     text = (
-        f"<blockquote><b>📋 CONFIRM PURCHASE</b></blockquote>\n\n"
-        f"<b>Plan:</b> {plan['display_name']}\n"
-        f"<b>Duration:</b> {tier['label']}\n"
-        f"<b>Price:</b> ₹{price:.0f}\n"
-        f"<b>Your Wallet:</b> ₹{balance:.2f}\n\n"
+        f"<blockquote><b>📋 ᴄᴏɴғɪʀᴍ ᴘᴜʀᴄʜᴀsᴇ</b></blockquote>\n\n"
+        f"<b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
+        f"<b>ᴅᴜʀᴀᴛɪᴏɴ:</b> {tier['label']}\n"
+        f"<b>ᴘʀɪᴄᴇ:</b> ₹{price:.0f}\n"
+        f"<b>ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ:</b> ₹{balance:.2f}\n\n"
     )
 
     if balance >= price:
-        text += "✅ <b>Sufficient balance.</b> Confirm purchase below."
+        text += "✅ <b>sᴜғғɪᴄɪᴇɴᴛ ʙᴀʟᴀɴᴄᴇ.</b> ᴄᴏɴғɪʀᴍ ᴘᴜʀᴄʜᴀsᴇ ʙᴇʟᴏᴡ."
     else:
         shortfall = price - balance
-        text += f"⚠️ <b>Insufficient balance.</b> You need ₹{shortfall:.2f} more.\nPlease top up your wallet first."
+        text += f"⚠️ <b>ɪɴsᴜғғɪᴄɪᴇɴᴛ ʙᴀʟᴀɴᴄᴇ.</b> ʏᴏᴜ ɴᴇᴇᴅ ₹{shortfall:.2f} ᴍᴏʀᴇ.\nᴘʟᴇᴀsᴇ ᴛᴏᴘ ᴜᴘ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ ғɪʀsᴛ."
 
     try:
         if callback.message and callback.message.photo:
@@ -175,7 +175,7 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
     user_id = callback.from_user.id if callback.from_user else 0
 
     if not plan:
-        await callback.answer("Plan not found.", show_alert=True)
+        await callback.answer("ᴘʟᴀɴ ɴᴏᴛ ғᴏᴜɴᴅ.", show_alert=True)
         return
 
     success = await purchase_subscription(user_id, plan, days)
@@ -183,29 +183,29 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
     if success:
         durations = plan.get("durations", [])
         tier = next((d for d in durations if d["days"] == days), None)
-        duration_label = tier["label"] if tier else f"{days} days"
+        duration_label = tier["label"] if tier else f"{days} ᴅᴀʏs"
         price = tier["price"] if tier else plan.get("price", 0)
 
         channels = plan.get("channels", [])
         channel_links = (
-            "\n".join(f'• <a href="{c}">Join Channel</a>' for c in channels)
+            "\n".join(f'• <a href="{c}">ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ</a>' for c in channels)
             if channels else ""
         )
 
         text = (
-            f"<blockquote><b>✅ SUBSCRIPTION ACTIVATED!</b></blockquote>\n\n"
-            f"<b>Plan:</b> {plan['display_name']}\n"
-            f"<b>Duration:</b> {duration_label}\n"
-            f"<b>Amount Paid:</b> ₹{price:.0f}\n\n"
-            f"Welcome to <b>FLIX VERSE</b> Premium! 🎉\n"
+            f"<blockquote><b>✅ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!</b></blockquote>\n\n"
+            f"<b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
+            f"<b>ᴅᴜʀᴀᴛɪᴏɴ:</b> {duration_label}\n"
+            f"<b>ᴀᴍᴏᴜɴᴛ ᴘᴀɪᴅ:</b> ₹{price:.0f}\n\n"
+            f"ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ <b>ғʟɪx ᴠᴇʀsᴇ</b> ᴘʀᴇᴍɪᴜᴍ! 🎉\n"
         )
         if channel_links:
-            text += f"\n<b>Your Channels:</b>\n{channel_links}"
+            text += f"\n<b>ʏᴏᴜʀ ᴄʜᴀɴɴᴇʟs:</b>\n{channel_links}"
     else:
         text = (
-            "<blockquote><b>❌ PURCHASE FAILED</b></blockquote>\n\n"
-            "Insufficient wallet balance.\n"
-            "Please top up your wallet and try again."
+            "<blockquote><b>❌ ᴘᴜʀᴄʜᴀsᴇ ғᴀɪʟᴇᴅ</b></blockquote>\n\n"
+            "ɪɴsᴜғғɪᴄɪᴇɴᴛ ᴡᴀʟʟᴇᴛ ʙᴀʟᴀɴᴄᴇ.\n"
+            "ᴘʟᴇᴀsᴇ ᴛᴏᴘ ᴜᴘ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ ᴀɴᴅ ᴛʀʏ ᴀɢᴀɪɴ."
         )
 
     try:
@@ -235,24 +235,24 @@ async def cb_view_plan(callback: CallbackQuery) -> None:
         remaining = days_remaining(end_date)
         channels = sub.get("channels", [])
         channel_links = (
-            "\n".join(f'• <a href="{c}">Join Channel</a>' for c in channels)
+            "\n".join(f'• <a href="{c}">ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ</a>' for c in channels)
             if channels else ""
         )
 
         text = (
-            "<blockquote><b>📋 YOUR CURRENT PLAN</b></blockquote>\n\n"
-            f"<b>Plan:</b> {sub['plan_name'].upper()}\n"
-            f"<b>Status:</b> ✅ Active\n"
-            f"<b>Expires:</b> {format_date(end_date)}\n"
-            f"<b>Remaining:</b> {remaining} day(s)\n"
+            "<blockquote><b>📋 ʏᴏᴜʀ ᴄᴜʀʀᴇɴᴛ ᴘʟᴀɴ</b></blockquote>\n\n"
+            f"<b>ᴘʟᴀɴ:</b> {sub['plan_name'].upper()}\n"
+            f"<b>sᴛᴀᴛᴜs:</b> ✅ ᴀᴄᴛɪᴠᴇ\n"
+            f"<b>ᴇxᴘɪʀᴇs:</b> {format_date(end_date)}\n"
+            f"<b>ʀᴇᴍᴀɪɴɪɴɢ:</b> {remaining} ᴅᴀʏ(s)\n"
         )
         if channel_links:
-            text += f"\n<b>Your Channels:</b>\n{channel_links}"
+            text += f"\n<b>ʏᴏᴜʀ ᴄʜᴀɴɴᴇʟs:</b>\n{channel_links}"
     else:
         text = (
-            "<blockquote><b>📋 YOUR CURRENT PLAN</b></blockquote>\n\n"
-            "❌ <b>No active subscription.</b>\n\n"
-            "Purchase a plan to get instant access to exclusive premium channels."
+            "<blockquote><b>📋 ʏᴏᴜʀ ᴄᴜʀʀᴇɴᴛ ᴘʟᴀɴ</b></blockquote>\n\n"
+            "❌ <b>ɴᴏ ᴀᴄᴛɪᴠᴇ sᴜʙsᴄʀɪᴘᴛɪᴏɴ.</b>\n\n"
+            "ᴘᴜʀᴄʜᴀsᴇ ᴀ ᴘʟᴀɴ ᴛᴏ ɢᴇᴛ ɪɴsᴛᴀɴᴛ ᴀᴄᴄᴇss ᴛᴏ ᴇxᴄʟᴜsɪᴠᴇ ᴘʀᴇᴍɪᴜᴍ ᴄʜᴀɴɴᴇʟs."
         )
 
     try:
@@ -275,14 +275,14 @@ async def cb_view_plan(callback: CallbackQuery) -> None:
 @router.callback_query(lambda c: c.data == "help")
 async def cb_help(callback: CallbackQuery) -> None:
     text = (
-        "<blockquote><b>ABOUT THIS BOT</b></blockquote>\n\n"
-        "I AM AN ADVANCED <b>PREMIUM MANAGEMENT BOT</b> DESIGNED TO GRANT "
-        "YOU INSTANT ACCESS TO EXCLUSIVE CHANNELS AND BOTS!\n\n"
-        "✦ HOW IT WORKS ✦\n\n"
-        "• SELECT YOUR FAVORITE BOTS OR CHOOSE A <b>COMBO PLAN</b> FOR MASSIVE DISCOUNTS.\n"
-        "• PAY VIA UPI/QR AND SEND THE SCREENSHOT USING /bought.\n"
-        "• ONCE VERIFIED, YOUR PREMIUM IS ACTIVATED AUTOMATICALLY ACROSS ALL SELECTED BOTS!!\n\n"
-        "◈ OWNER: ToBi"
+        "<blockquote><b>ᴀʙᴏᴜᴛ ᴛʜɪs ʙᴏᴛ</b></blockquote>\n\n"
+        "ɪ ᴀᴍ ᴀɴ ᴀᴅᴠᴀɴᴄᴇᴅ <b>ᴘʀᴇᴍɪᴜᴍ ᴍᴀɴᴀɢᴇᴍᴇɴᴛ ʙᴏᴛ</b> ᴅᴇsɪɢɴᴇᴅ ᴛᴏ ɢʀᴀɴᴛ "
+        "ʏᴏᴜ ɪɴsᴛᴀɴᴛ ᴀᴄᴄᴇss ᴛᴏ ᴇxᴄʟᴜsɪᴠᴇ ᴄʜᴀɴɴᴇʟs ᴀɴᴅ ʙᴏᴛs!\n\n"
+        "✦ ʜᴏᴡ ɪᴛ ᴡᴏʀᴋs ✦\n\n"
+        "• sᴇʟᴇᴄᴛ ʏᴏᴜʀ ғᴀᴠᴏʀɪᴛᴇ ʙᴏᴛs ᴏʀ ᴄʜᴏᴏsᴇ ᴀ <b>ᴄᴏᴍʙᴏ ᴘʟᴀɴ</b> ғᴏʀ ᴍᴀssɪᴠᴇ ᴅɪsᴄᴏᴜɴᴛs.\n"
+        "• ᴘᴀʏ ᴠɪᴀ ᴜᴘɪ/ǫʀ ᴀɴᴅ sᴇɴᴅ ᴛʜᴇ sᴄʀᴇᴇɴsʜᴏᴛ ᴜsɪɴɢ /bought.\n"
+        "• ᴏɴᴄᴇ ᴠᴇʀɪғɪᴇᴅ, ʏᴏᴜʀ ᴘʀᴇᴍɪᴜᴍ ɪs ᴀᴄᴛɪᴠᴀᴛᴇᴅ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴀᴄʀᴏss ᴀʟʟ sᴇʟᴇᴄᴛᴇᴅ ʙᴏᴛs!!\n\n"
+        "◈ ᴏᴡɴᴇʀ: ToBi"
     )
 
     try:
@@ -309,11 +309,11 @@ async def cb_help(callback: CallbackQuery) -> None:
 @router.callback_query(lambda c: c.data == "support")
 async def cb_support(callback: CallbackQuery) -> None:
     text = (
-        "<blockquote><b>🛟 SUPPORT — FLIX VERSE</b></blockquote>\n\n"
-        "Need help? Our support team is here for you.\n\n"
-        "📩 <b>Contact Admin:</b> @FlixVerseSupport\n"
-        "⏰ <b>Response Time:</b> Within 24 hours\n\n"
-        "Please describe your issue clearly when contacting support."
+        "<blockquote><b>🛟 sᴜᴘᴘᴏʀᴛ — ғʟɪx ᴠᴇʀsᴇ</b></blockquote>\n\n"
+        "ɴᴇᴇᴅ ʜᴇʟᴘ? ᴏᴜʀ sᴜᴘᴘᴏʀᴛ ᴛᴇᴀᴍ ɪs ʜᴇʀᴇ ғᴏʀ ʏᴏᴜ.\n\n"
+        "📩 <b>ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ:</b> @FlixVerseSupport\n"
+        "⏰ <b>ʀᴇsᴘᴏɴsᴇ ᴛɪᴍᴇ:</b> ᴡɪᴛʜɪɴ 24 ʜᴏᴜʀs\n\n"
+        "ᴘʟᴇᴀsᴇ ᴅᴇsᴄʀɪʙᴇ ʏᴏᴜʀ ɪssᴜᴇ ᴄʟᴇᴀʀʟʏ ᴡʜᴇɴ ᴄᴏɴᴛᴀᴄᴛɪɴɢ sᴜᴘᴘᴏʀᴛ."
     )
 
     try:

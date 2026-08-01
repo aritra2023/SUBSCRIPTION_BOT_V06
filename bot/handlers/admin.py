@@ -264,10 +264,10 @@ async def handle_addplan_demo_link(message: Message, state: FSMContext) -> None:
 
     builder = InlineKeyboardBuilder()
     builder.row(
-        InlineKeyboardButton(text="✅ Yes (Recommended)", callback_data="addplan_proof:yes"),
-        InlineKeyboardButton(text="❌ No", callback_data="addplan_proof:no"),
+        InlineKeyboardButton(text="✅ ʏᴇs (ʀᴇᴄᴏᴍᴍᴇɴᴅᴇᴅ)", callback_data="addplan_proof:yes", style="success"),
+        InlineKeyboardButton(text="❌ ɴᴏ", callback_data="addplan_proof:no", style="danger"),
     )
-    builder.row(InlineKeyboardButton(text="✖ Cancel", callback_data="admin_cancel"))
+    builder.row(InlineKeyboardButton(text="✖ ᴄᴀɴᴄᴇʟ", callback_data="admin_cancel", style="danger"))
 
     await message.answer(
         "<blockquote><b>➕ ADD PLAN — Step 4/6</b></blockquote>\n\n"
