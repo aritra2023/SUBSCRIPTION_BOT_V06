@@ -65,7 +65,11 @@ def _build_content(
     if active_sub:
         end = active_sub.get("end_date")
         end_str = format_date(end) if end else "—"
-        remaining = max(0, (end - datetime.now(timezone.utc)).days) if end else 0
+        if end:
+            end_aware = end.replace(tzinfo=timezone.utc) if end.tzinfo is None else end
+            remaining = max(0, (end_aware - datetime.now(timezone.utc)).days)
+        else:
+            remaining = 0
         plan_display = sc(active_sub.get("plan_name", "—"))
         nodes.append({"tag": "h4", "children": [f"✅ {sc('Active Subscription')}"]})
         nodes.append({"tag": "p", "children": [
