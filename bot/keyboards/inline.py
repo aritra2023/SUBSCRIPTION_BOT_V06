@@ -142,8 +142,13 @@ def back_main_keyboard() -> InlineKeyboardMarkup:
 def help_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(
+        InlineKeyboardButton(
+            text="📺 ᴡᴀᴛᴄʜ ᴛᴜᴛᴏʀɪᴀʟ",
+            url="https://t.me/FlixVersePremium",
+        )
+    )
+    builder.row(
         InlineKeyboardButton(text="‹ ʙᴀᴄᴋ", callback_data="back_main", style="primary"),
-        InlineKeyboardButton(text="● ᴄʟᴏsᴇ ●", callback_data="help_close", style="danger"),
     )
     return builder.as_markup()
 

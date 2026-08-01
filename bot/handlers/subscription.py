@@ -4,7 +4,8 @@ import logging
 
 from aiogram import Router
 from aiogram.enums import ParseMode
-from aiogram.types import CallbackQuery
+from aiogram.filters import Command
+from aiogram.types import CallbackQuery, Message
 
 from keyboards.inline import (
     back_main_keyboard,
@@ -227,10 +228,8 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
 
 # ── View Plan ─────────────────────────────────────────────────────────────────
 
-@router.callback_query(lambda c: c.data == "view_plan")
-async def cb_view_plan(callback: CallbackQuery) -> None:
-    user_id = callback.from_user.id if callback.from_user else 0
-    first_name = callback.from_user.first_name if callback.from_user else "ᴛʜᴇʀᴇ"
+async def _send_view_plan(user_id: int, first_name: str, message: Message) -> None:
+    """Shared logic for /myplan command and view_plan callback."""
     sub = await get_active_subscription(user_id)
 
     if sub:
@@ -241,7 +240,6 @@ async def cb_view_plan(callback: CallbackQuery) -> None:
             "\n".join(f'• <a href="{c}">ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ</a>' for c in channels)
             if channels else ""
         )
-
         text = (
             "<blockquote><b>📋 ʏᴏᴜʀ ᴄᴜʀʀᴇɴᴛ ᴘʟᴀɴ</b></blockquote>\n\n"
             f"<b>ᴘʟᴀɴ:</b> {sub['plan_name'].upper()}\n"
@@ -261,17 +259,32 @@ async def cb_view_plan(callback: CallbackQuery) -> None:
         keyboard = no_plan_keyboard()
 
     try:
-        if callback.message and callback.message.photo:
-            await callback.message.edit_caption(
+        if message.photo:
+            await message.edit_caption(
                 caption=text, parse_mode=ParseMode.HTML, reply_markup=keyboard
             )
-        elif callback.message:
-            await callback.message.edit_text(
+        else:
+            await message.edit_text(
                 text=text, parse_mode=ParseMode.HTML, reply_markup=keyboard
             )
     except Exception:
-        pass
+        await message.answer(text=text, parse_mode=ParseMode.HTML, reply_markup=keyboard)
 
+
+@router.message(Command("myplan"))
+async def cmd_myplan(message: Message) -> None:
+    user = message.from_user
+    if user is None:
+        return
+    await _send_view_plan(user.id, user.first_name, message)
+
+
+@router.callback_query(lambda c: c.data == "view_plan")
+async def cb_view_plan(callback: CallbackQuery) -> None:
+    user_id = callback.from_user.id if callback.from_user else 0
+    first_name = callback.from_user.first_name if callback.from_user else "ᴛʜᴇʀᴇ"
+    if callback.message:
+        await _send_view_plan(user_id, first_name, callback.message)
     await callback.answer()
 
 
