@@ -21,7 +21,9 @@ from keyboards.inline import (
     DURATION_OPTIONS,
     admin_duration_select_keyboard,
     admin_panel_keyboard,
+    admin_plan_channels_keyboard,
     admin_plan_delete_confirm_keyboard,
+    admin_plan_edit_prices_keyboard,
     admin_plan_list_keyboard,
     admin_plan_manage_keyboard,
     back_to_admin_keyboard,
@@ -71,6 +73,9 @@ class AdminStates(StatesGroup):
     # Edit plan flow
     editplan_name = State()
     editplan_desc = State()
+    editplan_demo_link = State()
+    editplan_ch_add = State()
+    editplan_price = State()
 
 
 # ── Admin Panel ───────────────────────────────────────────────────────────────
@@ -389,6 +394,210 @@ async def handle_editplan_desc(message: Message, state: FSMContext) -> None:
     await state.clear()
     await message.answer(
         "✅ ᴘʟᴀɴ ᴅᴇsᴄʀɪᴘᴛɪᴏɴ ᴜᴘᴅᴀᴛᴇᴅ.",
+        parse_mode=ParseMode.HTML,
+        reply_markup=admin_panel_keyboard(),
+    )
+
+
+# ── Edit Plan — Demo Link ─────────────────────────────────────────────────────
+
+@router.callback_query(lambda c: c.data and c.data.startswith("admin_plan:edit_demo:"))
+async def cb_admin_plan_edit_demo(callback: CallbackQuery, state: FSMContext) -> None:
+    plan_name = (callback.data or "").split(":", 2)[2]
+    plan = await get_plan(plan_name)
+    current = (plan or {}).get("demo_link", "") or "—"
+    await state.update_data(editing_plan=plan_name)
+    if callback.message:
+        await callback.message.edit_text(
+            f"<blockquote><b>🎥 ᴇᴅɪᴛ ᴅᴇᴍᴏ ʟɪɴᴋ</b></blockquote>\n\n"
+            f"ᴄᴜʀʀᴇɴᴛ: <code>{current}</code>\n\n"
+            "sᴇɴᴅ ᴛʜᴇ ɴᴇᴡ ᴅᴇᴍᴏ ʟɪɴᴋ, ᴏʀ <code>skip</code> ᴛᴏ ᴄʟᴇᴀʀ ɪᴛ:",
+            parse_mode=ParseMode.HTML,
+            reply_markup=cancel_keyboard(),
+        )
+    await state.set_state(AdminStates.editplan_demo_link)
+    await callback.answer()
+
+
+@router.message(StateFilter(AdminStates.editplan_demo_link), F.text)
+async def handle_editplan_demo_link(message: Message, state: FSMContext) -> None:
+    raw = (message.text or "").strip()
+    new_link = "" if raw.lower() == "skip" else raw
+    data = await state.get_data()
+    plan_name = data.get("editing_plan", "")
+    await update_plan_fields(plan_name, {"demo_link": new_link})
+    await state.clear()
+    await message.answer(
+        "✅ ᴅᴇᴍᴏ ʟɪɴᴋ ᴜᴘᴅᴀᴛᴇᴅ." if new_link else "✅ ᴅᴇᴍᴏ ʟɪɴᴋ ᴄʟᴇᴀʀᴇᴅ.",
+        parse_mode=ParseMode.HTML,
+        reply_markup=admin_panel_keyboard(),
+    )
+
+
+# ── Edit Plan — Channels ──────────────────────────────────────────────────────
+
+@router.callback_query(lambda c: c.data and c.data.startswith("admin_plan:edit_channels:"))
+async def cb_admin_plan_edit_channels(callback: CallbackQuery) -> None:
+    plan_name = (callback.data or "").split(":", 2)[2]
+    plan = await get_plan(plan_name)
+    if not plan:
+        await callback.answer("ᴘʟᴀɴ ɴᴏᴛ ғᴏᴜɴᴅ.", show_alert=True)
+        return
+    channels: list[str] = plan.get("channels", []) or []
+    ch_text = (
+        "\n".join(f"{i + 1}. <code>{c}</code>" for i, c in enumerate(channels))
+        if channels else "<i>ɴᴏ ᴄʜᴀɴɴᴇʟs ʏᴇᴛ.</i>"
+    )
+    text = (
+        f"<blockquote><b>🔗 ᴄʜᴀɴɴᴇʟs — {plan['display_name']}</b></blockquote>\n\n"
+        f"{ch_text}\n\n"
+        "ᴛᴀᴘ <b>➕ ᴀᴅᴅ</b> ᴛᴏ ᴀᴅᴅ ᴀ ʟɪɴᴋ, ᴏʀ ʀᴇᴍᴏᴠᴇ ᴀɴ ᴇxɪsᴛɪɴɢ ᴏɴᴇ."
+    )
+    if callback.message:
+        await callback.message.edit_text(
+            text, parse_mode=ParseMode.HTML,
+            reply_markup=admin_plan_channels_keyboard(plan_name, channels),
+        )
+    await callback.answer()
+
+
+@router.callback_query(lambda c: c.data and c.data.startswith("admin_plan:ch_add:"))
+async def cb_admin_plan_ch_add(callback: CallbackQuery, state: FSMContext) -> None:
+    plan_name = (callback.data or "").split(":", 2)[2]
+    await state.update_data(editing_plan=plan_name)
+    if callback.message:
+        await callback.message.edit_text(
+            "<blockquote><b>➕ ᴀᴅᴅ ᴄʜᴀɴɴᴇʟ</b></blockquote>\n\n"
+            "sᴇɴᴅ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ɪɴᴠɪᴛᴇ ʟɪɴᴋ (e.g. <code>t.me/+xxx</code>):",
+            parse_mode=ParseMode.HTML,
+            reply_markup=cancel_keyboard(),
+        )
+    await state.set_state(AdminStates.editplan_ch_add)
+    await callback.answer()
+
+
+@router.message(StateFilter(AdminStates.editplan_ch_add), F.text)
+async def handle_editplan_ch_add(message: Message, state: FSMContext) -> None:
+    link = (message.text or "").strip()
+    data = await state.get_data()
+    plan_name = data.get("editing_plan", "")
+    plan = await get_plan(plan_name)
+    channels: list[str] = list((plan or {}).get("channels", []) or [])
+    channels.append(link)
+    await update_plan_fields(plan_name, {"channels": channels})
+    await state.clear()
+    await message.answer(
+        f"✅ ᴄʜᴀɴɴᴇʟ ᴀᴅᴅᴇᴅ. ᴛᴏᴛᴀʟ: {len(channels)}",
+        parse_mode=ParseMode.HTML,
+        reply_markup=admin_panel_keyboard(),
+    )
+
+
+@router.callback_query(lambda c: c.data and c.data.startswith("admin_plan:ch_rm:"))
+async def cb_admin_plan_ch_rm(callback: CallbackQuery) -> None:
+    parts = (callback.data or "").split(":")
+    # format: admin_plan:ch_rm:{plan_name}:{index}
+    plan_name = parts[2]
+    idx = int(parts[3])
+    plan = await get_plan(plan_name)
+    if not plan:
+        await callback.answer("ᴘʟᴀɴ ɴᴏᴛ ғᴏᴜɴᴅ.", show_alert=True)
+        return
+    channels: list[str] = list((plan or {}).get("channels", []) or [])
+    if 0 <= idx < len(channels):
+        channels.pop(idx)
+        await update_plan_fields(plan_name, {"channels": channels})
+    ch_text = (
+        "\n".join(f"{i + 1}. <code>{c}</code>" for i, c in enumerate(channels))
+        if channels else "<i>ɴᴏ ᴄʜᴀɴɴᴇʟs ʏᴇᴛ.</i>"
+    )
+    text = (
+        f"<blockquote><b>🔗 ᴄʜᴀɴɴᴇʟs — {plan['display_name']}</b></blockquote>\n\n"
+        f"{ch_text}\n\n"
+        "ᴛᴀᴘ <b>➕ ᴀᴅᴅ</b> ᴛᴏ ᴀᴅᴅ ᴀ ʟɪɴᴋ, ᴏʀ ʀᴇᴍᴏᴠᴇ ᴀɴ ᴇxɪsᴛɪɴɢ ᴏɴᴇ."
+    )
+    if callback.message:
+        await callback.message.edit_text(
+            text, parse_mode=ParseMode.HTML,
+            reply_markup=admin_plan_channels_keyboard(plan_name, channels),
+        )
+    await callback.answer("✅ ʀᴇᴍᴏᴠᴇᴅ.")
+
+
+# ── Edit Plan — Prices ────────────────────────────────────────────────────────
+
+@router.callback_query(lambda c: c.data and c.data.startswith("admin_plan:edit_prices:"))
+async def cb_admin_plan_edit_prices(callback: CallbackQuery) -> None:
+    plan_name = (callback.data or "").split(":", 2)[2]
+    plan = await get_plan(plan_name)
+    if not plan:
+        await callback.answer("ᴘʟᴀɴ ɴᴏᴛ ғᴏᴜɴᴅ.", show_alert=True)
+        return
+    durations = plan.get("durations", []) or []
+    text = (
+        f"<blockquote><b>💰 ᴇᴅɪᴛ ᴘʀɪᴄᴇs — {plan['display_name']}</b></blockquote>\n\n"
+        "ᴛᴀᴘ ᴀ ᴛɪᴇʀ ᴛᴏ ᴜᴘᴅᴀᴛᴇ ɪᴛs ᴘʀɪᴄᴇ:"
+    )
+    if callback.message:
+        await callback.message.edit_text(
+            text, parse_mode=ParseMode.HTML,
+            reply_markup=admin_plan_edit_prices_keyboard(plan_name, durations),
+        )
+    await callback.answer()
+
+
+@router.callback_query(lambda c: c.data and c.data.startswith("admin_plan:ep_tier:"))
+async def cb_admin_plan_edit_price_tier(callback: CallbackQuery, state: FSMContext) -> None:
+    parts = (callback.data or "").split(":")
+    # format: admin_plan:ep_tier:{plan_name}:{tier_index}
+    plan_name = parts[2]
+    tier_idx = int(parts[3])
+    plan = await get_plan(plan_name)
+    if not plan:
+        await callback.answer("ᴘʟᴀɴ ɴᴏᴛ ғᴏᴜɴᴅ.", show_alert=True)
+        return
+    durations = plan.get("durations", []) or []
+    tier = durations[tier_idx] if tier_idx < len(durations) else None
+    if not tier:
+        await callback.answer("ᴛɪᴇʀ ɴᴏᴛ ғᴏᴜɴᴅ.", show_alert=True)
+        return
+    await state.update_data(editing_plan=plan_name, editing_tier_idx=tier_idx)
+    if callback.message:
+        await callback.message.edit_text(
+            f"<blockquote><b>💰 ᴇᴅɪᴛ ᴘʀɪᴄᴇ — {tier['label']}</b></blockquote>\n\n"
+            f"ᴄᴜʀʀᴇɴᴛ ᴘʀɪᴄᴇ: <b>₹{tier['price']:.0f}</b>\n\n"
+            "sᴇɴᴅ ᴛʜᴇ ɴᴇᴡ ᴘʀɪᴄᴇ (₹):",
+            parse_mode=ParseMode.HTML,
+            reply_markup=cancel_keyboard(),
+        )
+    await state.set_state(AdminStates.editplan_price)
+    await callback.answer()
+
+
+@router.message(StateFilter(AdminStates.editplan_price), F.text)
+async def handle_editplan_price(message: Message, state: FSMContext) -> None:
+    try:
+        new_price = float((message.text or "").strip())
+        if new_price < 0:
+            raise ValueError
+    except ValueError:
+        await message.answer("❌ ɪɴᴠᴀʟɪᴅ ᴘʀɪᴄᴇ. sᴇɴᴅ ᴀ ᴘᴏsɪᴛɪᴠᴇ ɴᴜᴍʙᴇʀ.")
+        return
+    data = await state.get_data()
+    plan_name = data.get("editing_plan", "")
+    tier_idx: int = data.get("editing_tier_idx", 0)
+    plan = await get_plan(plan_name)
+    if not plan:
+        await state.clear()
+        await message.answer("❌ ᴘʟᴀɴ ɴᴏᴛ ғᴏᴜɴᴅ.", reply_markup=admin_panel_keyboard())
+        return
+    durations: list[dict] = list(plan.get("durations", []) or [])
+    if tier_idx < len(durations):
+        durations[tier_idx] = {**durations[tier_idx], "price": new_price}
+    await update_plan_fields(plan_name, {"durations": durations})
+    await state.clear()
+    await message.answer(
+        f"✅ ᴘʀɪᴄᴇ ᴜᴘᴅᴀᴛᴇᴅ ᴛᴏ <b>₹{new_price:.0f}</b>.",
         parse_mode=ParseMode.HTML,
         reply_markup=admin_panel_keyboard(),
     )

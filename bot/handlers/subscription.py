@@ -136,7 +136,7 @@ async def cb_plan_select(callback: CallbackQuery) -> None:
     footer += (
         "<blockquote>⧗ ᴘᴀʏᴍᴇɴᴛ ᴍᴇᴛʜᴏᴅs: ᴘᴀʏᴛᴍ, ɢᴘᴀʏ, ᴘʜᴏɴᴇᴘᴇ, ᴜᴘɪ &amp; ǫʀ ᴄᴏᴅᴇ</blockquote>\n"
         "<blockquote>◍ ᴘʀᴇᴍɪᴜᴍ ᴀᴅᴅᴇᴅ ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ ᴀғᴛᴇʀ ᴘᴀʏᴍᴇɴᴛ!\n"
-        "◍ sᴇɴᴅ ᴜs ss ᴜsɪɴɢ /bought &amp; ɢᴇᴛ ᴜʀ ᴘʀᴇᴍɪᴜᴍ ᴄʜᴀɴɴᴇʟ ᴏʀ ʙᴏᴛ ᴀᴄᴄᴇss ɪɴsᴛᴀɴᴛʟʏ</blockquote>"
+        "◍ ᴀғᴛᴇʀ ᴘᴀʏᴍᴇɴᴛ ᴘʟᴇᴀsᴇ sᴇɴᴅ ᴜs sᴄʀᴇᴇɴsʜᴏᴛ &amp; ɢᴇᴛ ᴜʀ ᴘʀᴇᴍɪᴜᴍ ᴄʜᴀɴɴᴇʟ ᴏʀ ʙᴏᴛ ᴀᴄᴄᴇss ɪɴsᴛᴀɴᴛʟʏ ᴡɪᴛʜᴏᴜᴛ ᴅᴇʟᴀʏ</blockquote>"
     )
     text += footer
 

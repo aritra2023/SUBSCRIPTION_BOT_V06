@@ -3,6 +3,8 @@ from __future__ import annotations
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from utils.helpers import to_small_caps
+
 
 # Duration options available for plans (days, display label)
 DURATION_OPTIONS: list[tuple[int, str]] = [
@@ -83,7 +85,7 @@ def plans_keyboard(plans: list[dict]) -> InlineKeyboardMarkup:
 
         builder.row(
             InlineKeyboardButton(
-                text=f"💎 {plan['display_name']} — {price_str}",
+                text=f"💎 {to_small_caps(plan['display_name'])} — {price_str}",
                 callback_data=f"plan_select:{plan['name']}",
                 style="primary",
             )
@@ -245,9 +247,9 @@ def admin_plan_list_keyboard(plans: list[dict]) -> InlineKeyboardMarkup:
     for plan in plans:
         builder.row(
             InlineKeyboardButton(
-                text=f"📦 {plan['display_name']}",
+                text=f"📦 {to_small_caps(plan['display_name'])}",
                 callback_data=f"admin_plan:manage:{plan['name']}",
-                style="primary",
+                style="success",
             )
         )
     builder.row(
@@ -257,17 +259,61 @@ def admin_plan_list_keyboard(plans: list[dict]) -> InlineKeyboardMarkup:
 
 
 def admin_plan_manage_keyboard(plan_name: str) -> InlineKeyboardMarkup:
-    """Per-plan menu: edit name, edit description, delete."""
+    """Per-plan menu: edit name, desc, demo link, channels, prices, delete."""
     builder = InlineKeyboardBuilder()
     builder.row(
         InlineKeyboardButton(text="✏️ ᴇᴅɪᴛ ɴᴀᴍᴇ", callback_data=f"admin_plan:edit_name:{plan_name}", style="primary"),
         InlineKeyboardButton(text="📝 ᴇᴅɪᴛ ᴅᴇsᴄ", callback_data=f"admin_plan:edit_desc:{plan_name}", style="primary"),
     )
     builder.row(
+        InlineKeyboardButton(text="🔗 ᴇᴅɪᴛ ᴄʜᴀɴɴᴇʟs", callback_data=f"admin_plan:edit_channels:{plan_name}", style="primary"),
+        InlineKeyboardButton(text="🎥 ᴇᴅɪᴛ ᴅᴇᴍᴏ ʟɪɴᴋ", callback_data=f"admin_plan:edit_demo:{plan_name}", style="primary"),
+    )
+    builder.row(
+        InlineKeyboardButton(text="💰 ᴇᴅɪᴛ ᴘʀɪᴄᴇs", callback_data=f"admin_plan:edit_prices:{plan_name}", style="primary"),
+    )
+    builder.row(
         InlineKeyboardButton(text="🗑 ᴅᴇʟᴇᴛᴇ ᴘʟᴀɴ", callback_data=f"admin_plan:delete:{plan_name}", style="danger"),
     )
     builder.row(
         InlineKeyboardButton(text="‹ ʙᴀᴄᴋ", callback_data="admin_plans", style="primary"),
+    )
+    return builder.as_markup()
+
+
+def admin_plan_channels_keyboard(plan_name: str, channels: list[str]) -> InlineKeyboardMarkup:
+    """Channel management: add new / remove existing."""
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(text="➕ ᴀᴅᴅ ᴄʜᴀɴɴᴇʟ", callback_data=f"admin_plan:ch_add:{plan_name}", style="success"),
+    )
+    for i, _ in enumerate(channels):
+        builder.row(
+            InlineKeyboardButton(
+                text=f"❌ ʀᴇᴍᴏᴠᴇ #{i + 1}",
+                callback_data=f"admin_plan:ch_rm:{plan_name}:{i}",
+                style="danger",
+            )
+        )
+    builder.row(
+        InlineKeyboardButton(text="‹ ʙᴀᴄᴋ", callback_data=f"admin_plan:manage:{plan_name}", style="primary"),
+    )
+    return builder.as_markup()
+
+
+def admin_plan_edit_prices_keyboard(plan_name: str, durations: list[dict]) -> InlineKeyboardMarkup:
+    """Show each duration tier as a button to tap and edit its price."""
+    builder = InlineKeyboardBuilder()
+    for i, tier in enumerate(durations):
+        builder.row(
+            InlineKeyboardButton(
+                text=f"✏️ {tier['label']} — ₹{tier['price']:.0f}",
+                callback_data=f"admin_plan:ep_tier:{plan_name}:{i}",
+                style="primary",
+            )
+        )
+    builder.row(
+        InlineKeyboardButton(text="‹ ʙᴀᴄᴋ", callback_data=f"admin_plan:manage:{plan_name}", style="primary"),
     )
     return builder.as_markup()
 
