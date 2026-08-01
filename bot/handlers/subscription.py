@@ -34,13 +34,14 @@ router = Router(name="subscription")
 @router.callback_query(lambda c: c.data == "buy_subscription")
 async def cb_buy_subscription(callback: CallbackQuery) -> None:
     text = (
-        "<blockquote><b>💎 ᴄʜᴏᴏsᴇ ᴀ ᴄᴀᴛᴇɢᴏʀʏ</b>\n\n"
-        "<b>sᴇʟᴇᴄᴛ ᴀ ᴄᴀᴛᴇɢᴏʀʏ ʙᴇʟᴏᴡ ᴛᴏ ᴠɪᴇᴡ ᴀᴠᴀɪʟᴀʙʟᴇ ᴘʟᴀɴs.</b></blockquote>\n\n"
-        "<blockquote>♡ <b>ᴘʀᴇᴍɪᴜᴍ ᴄʜᴀɴɴᴇʟ</b>\n"
-        "ʏᴏᴜ ᴄᴀɴ ᴄʜᴇᴄᴋᴏᴜᴛ ᴏᴜʀ ᴇxᴄʟᴜsɪᴠᴇ ᴘʀᴇᴍɪᴜᴍ ᴄʜᴀɴɴᴇʟs ʜᴇʀᴇ. "
-        "ᴛʜᴇʀᴇ ᴀʀᴇ ɴᴏ ᴀᴅs ᴀɴᴅ ʏᴏᴜ ɢᴇᴛ ᴜɴʟɪᴍɪᴛᴇᴅ ᴀᴄᴄᴇss ᴛᴏ ᴀʟʟ ᴄᴏɴᴛᴇɴᴛ.</blockquote>\n\n"
-        "<blockquote>♡ <b>ᴘʀᴇᴍɪᴜᴍ ʙᴏᴛs</b>\n"
-        "ᴇɴᴊᴏʏ ᴏᴜʀ ᴘᴏᴡᴇʀғᴜʟ ᴘʀᴇᴍɪᴜᴍ ʙᴏᴛs — ᴄᴏᴍᴘʟᴇᴛᴇʟʏ ᴀᴅs-ғʀᴇᴇ ᴡɪᴛʜ ᴜɴʟɪᴍɪᴛᴇᴅ ᴜsᴀɢᴇ ᴀɴᴅ ᴇxᴄʟᴜsɪᴠᴇ ғᴇᴀᴛᴜʀᴇs.</blockquote>"
+        "<blockquote>➤ <b>sᴇʟᴇᴄᴛ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴛʏᴘᴇ</b> \"\n\n"
+        "<i>➣ ᴄʜᴏᴏsᴇ ᴡʜᴀᴛ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ sᴜʙsᴄʀɪʙᴇ ᴛᴏ:</i></blockquote>\n\n"
+        "🤖 <b>ʙᴏᴛ ᴘʀᴇᴍɪᴜᴍ</b> <i>(ᴜɴᴅᴇʀ ᴍᴀɪɴᴛᴇɴᴀɴᴄᴇ)</i>\n"
+        "• sᴜʙsᴄʀɪʙᴇ ᴛᴏ ᴏᴜʀ ᴀʟʟ ᴛʜᴇ ᴘʀᴇᴍɪᴜᴍ ʙᴏᴛs ʟɪᴋᴇ ᴄᴏʀɴ,ʜᴇɴᴛᴀɪ sɪᴍɪʟᴀʀ ʙᴏᴛs\n\n"
+        "🔴 <b>ᴄʜᴀɴɴᴇʟs ᴘʀᴇᴍɪᴜᴍ</b>\n"
+        "• sᴜʙsᴄʀɪʙᴇ ᴛᴏ sᴘᴇᴄɪғɪᴄ ᴘʀᴇᴍɪᴜᴍ ᴄʜᴀɴɴᴇʟs ʟɪᴋᴇ 'ᴍᴏᴠɪᴇs ʙᴏᴛ ᴅᴀᴛᴀʙᴀsᴇ' ᴏʀ 'ᴄᴏʀɴ ғɪʟᴇs ᴅᴀᴛᴀʙᴀsᴇ'.\n"
+        "▸ ɢᴇᴛ ᴛᴇᴍᴘᴏʀᴀʀʏ ɪɴᴠɪᴛᴇ ʟɪɴᴋs ᴀᴜᴛᴏᴍᴀᴛɪᴄᴀʟʟʏ.\n\n"
+        "💡 <b>ɴᴏᴛᴇ:</b> ᴘʟᴇᴀsᴇ ᴛʀʏ ᴄʜᴀɴɴᴇʟ ᴘʀᴇᴍɪᴜᴍ ᴀs ʙᴏᴛ sᴜʙsᴄʀɪᴘᴛɪᴏɴs ᴀʀᴇ ᴄᴜʀʀᴇɴᴛʟʏ ᴜɴᴅᴇʀ ᴍᴀɪɴᴛᴇɴᴀɴᴄᴇ!"
     )
     try:
         if callback.message and callback.message.photo:
