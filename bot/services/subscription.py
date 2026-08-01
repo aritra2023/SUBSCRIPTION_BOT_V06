@@ -234,6 +234,25 @@ async def topup_wallet(user_id: int, amount: float, description: str = "Admin to
     await db.transactions.insert_one(dict(txn))
 
 
+async def deduct_wallet(user_id: int, amount: float, description: str = "Admin penalty") -> None:
+    """Deduct balance from a user's wallet (penalty / correction)."""
+    db = get_db()
+    await db.users.update_one(
+        {"user_id": user_id},
+        {"$inc": {"wallet_balance": -amount}},
+    )
+    txn: TransactionDoc = {
+        "user_id": user_id,
+        "amount": -amount,
+        "type": "penalty",
+        "plan_name": None,
+        "description": description,
+        "created_at": now_utc(),
+        "status": "completed",
+    }
+    await db.transactions.insert_one(dict(txn))
+
+
 # ── Auto-Renew ────────────────────────────────────────────────────────────────
 
 async def process_auto_renewals(bot_instance=None) -> list[dict]:

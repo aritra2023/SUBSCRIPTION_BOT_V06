@@ -19,6 +19,7 @@ _TYPE_LABELS = {
     "purchase": "🛒 ᴘᴜʀᴄʜᴀsᴇ",
     "topup":    "💰 ᴛᴏᴘ-ᴜᴘ",
     "refund":   "↩️ ʀᴇғᴜɴᴅ",
+    "penalty":  "⚠️ ᴘᴇɴᴀʟᴛʏ",
 }
 
 

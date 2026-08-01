@@ -21,7 +21,7 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
         InlineKeyboardButton(
             text="➲ ʙᴜʏ sᴜʙsᴄʀɪᴘᴛɪᴏɴ",
             callback_data="buy_subscription",
-            style="primary",
+            style="success",
         )
     )
     builder.row(
@@ -36,7 +36,7 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
         InlineKeyboardButton(
             text="➲ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ",
             callback_data="wallet",
-            style="primary",
+            style="success",
         )
     )
 

@@ -20,6 +20,7 @@ from keyboards.inline import (
 )
 from services.subscription import (
     create_plan,
+    deduct_wallet,
     get_active_plans,
     get_all_users,
     get_user_count,
@@ -38,6 +39,8 @@ class AdminStates(StatesGroup):
     waiting_for_broadcast = State()
     waiting_for_topup_user = State()
     waiting_for_topup_amount = State()
+    waiting_for_penalty_user = State()
+    waiting_for_penalty_amount = State()
     # Add plan flow
     addplan_name = State()
     addplan_description = State()
@@ -465,6 +468,55 @@ async def handle_topup_amount(message: Message, state: FSMContext) -> None:
     await topup_wallet(user_id, amount, description=f"ᴀᴅᴍɪɴ ᴛᴏᴘ-ᴜᴘ ᴏғ ₹{amount}")
     await message.answer(
         f"✅ <b>ᴡᴀʟʟᴇᴛ ᴛᴏᴘᴘᴇᴅ ᴜᴘ!</b>\n\nᴜsᴇʀ <code>{user_id}</code> ʀᴇᴄᴇɪᴠᴇᴅ <b>₹{amount:.2f}</b>.",
+        parse_mode=ParseMode.HTML,
+        reply_markup=admin_panel_keyboard(),
+    )
+
+
+# ── Penalty Wallet ────────────────────────────────────────────────────────────
+
+@router.message(Command("penalty"))
+async def cmd_penalty(message: Message, state: FSMContext) -> None:
+    await message.answer(
+        "<blockquote><b>⚠️ ᴡᴀʟʟᴇᴛ ᴘᴇɴᴀʟᴛʏ</b></blockquote>\n\n"
+        "sᴇɴᴅ ᴛʜᴇ ᴜsᴇʀ ɪᴅ ᴛᴏ ᴅᴇᴅᴜᴄᴛ ʙᴀʟᴀɴᴄᴇ ғʀᴏᴍ:",
+        parse_mode=ParseMode.HTML,
+        reply_markup=cancel_keyboard(),
+    )
+    await state.set_state(AdminStates.waiting_for_penalty_user)
+
+
+@router.message(AdminStates.waiting_for_penalty_user, F.text)
+async def handle_penalty_user(message: Message, state: FSMContext) -> None:
+    try:
+        user_id = int(message.text or "")
+    except ValueError:
+        await message.answer("❌ ɪɴᴠᴀʟɪᴅ ᴜsᴇʀ ɪᴅ. sᴇɴᴅ ᴀ ɴᴜᴍᴇʀɪᴄ ᴛᴇʟᴇɢʀᴀᴍ ᴜsᴇʀ ɪᴅ.")
+        return
+    await state.update_data(penalty_user_id=user_id)
+    await message.answer(
+        f"ᴜsᴇʀ ɪᴅ: <code>{user_id}</code>\n\nɴᴏᴡ sᴇɴᴅ ᴛʜᴇ ᴀᴍᴏᴜɴᴛ ᴛᴏ ᴅᴇᴅᴜᴄᴛ (e.g. <code>200</code>):",
+        parse_mode=ParseMode.HTML,
+        reply_markup=cancel_keyboard(),
+    )
+    await state.set_state(AdminStates.waiting_for_penalty_amount)
+
+
+@router.message(AdminStates.waiting_for_penalty_amount, F.text)
+async def handle_penalty_amount(message: Message, state: FSMContext) -> None:
+    try:
+        amount = float(message.text or "")
+        if amount <= 0:
+            raise ValueError
+    except ValueError:
+        await message.answer("❌ ɪɴᴠᴀʟɪᴅ ᴀᴍᴏᴜɴᴛ. sᴇɴᴅ ᴀ ᴘᴏsɪᴛɪᴠᴇ ɴᴜᴍʙᴇʀ.")
+        return
+    data = await state.get_data()
+    user_id = data.get("penalty_user_id")
+    await state.clear()
+    await deduct_wallet(user_id, amount, description=f"ᴀᴅᴍɪɴ ᴘᴇɴᴀʟᴛʏ ᴏғ ₹{amount}")
+    await message.answer(
+        f"✅ <b>ᴘᴇɴᴀʟᴛʏ ᴀᴘᴘʟɪᴇᴅ!</b>\n\n₹{amount:.2f} ᴅᴇᴅᴜᴄᴛᴇᴅ ғʀᴏᴍ ᴜsᴇʀ <code>{user_id}</code>'s ᴡᴀʟʟᴇᴛ.",
         parse_mode=ParseMode.HTML,
         reply_markup=admin_panel_keyboard(),
     )
