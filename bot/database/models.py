@@ -14,6 +14,7 @@ class UserDoc(TypedDict, total=False):
     auto_renew: bool
     joined_at: datetime
     is_banned: bool
+    is_blocked: bool
 
 
 class DurationTier(TypedDict):
@@ -28,10 +29,9 @@ class PlanDoc(TypedDict, total=False):
     description: str
     demo_link: str
     payment_proof_required: bool
-    durations: list[DurationTier]   # multiple duration tiers
+    durations: list[DurationTier]
     channels: list[str]
     is_active: bool
-    # Legacy single-tier fields (backward compat)
     price: float
     duration_days: int
 
@@ -39,8 +39,8 @@ class PlanDoc(TypedDict, total=False):
 class SubscriptionDoc(TypedDict, total=False):
     user_id: int
     plan_name: str
-    duration_days: int      # chosen tier
-    price_paid: float       # price paid for that tier
+    duration_days: int
+    price_paid: float
     start_date: datetime
     end_date: datetime
     is_active: bool
@@ -50,16 +50,11 @@ class SubscriptionDoc(TypedDict, total=False):
 class TransactionDoc(TypedDict, total=False):
     user_id: int
     amount: float
-    type: str          # "purchase", "topup", "refund"
+    type: str
     plan_name: Optional[str]
     description: str
     created_at: datetime
-    status: str        # "completed", "pending", "failed"
-
-
-class SettingsDoc(TypedDict, total=False):
-    key: str
-    value: str
+    status: str
 
 
 def now_utc() -> datetime:

@@ -54,7 +54,6 @@ async def get_user_count() -> int:
 
 async def get_paid_user_count() -> int:
     """Count users with a currently active subscription."""
-    from database.models import now_utc
     now = now_utc()
     return await get_db().subscriptions.count_documents({"is_active": True, "end_date": {"$gt": now}})
 

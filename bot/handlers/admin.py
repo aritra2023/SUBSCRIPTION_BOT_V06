@@ -6,11 +6,14 @@ import re
 
 from aiogram import F, Router
 from aiogram.enums import ParseMode
+from aiogram.exceptions import TelegramForbiddenError
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import CallbackQuery, InlineKeyboardButton, Message
+from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+from loader import bot
 
 from filters.admin import IsAdmin
 from keyboards.inline import (
@@ -195,10 +198,6 @@ async def handle_broadcast_message(message: Message, state: FSMContext) -> None:
     lambda c: c.data == "broadcast_confirm",
 )
 async def cb_broadcast_confirm(callback: CallbackQuery, state: FSMContext) -> None:
-    from loader import bot
-    from aiogram.exceptions import TelegramForbiddenError
-    from aiogram.types import InlineKeyboardMarkup
-
     data = await state.get_data()
     from_chat_id = data.get("broadcast_from_chat_id")
     msg_id = data.get("broadcast_message_id")

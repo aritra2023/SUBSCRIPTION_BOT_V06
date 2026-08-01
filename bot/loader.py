@@ -1,15 +1,15 @@
 from __future__ import annotations
 
+import motor.motor_asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.mongo import MongoStorage
-import motor.motor_asyncio
 
-from config import BOT_TOKEN, MONGO_URI, DB_NAME
+from config import BOT_TOKEN, DB_NAME, MONGO_URI
 
-_motor_client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI)
-_fsm_storage = MongoStorage(client=_motor_client, db_name=DB_NAME, collection_name="fsm_states")
+motor_client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI)
+_fsm_storage = MongoStorage(client=motor_client, db_name=DB_NAME, collection_name="fsm_states")
 
 bot: Bot = Bot(
     token=BOT_TOKEN,

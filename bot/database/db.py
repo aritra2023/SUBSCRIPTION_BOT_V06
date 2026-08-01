@@ -1,31 +1,22 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
 
 import motor.motor_asyncio
 from pymongo import ASCENDING, DESCENDING
 
-from config import MONGO_URI, DB_NAME
+from config import DB_NAME
 
 logger = logging.getLogger(__name__)
 
-_client: Optional[motor.motor_asyncio.AsyncIOMotorClient] = None
-_db: Optional[motor.motor_asyncio.AsyncIOMotorDatabase] = None
+_db: motor.motor_asyncio.AsyncIOMotorDatabase | None = None
 
 
-async def init_db() -> None:
-    global _client, _db
-    _client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI)
-    _db = _client[DB_NAME]
+async def init_db(client: motor.motor_asyncio.AsyncIOMotorClient) -> None:
+    global _db
+    _db = client[DB_NAME]
     await _create_indexes()
     logger.info("MongoDB connected: %s", DB_NAME)
-
-
-async def close_db() -> None:
-    if _client:
-        _client.close()
-        logger.info("MongoDB connection closed")
 
 
 def get_db() -> motor.motor_asyncio.AsyncIOMotorDatabase:
