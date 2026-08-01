@@ -28,7 +28,7 @@ async def cb_history(callback: CallbackQuery) -> None:
     """Show loading in-message, create Telegraph page, then show Open button."""
     await callback.answer()  # ack immediately — no popup
 
-    loading_text = "⏳ <b>ɢᴇɴᴇʀᴀᴛɪɴɢ ʏᴏᴜʀ ʜɪsᴛᴏʀʏ ᴘᴀɢᴇ . . .</b>"
+    loading_text = "⧖ <b>ɢᴇɴᴇʀᴀᴛɪɴɢ ʏᴏᴜʀ ʜɪsᴛᴏʀʏ ᴘᴀɢᴇ . . .</b>"
 
     # Step 1 — show loading state in the message
     try:
