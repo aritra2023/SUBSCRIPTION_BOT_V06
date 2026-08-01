@@ -159,6 +159,31 @@ def wallet_keyboard(auto_renew: bool = True) -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
+def history_prompt_keyboard() -> InlineKeyboardMarkup:
+    """Shown as a reply to /start when user taps History — leads to detail view."""
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(
+            text="🗂 ᴠɪᴇᴡ ʜɪsᴛᴏʀʏ",
+            callback_data="view_history_detail",
+            style="success",
+        )
+    )
+    builder.row(
+        InlineKeyboardButton(text="‹ ʙᴀᴄᴋ", callback_data="history_close"),
+    )
+    return builder.as_markup()
+
+
+def history_detail_keyboard() -> InlineKeyboardMarkup:
+    """Shown on the actual transaction list — back closes the reply message."""
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(text="‹ ʙᴀᴄᴋ", callback_data="history_close"),
+    )
+    return builder.as_markup()
+
+
 def back_main_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(

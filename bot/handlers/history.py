@@ -6,7 +6,7 @@ from aiogram import Router
 from aiogram.enums import ParseMode
 from aiogram.types import CallbackQuery
 
-from keyboards.inline import back_main_keyboard
+from keyboards.inline import history_prompt_keyboard, history_detail_keyboard
 from services.subscription import get_user_transactions
 from utils.helpers import format_date
 
@@ -22,6 +22,24 @@ _TYPE_LABELS = {
 
 @router.callback_query(lambda c: c.data == "history")
 async def cb_history(callback: CallbackQuery) -> None:
+    """Send a new reply to the /start message with the history prompt."""
+    text = (
+        "✅ <b>ʏᴏᴜʀ ᴄᴏᴍᴘʟᴇᴛᴇ ᴘᴜʀᴄʜᴀsᴇ ʜɪsᴛᴏʀʏ ɪs ʀᴇᴀᴅʏ!</b>\n\n"
+        "ᴄʟɪᴄᴋ ᴛʜᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ᴠɪᴇᴡ ᴀʟʟ ʏᴏᴜʀ ᴘʀᴇᴠɪᴏᴜs ᴘᴜʀᴄʜᴀsᴇs, "
+        "ᴀᴄᴛɪᴠᴇ sᴜʙsᴄʀɪᴘᴛɪᴏɴs, ᴀɴᴅ ᴇxᴘɪʀʏ ᴅᴀᴛᴇs."
+    )
+    if callback.message:
+        await callback.message.reply(
+            text=text,
+            parse_mode=ParseMode.HTML,
+            reply_markup=history_prompt_keyboard(),
+        )
+    await callback.answer()
+
+
+@router.callback_query(lambda c: c.data == "view_history_detail")
+async def cb_view_history_detail(callback: CallbackQuery) -> None:
+    """Edit the prompt message to show the full transaction list."""
     user_id = callback.from_user.id if callback.from_user else 0
     transactions = await get_user_transactions(user_id, limit=10)
 
@@ -48,19 +66,24 @@ async def cb_history(callback: CallbackQuery) -> None:
         text = "\n".join(lines)
 
     try:
-        if callback.message and callback.message.photo:
-            await callback.message.edit_caption(
-                caption=text,
-                parse_mode=ParseMode.HTML,
-                reply_markup=back_main_keyboard(),
-            )
-        elif callback.message:
+        if callback.message:
             await callback.message.edit_text(
                 text=text,
                 parse_mode=ParseMode.HTML,
-                reply_markup=back_main_keyboard(),
+                reply_markup=history_detail_keyboard(),
             )
     except Exception:
         pass
 
+    await callback.answer()
+
+
+@router.callback_query(lambda c: c.data == "history_close")
+async def cb_history_close(callback: CallbackQuery) -> None:
+    """Delete the history reply message."""
+    try:
+        if callback.message:
+            await callback.message.delete()
+    except Exception:
+        pass
     await callback.answer()
