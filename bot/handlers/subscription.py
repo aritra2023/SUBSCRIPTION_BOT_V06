@@ -186,12 +186,17 @@ async def cb_plan_duration(callback: CallbackQuery) -> None:
     balance = user.get("wallet_balance", 0.0) if user else 0.0
     price = tier["price"]
 
-    text = (
-        f"<blockquote><b>📋 ᴄᴏɴғɪʀᴍ ᴘᴜʀᴄʜᴀsᴇ</b></blockquote>\n\n"
+    plan_desc = (plan.get("description") or "").strip()
+    text = f"<blockquote><b>{to_small_caps(plan['display_name'])}</b></blockquote>\n\n"
+    if plan_desc:
+        text += f"{plan_desc}\n\n"
+    text += (
+        f"<blockquote>"
         f"➲ <b>ᴘʟᴀɴ:</b> {to_small_caps(plan['display_name'])}\n"
         f"➲ <b>ᴅᴜʀᴀᴛɪᴏɴ:</b> {tier['label']}\n"
         f"➲ <b>ᴘʀɪᴄᴇ:</b> ₹{price:.0f}\n"
-        f"➲ <b>ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ:</b> ₹{balance:.2f}\n\n"
+        f"➲ <b>ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ:</b> ₹{balance:.2f}"
+        f"</blockquote>\n\n"
     )
 
     insufficient = balance < price

@@ -385,9 +385,9 @@ async def cb_admin_plan_edit_desc(callback: CallbackQuery, state: FSMContext) ->
     await callback.answer()
 
 
-@router.message(StateFilter(AdminStates.editplan_desc), F.text)
+@router.message(StateFilter(AdminStates.editplan_desc), F.text | F.caption)
 async def handle_editplan_desc(message: Message, state: FSMContext) -> None:
-    new_desc = (message.text or "").strip()
+    new_desc = (message.text or message.caption or "").strip()
     data = await state.get_data()
     plan_name = data.get("editing_plan", "")
     await update_plan_fields(plan_name, {"description": new_desc})
@@ -639,9 +639,9 @@ async def handle_addplan_name(message: Message, state: FSMContext) -> None:
 
 # ── Add Plan — Step 2: Description ───────────────────────────────────────────
 
-@router.message(StateFilter(AdminStates.addplan_description), F.text)
+@router.message(StateFilter(AdminStates.addplan_description), F.text | F.caption)
 async def handle_addplan_description(message: Message, state: FSMContext) -> None:
-    await state.update_data(description=(message.text or "").strip())
+    await state.update_data(description=(message.text or message.caption or "").strip())
     await message.answer(
         "<blockquote><b>➕ ᴀᴅᴅ ᴘʟᴀɴ — sᴛᴇᴘ 3/6</b></blockquote>\n\n"
         "ᴇɴᴛᴇʀ ᴀ <b>ᴅᴇᴍᴏ ᴄʜᴀɴɴᴇʟ ʟɪɴᴋ</b> (e.g. <code>t.me/+xxx</code>):\n\n"
