@@ -197,7 +197,7 @@ def history_prompt_keyboard() -> InlineKeyboardMarkup:
         )
     )
     builder.row(
-        InlineKeyboardButton(text="‹ ʙᴀᴄᴋ", callback_data="history_close", style="success"),
+        InlineKeyboardButton(text="‹ ʙᴀᴄᴋ", callback_data="history_close", style="danger"),
     )
     return builder.as_markup()
 
@@ -213,7 +213,7 @@ def history_telegraph_keyboard(url: str) -> InlineKeyboardMarkup:
         )
     )
     builder.row(
-        InlineKeyboardButton(text="‹ ʙᴀᴄᴋ", callback_data="history_close", style="success"),
+        InlineKeyboardButton(text="‹ ʙᴀᴄᴋ", callback_data="history_close", style="danger"),
     )
     return builder.as_markup()
 
@@ -222,7 +222,7 @@ def history_detail_keyboard() -> InlineKeyboardMarkup:
     """Fallback: shown on the inline transaction list."""
     builder = InlineKeyboardBuilder()
     builder.row(
-        InlineKeyboardButton(text="‹ ʙᴀᴄᴋ", callback_data="history_close", style="success"),
+        InlineKeyboardButton(text="‹ ʙᴀᴄᴋ", callback_data="history_close", style="danger"),
     )
     return builder.as_markup()
 
