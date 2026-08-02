@@ -96,7 +96,7 @@ def duration_keyboard(plan_name: str, durations: list[dict], demo_link: str = ""
     # Demo channel link at top as blue button
     if demo_link:
         builder.row(
-            InlineKeyboardButton(text="⌞⌝ ᴅᴇᴍᴏ ᴄʜᴀɴɴᴇʟ", url=demo_link, style="primary"),
+            InlineKeyboardButton(text="ᴅᴇᴍᴏ ᴄʜᴀɴɴᴇʟ ⌞⌝", url=demo_link, style="primary"),
         )
 
     buttons = [

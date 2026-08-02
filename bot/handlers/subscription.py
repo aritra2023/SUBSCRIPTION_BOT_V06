@@ -196,7 +196,7 @@ async def cb_plan_duration(callback: CallbackQuery) -> None:
         f"➲ <b>ᴅᴜʀᴀᴛɪᴏɴ:</b> {tier['label']}\n"
         f"➲ <b>ᴘʀɪᴄᴇ:</b> ₹{price:.0f}\n"
         f"➲ <b>ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ:</b> ₹{balance:.2f}"
-        f"</blockquote>\n\n"
+        f"</blockquote>\n"
     )
 
     insufficient = balance < price
