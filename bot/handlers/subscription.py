@@ -413,11 +413,21 @@ async def cb_join_channel(callback: CallbackQuery) -> None:
             )
             return
 
-    # Open the link directly — no separate message needed
-    await callback.answer(url=link)
-
     await mark_channel_joined(user_id, idx)
     joined_set.add(idx)
+
+    # Send the invite link as plain text so user can tap it directly
+    try:
+        await bot.send_message(
+            user_id,
+            f"🔗 <b>ʏᴏᴜʀ ɪɴᴠɪᴛᴇ ʟɪɴᴋ:</b>\n\n{link}\n\n"
+            "<i>⚠️ ᴛʜɪs ʟɪɴᴋ ᴄᴀɴ ᴏɴʟʏ ʙᴇ ᴜsᴇᴅ ᴏɴᴄᴇ.</i>",
+            parse_mode=ParseMode.HTML,
+        )
+    except Exception as e:
+        logger.error("Could not send invite link to user %d: %s", user_id, e)
+        await callback.answer("❌ ғᴀɪʟᴇᴅ ᴛᴏ sᴇɴᴅ ʟɪɴᴋ. ᴄᴏɴᴛᴀᴄᴛ sᴜᴘᴘᴏʀᴛ.", show_alert=True)
+        return
 
     # Update button to ✓ ᴊᴏɪɴᴇᴅ
     new_kb = subscription_activated_keyboard(channels, joined_set)
@@ -426,6 +436,8 @@ async def cb_join_channel(callback: CallbackQuery) -> None:
             await callback.message.edit_reply_markup(reply_markup=new_kb)
     except Exception as e:
         logger.warning("Could not update join button: %s", e)
+
+    await callback.answer()
 
     # Revoke the invite link so it can't be reused
     plan = await get_plan(sub.get("plan_name", ""))
