@@ -76,7 +76,7 @@ def plans_keyboard(plans: list[dict]) -> InlineKeyboardMarkup:
     for plan in plans:
         builder.row(
             InlineKeyboardButton(
-                text=f"💎 {to_small_caps(plan['display_name'])}",
+                text=f"‣ {to_small_caps(plan['display_name'])}",
                 callback_data=f"plan_select:{plan['name']}",
                 style="primary",
             )
@@ -271,7 +271,7 @@ def admin_plan_list_keyboard(plans: list[dict]) -> InlineKeyboardMarkup:
     for plan in plans:
         builder.row(
             InlineKeyboardButton(
-                text=f"📦 {to_small_caps(plan['display_name'])}",
+                text=f"➠ {to_small_caps(plan['display_name'])}",
                 callback_data=f"admin_plan:manage:{plan['name']}",
                 style="success",
             )

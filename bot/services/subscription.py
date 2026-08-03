@@ -139,7 +139,12 @@ async def get_active_subscription(user_id: int) -> Optional[SubscriptionDoc]:
     return sub
 
 
-async def purchase_subscription(user_id: int, plan: PlanDoc, duration_days: int) -> bool:
+async def purchase_subscription(
+    user_id: int,
+    plan: PlanDoc,
+    duration_days: int,
+    invite_links: list[str] | None = None,
+) -> bool:
     db = get_db()
     user = await get_user(user_id)
     if user is None:
@@ -176,7 +181,7 @@ async def purchase_subscription(user_id: int, plan: PlanDoc, duration_days: int)
                 "start_date": now,
                 "end_date": end_date,
                 "is_active": True,
-                "channels": plan.get("channels", []),
+                "channels": invite_links if invite_links is not None else plan.get("channels", []),
             }
         },
         upsert=True,

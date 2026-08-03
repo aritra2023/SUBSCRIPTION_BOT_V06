@@ -468,7 +468,9 @@ async def cb_admin_plan_ch_add(callback: CallbackQuery, state: FSMContext) -> No
     if callback.message:
         await callback.message.edit_text(
             "<blockquote><b>➕ ᴀᴅᴅ ᴄʜᴀɴɴᴇʟ</b></blockquote>\n\n"
-            "sᴇɴᴅ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ɪɴᴠɪᴛᴇ ʟɪɴᴋ (e.g. <code>t.me/+xxx</code>):",
+            "sᴇɴᴅ ᴛʜᴇ <b>ᴄʜᴀɴɴᴇʟ ɪᴅ</b> ᴏʀ <b>@ᴜsᴇʀɴᴀᴍᴇ</b>:\n"
+            "<i>(e.g. <code>-1001234567890</code> ᴏʀ <code>@ᴍʏᴄʜᴀɴɴᴇʟ</code>)</i>\n\n"
+            "<blockquote>⚠️ <i>ʙᴏᴛ ᴍᴜsᴛ ʙᴇ ᴀᴅᴅᴇᴅ ᴀs ᴀɴ <b>ᴀᴅᴍɪɴ</b> ɪɴ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ᴛᴏ ɢᴇɴᴇʀᴀᴛᴇ ɪɴᴠɪᴛᴇ ʟɪɴᴋs.</i></blockquote>",
             parse_mode=ParseMode.HTML,
             reply_markup=cancel_keyboard(),
         )
@@ -814,8 +816,9 @@ async def handle_addplan_channels(message: Message, state: FSMContext) -> None:
         channels.append(text)
         await state.update_data(channels=channels)
         await message.answer(
-            f"✅ ʟɪɴᴋ ᴀᴅᴅᴇᴅ. <i>ᴄʜᴀɴɴᴇʟs ᴀᴅᴅᴇᴅ: {len(channels)}</i>\n\n"
-            "sᴇɴᴅ ᴀɴᴏᴛʜᴇʀ ʟɪɴᴋ ᴏʀ <code>done</code> ᴛᴏ ғɪɴɪsʜ.",
+            f"✅ ᴄʜᴀɴɴᴇʟ ᴀᴅᴅᴇᴅ. <i>ᴛᴏᴛᴀʟ: {len(channels)}</i>\n\n"
+            "sᴇɴᴅ ᴀɴᴏᴛʜᴇʀ <b>ᴄʜᴀɴɴᴇʟ ɪᴅ / @ᴜsᴇʀɴᴀᴍᴇ</b> ᴏʀ <code>done</code> ᴛᴏ ғɪɴɪsʜ.\n\n"
+            "<blockquote>⚠️ <i>ʙᴏᴛ ᴍᴜsᴛ ʙᴇ ᴀᴅᴅᴇᴅ ᴀs ᴀɴ <b>ᴀᴅᴍɪɴ</b> ɪɴ ᴇᴀᴄʜ ᴄʜᴀɴɴᴇʟ.</i></blockquote>",
             parse_mode=ParseMode.HTML,
             reply_markup=cancel_keyboard(),
         )

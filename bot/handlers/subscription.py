@@ -245,7 +245,17 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
         await callback.answer("ᴘʟᴀɴ ɴᴏᴛ ғᴏᴜɴᴅ.", show_alert=True)
         return
 
-    success = await purchase_subscription(user_id, plan, days)
+    # Generate fresh one-time invite links before purchase
+    raw_channels = plan.get("channels", [])
+    invite_links: list[str] = []
+    for ch in raw_channels:
+        try:
+            link_obj = await bot.create_chat_invite_link(ch, member_limit=1)
+            invite_links.append(link_obj.invite_link)
+        except Exception:
+            invite_links.append(str(ch))  # fallback to stored value
+
+    success = await purchase_subscription(user_id, plan, days, invite_links=invite_links)
 
     if success:
         durations = plan.get("durations", [])
@@ -253,11 +263,7 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
         duration_label = tier["label"] if tier else f"{days} ᴅᴀʏs"
         price = tier["price"] if tier else plan.get("price", 0)
 
-        channels = plan.get("channels", [])
-        channel_links = (
-            "\n".join(f'• <a href="{c}">ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ</a>' for c in channels)
-            if channels else ""
-        )
+        channels = invite_links
 
         text = (
             f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!</b></blockquote>\n\n"
