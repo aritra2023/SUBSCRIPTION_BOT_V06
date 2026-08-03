@@ -365,15 +365,15 @@ async def cb_join_channel(callback: CallbackQuery) -> None:
         )
         return
 
-    # Mark as joined and update button to red
-    link = channels[idx]
     # Normalize URL — Telegram rejects buttons without https://
+    link = channels[idx]
     if link.startswith("t.me"):
         link = "https://" + link
 
     await mark_channel_joined(user_id, idx)
     joined_set.add(idx)
 
+    # Update button to ✓ ᴊᴏɪɴᴇᴅ (still green)
     new_kb = subscription_activated_keyboard(channels, joined_set)
     try:
         if callback.message:
@@ -394,6 +394,23 @@ async def cb_join_channel(callback: CallbackQuery) -> None:
         )
     except Exception as e:
         logger.error("Could not send channel link to user %d: %s", user_id, e)
+
+    # Revoke the invite link immediately so it can't be reused
+    plan = await get_plan(sub.get("plan_name", ""))
+    if plan:
+        raw_channels = plan.get("channels", [])
+        if idx < len(raw_channels):
+            try:
+                ch = raw_channels[idx]
+                try:
+                    chat_id: int | str = int(str(ch).strip())
+                except ValueError:
+                    chat_id = str(ch).strip()
+                await bot.revoke_chat_invite_link(chat_id, link)
+                logger.info("Revoked invite link for channel %s after user %d joined", ch, user_id)
+            except Exception as e:
+                logger.warning("Could not revoke invite link for channel %s: %s", raw_channels[idx], e)
+
     await callback.answer()
 
 
