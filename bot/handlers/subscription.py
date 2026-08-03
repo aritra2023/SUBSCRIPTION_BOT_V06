@@ -413,10 +413,13 @@ async def cb_join_channel(callback: CallbackQuery) -> None:
             )
             return
 
+    # Open the link directly — no separate message needed
+    await callback.answer(url=link)
+
     await mark_channel_joined(user_id, idx)
     joined_set.add(idx)
 
-    # Update button to ✓ ᴊᴏɪɴᴇᴅ (still green)
+    # Update button to ✓ ᴊᴏɪɴᴇᴅ
     new_kb = subscription_activated_keyboard(channels, joined_set)
     try:
         if callback.message:
@@ -424,21 +427,7 @@ async def cb_join_channel(callback: CallbackQuery) -> None:
     except Exception as e:
         logger.warning("Could not update join button: %s", e)
 
-    # Send the invite link as a tappable button message
-    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-    link_kb = InlineKeyboardMarkup(inline_keyboard=[[
-        InlineKeyboardButton(text="➲ ᴏᴘᴇɴ ᴄʜᴀɴɴᴇʟ", url=link)
-    ]])
-    try:
-        await callback.message.answer(
-            "<b>ᴛᴀᴘ ʙᴇʟᴏᴡ ᴛᴏ ᴊᴏɪɴ ʏᴏᴜʀ ᴄʜᴀɴɴᴇʟ:</b>",
-            parse_mode=ParseMode.HTML,
-            reply_markup=link_kb,
-        )
-    except Exception as e:
-        logger.error("Could not send channel link to user %d: %s", user_id, e)
-
-    # Revoke the invite link immediately so it can't be reused
+    # Revoke the invite link so it can't be reused
     plan = await get_plan(sub.get("plan_name", ""))
     if plan:
         raw_channels = plan.get("channels", [])
@@ -453,8 +442,6 @@ async def cb_join_channel(callback: CallbackQuery) -> None:
                 logger.info("Revoked invite link for channel %s after user %d joined", ch, user_id)
             except Exception as e:
                 logger.warning("Could not revoke invite link for channel %s: %s", raw_channels[idx], e)
-
-    await callback.answer()
 
 
 # ── View Plan ─────────────────────────────────────────────────────────────────
