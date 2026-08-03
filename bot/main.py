@@ -23,10 +23,10 @@ logger = logging.getLogger(__name__)
 async def _set_commands(bot: Bot) -> None:
     await bot.set_my_commands([
         BotCommand(command="start",   description="➲ sᴛᴀʀᴛ ᴛʜᴇ ʙᴏᴛ"),
-        BotCommand(command="admin",   description="⚙️ ᴀᴅᴍɪɴ ᴘᴀɴᴇʟ (ᴀᴅᴍɪɴ ᴏɴʟʏ)"),
-        BotCommand(command="addplan", description="➕ ᴀᴅᴅ ᴀ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴘʟᴀɴ (ᴀᴅᴍɪɴ ᴏɴʟʏ)"),
-        BotCommand(command="topup",   description="💰 ᴛᴏᴘ ᴜᴘ ᴜsᴇʀ ᴡᴀʟʟᴇᴛ (ᴀᴅᴍɪɴ ᴏɴʟʏ)"),
-        BotCommand(command="penalty", description="⚠️ ᴅᴇᴅᴜᴄᴛ ᴘᴇɴᴀʟᴛʏ ғʀᴏᴍ ᴜsᴇʀ ᴡᴀʟʟᴇᴛ (ᴀᴅᴍɪɴ ᴏɴʟʏ)"),
+        BotCommand(command="admin",   description="ᴀᴅᴍɪɴ ᴘᴀɴᴇʟ (ᴀᴅᴍɪɴ ᴏɴʟʏ)"),
+        BotCommand(command="addplan", description="ᴀᴅᴅ ᴀ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴘʟᴀɴ (ᴀᴅᴍɪɴ ᴏɴʟʏ)"),
+        BotCommand(command="topup",   description="ᴛᴏᴘ ᴜᴘ ᴜsᴇʀ ᴡᴀʟʟᴇᴛ (ᴀᴅᴍɪɴ ᴏɴʟʏ)"),
+        BotCommand(command="penalty", description="ᴅᴇᴅᴜᴄᴛ ᴘᴇɴᴀʟᴛʏ ғʀᴏᴍ ᴜsᴇʀ ᴡᴀʟʟᴇᴛ (ᴀᴅᴍɪɴ ᴏɴʟʏ)"),
     ])
 
 
