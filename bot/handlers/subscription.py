@@ -277,13 +277,29 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
 
         channels = invite_links
 
-        text = (
-            f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!</b></blockquote>\n\n"
-            f"<b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
-            f"<b>ᴅᴜʀᴀᴛɪᴏɴ:</b> {duration_label}\n"
-            f"<b>ᴀᴍᴏᴜɴᴛ ᴘᴀɪᴅ:</b> ₹{price:.0f}\n\n"
-            f"<blockquote>⚠️ <i>ᴛʜɪs ɪɴᴠɪᴛᴇ ʟɪɴᴋ ᴄᴀɴ ᴏɴʟʏ ʙᴇ ᴊᴏɪɴᴇᴅ ᴏɴᴄᴇ. ᴏɴᴄᴇ ʏᴏᴜ ʜᴀᴠᴇ ᴊᴏɪɴᴇᴅ, ᴛʜᴇ ʟɪɴᴋ ᴡɪʟʟ ᴇxᴘɪʀᴇ ᴀɴᴅ ᴄᴀɴɴᴏᴛ ʙᴇ ᴜsᴇᴅ ᴀɢᴀɪɴ.</i></blockquote>"
-        )
+        if channels:
+            text = (
+                f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!</b></blockquote>\n\n"
+                f"<b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
+                f"<b>ᴅᴜʀᴀᴛɪᴏɴ:</b> {duration_label}\n"
+                f"<b>ᴀᴍᴏᴜɴᴛ ᴘᴀɪᴅ:</b> ₹{price:.0f}\n\n"
+                f"<blockquote>⚠️ <i>ᴛʜɪs ɪɴᴠɪᴛᴇ ʟɪɴᴋ ᴄᴀɴ ᴏɴʟʏ ʙᴇ ᴊᴏɪɴᴇᴅ ᴏɴᴄᴇ. ᴏɴᴄᴇ ʏᴏᴜ ʜᴀᴠᴇ ᴊᴏɪɴᴇᴅ, ᴛʜᴇ ʟɪɴᴋ ᴡɪʟʟ ᴇxᴘɪʀᴇ ᴀɴᴅ ᴄᴀɴɴᴏᴛ ʙᴇ ᴜsᴇᴅ ᴀɢᴀɪɴ.</i></blockquote>"
+            )
+        else:
+            # Bot is not admin in channel — links couldn't be generated
+            text = (
+                f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!</b></blockquote>\n\n"
+                f"<b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
+                f"<b>ᴅᴜʀᴀᴛɪᴏɴ:</b> {duration_label}\n"
+                f"<b>ᴀᴍᴏᴜɴᴛ ᴘᴀɪᴅ:</b> ₹{price:.0f}\n\n"
+                f"<blockquote>📩 <i>ʏᴏᴜʀ ᴄʜᴀɴɴᴇʟ ɪɴᴠɪᴛᴇ ʟɪɴᴋ ᴡɪʟʟ ʙᴇ sᴇɴᴛ ʙʏ ᴀᴅᴍɪɴ sʜᴏʀᴛʟʏ.\nᴘʟᴇᴀsᴇ ᴄᴏɴᴛᴀᴄᴛ sᴜᴘᴘᴏʀᴛ ɪғ ɴᴏᴛ ʀᴇᴄᴇɪᴠᴇᴅ ᴡɪᴛʜɪɴ 5 ᴍɪɴᴜᴛᴇs.</i></blockquote>"
+            )
+            # Alert admin to send link manually
+            logger.warning(
+                "Could not generate invite links for plan %s (user %d) — bot not admin in channel(s)",
+                plan['name'], user_id,
+            )
+
         activated_keyboard = subscription_activated_keyboard(channels) if channels else back_main_keyboard()
 
         # Notify admin about the purchase
