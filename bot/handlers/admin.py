@@ -901,6 +901,16 @@ async def handle_topup_amount(message: Message, state: FSMContext) -> None:
         )
     except Exception:
         pass
+    # Notify user
+    try:
+        await bot.send_message(
+            user_id,
+            f"💰 <b>+₹{amount:.0f} ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ</b>\n"
+            f"<b>ʙᴀʟᴀɴᴄᴇ: ₹{new_balance:.2f}</b>",
+            parse_mode=ParseMode.HTML,
+        )
+    except Exception:
+        pass
 
 
 # ── Penalty Wallet ────────────────────────────────────────────────────────────
@@ -962,6 +972,16 @@ async def handle_penalty_amount(message: Message, state: FSMContext) -> None:
             f"🆔 <b>ɪᴅ:</b> <code>{user_id}</code>\n"
             f"💸 <b>ᴅᴇᴅᴜᴄᴛᴇᴅ:</b> -₹{amount:.2f}\n"
             f"💼 <b>ɴᴇᴡ ʙᴀʟᴀɴᴄᴇ:</b> ₹{new_balance:.2f}",
+            parse_mode=ParseMode.HTML,
+        )
+    except Exception:
+        pass
+    # Notify user
+    try:
+        await bot.send_message(
+            user_id,
+            f"💸 <b>₹{amount:.0f} ᴅᴇᴅᴜᴄᴛᴇᴅ ғʀᴏᴍ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ</b>\n"
+            f"<b>ʙᴀʟᴀɴᴄᴇ: ₹{new_balance:.2f}</b>",
             parse_mode=ParseMode.HTML,
         )
     except Exception:

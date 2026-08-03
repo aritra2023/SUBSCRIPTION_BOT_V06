@@ -45,6 +45,7 @@ class SubscriptionDoc(TypedDict, total=False):
     end_date: datetime
     is_active: bool
     channels: list[str]
+    joined_channels: list[int]   # indices of channels the user has already joined
 
 
 class TransactionDoc(TypedDict, total=False):

@@ -119,19 +119,35 @@ def duration_keyboard(plan_name: str, durations: list[dict], demo_link: str = ""
     return builder.as_markup()
 
 
-def subscription_activated_keyboard(channels: list[str]) -> InlineKeyboardMarkup:
-    """Shown after subscription is activated — green join buttons + back."""
+def subscription_activated_keyboard(
+    channels: list[str],
+    joined: set[int] | None = None,
+) -> InlineKeyboardMarkup:
+    """Shown after subscription is activated — join buttons (red once used) + back."""
     builder = InlineKeyboardBuilder()
-    for i, link in enumerate(channels, 1):
+    joined = joined or set()
+    for i, _link in enumerate(channels):
+        num = i + 1
+        if i in joined:
+            text = (
+                f"🔴 ᴄʜᴀɴɴᴇʟ {num} — ᴀʟʀᴇᴀᴅʏ ᴊᴏɪɴᴇᴅ"
+                if len(channels) > 1
+                else "🔴 ᴀʟʀᴇᴀᴅʏ ᴊᴏɪɴᴇᴅ"
+            )
+        else:
+            text = (
+                f"➲ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ {num}"
+                if len(channels) > 1
+                else "➲ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ"
+            )
         builder.row(
             InlineKeyboardButton(
-                text=f"➲ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ {i}" if len(channels) > 1 else "➲ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ",
-                url=link,
-                style="success",
+                text=text,
+                callback_data=f"join_ch:{i}",
             )
         )
     builder.row(
-        InlineKeyboardButton(text="« ʙᴀᴄᴋ ᴛᴏ ᴍᴇɴᴜ", callback_data="back_main", style="primary"),
+        InlineKeyboardButton(text="« ʙᴀᴄᴋ ᴛᴏ ᴍᴇɴᴜ", callback_data="back_main"),
     )
     return builder.as_markup()
 

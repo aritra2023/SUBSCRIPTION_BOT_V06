@@ -25,6 +25,7 @@ from services.subscription import (
     get_active_subscription,
     get_plan,
     get_user,
+    mark_channel_joined,
     purchase_subscription,
 )
 from utils.helpers import format_date, days_remaining, to_small_caps
@@ -324,6 +325,58 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
         pass
 
     await callback.answer()
+
+
+# ── Join Channel ──────────────────────────────────────────────────────────────
+
+@router.callback_query(lambda c: c.data and c.data.startswith("join_ch:"))
+async def cb_join_channel(callback: CallbackQuery) -> None:
+    try:
+        idx = int(callback.data.split(":")[1])
+    except (IndexError, ValueError):
+        await callback.answer()
+        return
+
+    user_id = callback.from_user.id if callback.from_user else 0
+    sub = await get_active_subscription(user_id)
+
+    if not sub:
+        await callback.answer(
+            "❌ ɴᴏ ᴀᴄᴛɪᴠᴇ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ғᴏᴜɴᴅ.", show_alert=True
+        )
+        return
+
+    channels = sub.get("channels", [])
+    if idx >= len(channels):
+        await callback.answer("❌ ɪɴᴠᴀʟɪᴅ ᴄʜᴀɴɴᴇʟ.", show_alert=True)
+        return
+
+    joined_set: set[int] = set(sub.get("joined_channels", []))
+
+    if idx in joined_set:
+        # Already joined — show expired-link popup
+        await callback.answer(
+            "🔗 ʟɪɴᴋ ᴇxᴘɪʀᴇᴅ\n\n"
+            "ʏᴏᴜ ʜᴀᴠᴇ ᴀʟʀᴇᴀᴅʏ ᴊᴏɪɴᴇᴅ ᴛʜɪs ᴄʜᴀɴɴᴇʟ.\n"
+            "ᴇᴀᴄʜ ɪɴᴠɪᴛᴇ ʟɪɴᴋ ᴄᴀɴ ᴏɴʟʏ ʙᴇ ᴜsᴇᴅ ᴏɴᴄᴇ.",
+            show_alert=True,
+        )
+        return
+
+    # Mark as joined and update button to red
+    await mark_channel_joined(user_id, idx)
+    joined_set.add(idx)
+
+    new_kb = subscription_activated_keyboard(channels, joined_set)
+    try:
+        if callback.message:
+            await callback.message.edit_reply_markup(reply_markup=new_kb)
+    except Exception:
+        pass
+
+    # Open the invite link
+    link = channels[idx]
+    await callback.answer(url=link)
 
 
 # ── View Plan ─────────────────────────────────────────────────────────────────

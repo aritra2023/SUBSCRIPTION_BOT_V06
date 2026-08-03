@@ -258,6 +258,14 @@ async def topup_wallet(user_id: int, amount: float, description: str = "Admin to
     await db.transactions.insert_one(dict(txn))
 
 
+async def mark_channel_joined(user_id: int, channel_idx: int) -> None:
+    """Record that the user has tapped the join button for channel at given index."""
+    await get_db().subscriptions.update_one(
+        {"user_id": user_id, "is_active": True},
+        {"$addToSet": {"joined_channels": channel_idx}},
+    )
+
+
 async def deduct_wallet(user_id: int, amount: float, description: str = "Admin penalty") -> None:
     """Deduct balance from a user's wallet (penalty / correction)."""
     db = get_db()
@@ -380,6 +388,18 @@ async def process_auto_renewals(bot_instance=None) -> list[dict]:
                 "status": "completed",
             }
             await db.transactions.insert_one(dict(txn))
+            # Notify user about auto-renewal debit
+            if bot_instance:
+                new_bal = (user.get("wallet_balance", 0.0) or 0.0) - price
+                try:
+                    await bot_instance.send_message(
+                        user_id,
+                        f"🔄 <b>ᴀᴜᴛᴏ-ʀᴇɴᴇᴡᴀʟ: ₹{price:.0f} ᴅᴇᴅᴜᴄᴛᴇᴅ</b>\n"
+                        f"<b>ʙᴀʟᴀɴᴄᴇ: ₹{new_bal:.2f}</b>",
+                        parse_mode="HTML",
+                    )
+                except Exception:
+                    pass
             results.append({
                 "user_id": user_id,
                 "status": "renewed",
