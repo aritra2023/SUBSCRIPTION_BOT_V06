@@ -123,27 +123,30 @@ def subscription_activated_keyboard(
     channels: list[str],
     joined: set[int] | None = None,
 ) -> InlineKeyboardMarkup:
-    """Shown after subscription is activated — join buttons (red once used) + back."""
+    """Shown after subscription is activated — green join buttons, red once used."""
     builder = InlineKeyboardBuilder()
     joined = joined or set()
     for i, _link in enumerate(channels):
         num = i + 1
         if i in joined:
             text = (
-                f"🔴 ᴄʜᴀɴɴᴇʟ {num} — ᴀʟʀᴇᴀᴅʏ ᴊᴏɪɴᴇᴅ"
+                f"ᴄʜᴀɴɴᴇʟ {num} — ᴀʟʀᴇᴀᴅʏ ᴊᴏɪɴᴇᴅ"
                 if len(channels) > 1
-                else "🔴 ᴀʟʀᴇᴀᴅʏ ᴊᴏɪɴᴇᴅ"
+                else "ᴀʟʀᴇᴀᴅʏ ᴊᴏɪɴᴇᴅ"
             )
+            style = "danger"   # red
         else:
             text = (
                 f"➲ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ {num}"
                 if len(channels) > 1
                 else "➲ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ"
             )
+            style = "success"  # green
         builder.row(
             InlineKeyboardButton(
                 text=text,
                 callback_data=f"join_ch:{i}",
+                style=style,
             )
         )
     builder.row(
