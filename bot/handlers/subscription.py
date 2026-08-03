@@ -364,6 +364,7 @@ async def cb_join_channel(callback: CallbackQuery) -> None:
         return
 
     # Mark as joined and update button to red
+    link = channels[idx]
     await mark_channel_joined(user_id, idx)
     joined_set.add(idx)
 
@@ -374,9 +375,20 @@ async def cb_join_channel(callback: CallbackQuery) -> None:
     except Exception:
         pass
 
-    # Open the invite link
-    link = channels[idx]
-    await callback.answer(url=link)
+    # Send the invite link as a tappable message
+    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+    link_kb = InlineKeyboardMarkup(inline_keyboard=[[
+        InlineKeyboardButton(text="➲ ᴏᴘᴇɴ ᴄʜᴀɴɴᴇʟ", url=link)
+    ]])
+    try:
+        await callback.message.answer(
+            "<b>ᴛᴀᴘ ʙᴇʟᴏᴡ ᴛᴏ ᴊᴏɪɴ ʏᴏᴜʀ ᴄʜᴀɴɴᴇʟ:</b>",
+            parse_mode=ParseMode.HTML,
+            reply_markup=link_kb,
+        )
+    except Exception:
+        pass
+    await callback.answer()
 
 
 # ── View Plan ─────────────────────────────────────────────────────────────────
