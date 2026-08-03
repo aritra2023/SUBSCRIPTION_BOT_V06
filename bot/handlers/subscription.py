@@ -381,10 +381,37 @@ async def cb_join_channel(callback: CallbackQuery) -> None:
         )
         return
 
-    # Normalize URL — Telegram rejects buttons without https://
-    link = channels[idx]
-    if link.startswith("t.me"):
-        link = "https://" + link
+    # Resolve the link — stored value may be a raw channel ID (not a URL)
+    raw = channels[idx]
+    if raw.startswith("t.me"):
+        raw = "https://" + raw
+
+    if raw.startswith("https://"):
+        # Already a valid invite link
+        link = raw
+    else:
+        # Stored value is a channel ID — generate a fresh one-time invite link
+        try:
+            try:
+                chat_id_gen: int | str = int(raw.strip())
+            except ValueError:
+                chat_id_gen = raw.strip()
+            link_obj = await bot.create_chat_invite_link(chat_id_gen, member_limit=1)
+            link = link_obj.invite_link
+            # Update stored subscription so future taps use the fresh link
+            from database.db import db
+            await db.subscriptions.update_one(
+                {"user_id": user_id},
+                {"$set": {f"channels.{idx}": link}},
+            )
+        except Exception as e:
+            logger.error("Could not generate invite link for channel %s: %s", raw, e)
+            await callback.answer(
+                "❌ ᴄᴏᴜʟᴅ ɴᴏᴛ ɢᴇɴᴇʀᴀᴛᴇ ɪɴᴠɪᴛᴇ ʟɪɴᴋ.\n\n"
+                "ᴍᴀᴋᴇ sᴜʀᴇ ᴛʜᴇ ʙᴏᴛ ɪs ᴀɴ ᴀᴅᴍɪɴ ɪɴ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ᴡɪᴛʜ ɪɴᴠɪᴛᴇ ᴘᴇʀᴍɪssɪᴏɴ.",
+                show_alert=True,
+            )
+            return
 
     await mark_channel_joined(user_id, idx)
     joined_set.add(idx)
