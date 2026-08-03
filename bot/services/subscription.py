@@ -279,6 +279,21 @@ async def deduct_wallet(user_id: int, amount: float, description: str = "Admin p
 
 # ── Auto-Renew ────────────────────────────────────────────────────────────────
 
+async def _kick_from_channels(bot_instance, user_id: int, channels: list[str]) -> None:
+    """Ban then immediately unban to kick user from each channel."""
+    for ch in channels:
+        try:
+            chat_id: int | str = int(str(ch).strip())
+        except ValueError:
+            chat_id = str(ch).strip()
+        try:
+            await bot_instance.ban_chat_member(chat_id, user_id)
+            await bot_instance.unban_chat_member(chat_id, user_id)
+            logger.info("Kicked user %d from channel %s", user_id, ch)
+        except Exception as e:
+            logger.warning("Could not kick user %d from channel %s: %s", user_id, ch, e)
+
+
 async def process_auto_renewals(bot_instance=None) -> list[dict]:
     db = get_db()
     now = now_utc()
@@ -297,6 +312,8 @@ async def process_auto_renewals(bot_instance=None) -> list[dict]:
             await db.subscriptions.update_one(
                 {"user_id": user_id}, {"$set": {"is_active": False}}
             )
+            if bot_instance:
+                await _kick_from_channels(bot_instance, user_id, sub.get("channels", []))
             continue
 
         plan = await get_plan(plan_name) if plan_name else None
@@ -331,6 +348,8 @@ async def process_auto_renewals(bot_instance=None) -> list[dict]:
             await db.subscriptions.update_one(
                 {"user_id": user_id}, {"$set": {"is_active": False}}
             )
+            if bot_instance:
+                await _kick_from_channels(bot_instance, user_id, sub.get("channels", []))
             results.append({"user_id": user_id, "status": "insufficient_funds", "plan": plan, "price_paid": 0})
             logger.info("Auto-renew failed (low balance) for user %d", user_id)
         else:

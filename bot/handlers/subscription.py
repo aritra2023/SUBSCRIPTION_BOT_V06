@@ -249,11 +249,20 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
     raw_channels = plan.get("channels", [])
     invite_links: list[str] = []
     for ch in raw_channels:
+        # Parse channel ID — numeric strings must be int for Telegram API
         try:
-            link_obj = await bot.create_chat_invite_link(ch, member_limit=1)
+            chat_id: int | str = int(str(ch).strip())
+        except ValueError:
+            chat_id = str(ch).strip()
+        try:
+            link_obj = await bot.create_chat_invite_link(chat_id, member_limit=1)
             invite_links.append(link_obj.invite_link)
-        except Exception:
-            invite_links.append(str(ch))  # fallback to stored value
+        except Exception as e:
+            logger.warning("Failed to create invite link for channel %s: %s", ch, e)
+            # Fallback: only use stored value if it looks like a valid URL
+            ch_str = str(ch).strip()
+            if ch_str.startswith("http") or ch_str.startswith("t.me"):
+                invite_links.append(ch_str)
 
     success = await purchase_subscription(user_id, plan, days, invite_links=invite_links)
 

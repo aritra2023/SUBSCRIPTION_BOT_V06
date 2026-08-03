@@ -47,7 +47,7 @@ async def _auto_renew_loop() -> None:
     await asyncio.sleep(60)
     while True:
         try:
-            results = await process_auto_renewals()
+            results = await process_auto_renewals(bot_instance=bot)
             for r in results:
                 uid = r["user_id"]
                 status = r["status"]
