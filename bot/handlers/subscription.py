@@ -371,89 +371,53 @@ async def cb_join_channel(callback: CallbackQuery) -> None:
 
     joined_set: set[int] = set(sub.get("joined_channels", []))
 
-    if idx in joined_set:
-        # Already joined — show expired-link popup
+    # Always generate a fresh invite link — never block the user
+    plan = await get_plan(sub.get("plan_name", ""))
+    raw_ch = (plan or {}).get("channels", [None])[idx] if plan and idx < len((plan or {}).get("channels", [])) else None
+
+    link: str | None = None
+    if raw_ch:
+        try:
+            try:
+                chat_id_gen: int | str = int(str(raw_ch).strip())
+            except ValueError:
+                chat_id_gen = str(raw_ch).strip()
+            link_obj = await bot.create_chat_invite_link(chat_id_gen, member_limit=1)
+            link = link_obj.invite_link
+        except Exception as e:
+            logger.error("Could not generate fresh invite link for channel %s: %s", raw_ch, e)
+
+    if not link:
         await callback.answer(
-            "🔗 ʟɪɴᴋ ᴇxᴘɪʀᴇᴅ\n\n"
-            "ʏᴏᴜ ʜᴀᴠᴇ ᴀʟʀᴇᴀᴅʏ ᴊᴏɪɴᴇᴅ ᴛʜɪs ᴄʜᴀɴɴᴇʟ.\n"
-            "ᴇᴀᴄʜ ɪɴᴠɪᴛᴇ ʟɪɴᴋ ᴄᴀɴ ᴏɴʟʏ ʙᴇ ᴜsᴇᴅ ᴏɴᴄᴇ.",
+            "❌ ʟɪɴᴋ ɢᴇɴᴇʀᴀᴛɪᴏɴ ғᴀɪʟᴇᴅ.\n\n"
+            "ᴍᴀᴋᴇ sᴜʀᴇ ᴛʜᴇ ʙᴏᴛ ɪs ᴀᴅᴍɪɴ ɪɴ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ᴡɪᴛʜ ɪɴᴠɪᴛᴇ ᴘᴇʀᴍɪssɪᴏɴ.",
             show_alert=True,
         )
         return
 
-    # Resolve the link — stored value may be a raw channel ID (not a URL)
-    raw = channels[idx]
-    if raw.startswith("t.me"):
-        raw = "https://" + raw
-
-    if raw.startswith("https://"):
-        # Already a valid invite link
-        link = raw
-    else:
-        # Stored value is a channel ID — generate a fresh one-time invite link
-        try:
-            try:
-                chat_id_gen: int | str = int(raw.strip())
-            except ValueError:
-                chat_id_gen = raw.strip()
-            link_obj = await bot.create_chat_invite_link(chat_id_gen, member_limit=1)
-            link = link_obj.invite_link
-            # Update stored subscription so future taps use the fresh link
-            from database.db import db
-            await db.subscriptions.update_one(
-                {"user_id": user_id},
-                {"$set": {f"channels.{idx}": link}},
-            )
-        except Exception as e:
-            logger.error("Could not generate invite link for channel %s: %s", raw, e)
-            await callback.answer(
-                "❌ ᴄᴏᴜʟᴅ ɴᴏᴛ ɢᴇɴᴇʀᴀᴛᴇ ɪɴᴠɪᴛᴇ ʟɪɴᴋ.\n\n"
-                "ᴍᴀᴋᴇ sᴜʀᴇ ᴛʜᴇ ʙᴏᴛ ɪs ᴀɴ ᴀᴅᴍɪɴ ɪɴ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ᴡɪᴛʜ ɪɴᴠɪᴛᴇ ᴘᴇʀᴍɪssɪᴏɴ.",
-                show_alert=True,
-            )
-            return
-
-    await mark_channel_joined(user_id, idx)
+    # Edit the current message to show the link inline
     joined_set.add(idx)
+    await mark_channel_joined(user_id, idx)
 
-    # Send the invite link as plain text so user can tap it directly
+    new_text = (
+        f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!</b></blockquote>\n\n"
+        f"🔗 <b>ᴄʜᴀɴɴᴇʟ ʟɪɴᴋ:</b>\n{link}\n\n"
+        f"<i>ᴛᴀᴘ ᴛʜᴇ ʟɪɴᴋ ᴀʙᴏᴠᴇ ᴛᴏ ᴊᴏɪɴ.</i>"
+    )
+    from aiogram.utils.keyboard import InlineKeyboardBuilder as IKB
+    done_kb = IKB()
+    done_kb.button(text="« ʙᴀᴄᴋ ᴛᴏ ᴍᴇɴᴜ", callback_data="back_main")
     try:
-        await bot.send_message(
-            user_id,
-            f"🔗 <b>ʏᴏᴜʀ ɪɴᴠɪᴛᴇ ʟɪɴᴋ:</b>\n\n{link}\n\n"
-            "<i>⚠️ ᴛʜɪs ʟɪɴᴋ ᴄᴀɴ ᴏɴʟʏ ʙᴇ ᴜsᴇᴅ ᴏɴᴄᴇ.</i>",
-            parse_mode=ParseMode.HTML,
-        )
+        if callback.message and callback.message.photo:
+            await callback.message.edit_caption(caption=new_text, parse_mode=ParseMode.HTML, reply_markup=done_kb.as_markup())
+        elif callback.message:
+            await callback.message.edit_text(text=new_text, parse_mode=ParseMode.HTML, reply_markup=done_kb.as_markup())
     except Exception as e:
-        logger.error("Could not send invite link to user %d: %s", user_id, e)
-        await callback.answer("❌ ғᴀɪʟᴇᴅ ᴛᴏ sᴇɴᴅ ʟɪɴᴋ. ᴄᴏɴᴛᴀᴄᴛ sᴜᴘᴘᴏʀᴛ.", show_alert=True)
-        return
-
-    # Update button to ✓ ᴊᴏɪɴᴇᴅ
-    new_kb = subscription_activated_keyboard(channels, joined_set)
-    try:
-        if callback.message:
-            await callback.message.edit_reply_markup(reply_markup=new_kb)
-    except Exception as e:
-        logger.warning("Could not update join button: %s", e)
+        logger.warning("Could not edit message with link: %s", e)
+        # Fallback: send as new message
+        await bot.send_message(user_id, f"🔗 <b>ᴄʜᴀɴɴᴇʟ ʟɪɴᴋ:</b>\n{link}", parse_mode=ParseMode.HTML)
 
     await callback.answer()
-
-    # Revoke the invite link so it can't be reused
-    plan = await get_plan(sub.get("plan_name", ""))
-    if plan:
-        raw_channels = plan.get("channels", [])
-        if idx < len(raw_channels):
-            try:
-                ch = raw_channels[idx]
-                try:
-                    chat_id: int | str = int(str(ch).strip())
-                except ValueError:
-                    chat_id = str(ch).strip()
-                await bot.revoke_chat_invite_link(chat_id, link)
-                logger.info("Revoked invite link for channel %s after user %d joined", ch, user_id)
-            except Exception as e:
-                logger.warning("Could not revoke invite link for channel %s: %s", raw_channels[idx], e)
 
 
 # ── View Plan ─────────────────────────────────────────────────────────────────
