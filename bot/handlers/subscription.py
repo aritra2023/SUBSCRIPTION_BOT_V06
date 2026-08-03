@@ -262,7 +262,9 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
             logger.warning("Failed to create invite link for channel %s: %s", ch, e)
             # Fallback: only use stored value if it looks like a valid URL
             ch_str = str(ch).strip()
-            if ch_str.startswith("http") or ch_str.startswith("t.me"):
+            if ch_str.startswith("t.me"):
+                ch_str = "https://" + ch_str
+            if ch_str.startswith("http"):
                 invite_links.append(ch_str)
 
     success = await purchase_subscription(user_id, plan, days, invite_links=invite_links)
@@ -365,6 +367,10 @@ async def cb_join_channel(callback: CallbackQuery) -> None:
 
     # Mark as joined and update button to red
     link = channels[idx]
+    # Normalize URL — Telegram rejects buttons without https://
+    if link.startswith("t.me"):
+        link = "https://" + link
+
     await mark_channel_joined(user_id, idx)
     joined_set.add(idx)
 
@@ -372,10 +378,10 @@ async def cb_join_channel(callback: CallbackQuery) -> None:
     try:
         if callback.message:
             await callback.message.edit_reply_markup(reply_markup=new_kb)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("Could not update join button: %s", e)
 
-    # Send the invite link as a tappable message
+    # Send the invite link as a tappable button message
     from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
     link_kb = InlineKeyboardMarkup(inline_keyboard=[[
         InlineKeyboardButton(text="➲ ᴏᴘᴇɴ ᴄʜᴀɴɴᴇʟ", url=link)
@@ -386,8 +392,8 @@ async def cb_join_channel(callback: CallbackQuery) -> None:
             parse_mode=ParseMode.HTML,
             reply_markup=link_kb,
         )
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error("Could not send channel link to user %d: %s", user_id, e)
     await callback.answer()
 
 
