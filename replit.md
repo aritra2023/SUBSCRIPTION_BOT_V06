@@ -1,6 +1,6 @@
 # Flix Verse Premium Bot
 
-A production-grade Telegram bot for managing **Flix Verse** premium subscriptions.
+A production-grade Telegram bot for managing Flix Verse premium subscriptions.
 
 ## Stack
 
@@ -13,25 +13,17 @@ A production-grade Telegram bot for managing **Flix Verse** premium subscription
 
 The bot runs via the **"Flix Verse Telegram Bot"** workflow:
 
-```bash
+```
 cd bot && python main.py
 ```
 
-## Required Secrets
+## Required Secrets / Environment Variables
 
-Set these in Replit Secrets (already configured):
-
-| Secret      | Description                         |
-|-------------|-------------------------------------|
-| `BOT_TOKEN` | Telegram bot token from @BotFather  |
-| `ADMIN_ID`  | Telegram numeric user ID            |
-| `MONGO_URI` | MongoDB connection string           |
-
-## Install Dependencies
-
-```bash
-cd bot && pip install -r requirements.txt
-```
+| Key | Type | Description |
+|---|---|---|
+| `BOT_TOKEN` | Secret | Telegram bot token from BotFather |
+| `MONGO_URI` | Secret | MongoDB connection string |
+| `ADMIN_ID` | Env var (shared) | Your Telegram numeric user ID |
 
 ## Project Structure
 
@@ -42,20 +34,18 @@ bot/
 ├── filters/           # Admin-only filter
 ├── services/          # Business logic (subscriptions, auto-renewals)
 ├── database/          # MongoDB connection & models
-├── utils/             # Utility functions
-├── config.py          # Environment config
+├── utils/             # Helper functions
+├── config.py          # Loads env vars
 ├── loader.py          # Bot & dispatcher instances
 └── main.py            # Entry point
 ```
 
 ## Admin Commands
 
-| Command      | Description                            |
-|--------------|----------------------------------------|
-| `/admin`     | Open the admin panel                   |
-| `/addplan`   | Add a new subscription plan            |
-| `/topup`     | Top up a user's wallet balance         |
+| Command | Description |
+|---|---|
+| `/admin` | Open the admin panel |
+| `/addplan` | Add a new subscription plan |
+| `/topup` | Top up a user's wallet balance |
 
-## User Preferences
-
-- Keep the existing project structure and stack
+## User preferences
