@@ -478,18 +478,27 @@ async def cb_admin_plan_ch_add(callback: CallbackQuery, state: FSMContext) -> No
     await callback.answer()
 
 
-@router.message(StateFilter(AdminStates.editplan_ch_add), F.text)
+@router.message(StateFilter(AdminStates.editplan_ch_add))
 async def handle_editplan_ch_add(message: Message, state: FSMContext) -> None:
-    link = (message.text or "").strip()
+    # Accept forwarded channel message OR manually typed ID/@username
+    if message.forward_from_chat:
+        channel_id = str(message.forward_from_chat.id)
+        channel_label = message.forward_from_chat.title or channel_id
+    else:
+        channel_id = (message.text or "").strip()
+        channel_label = channel_id
+        if not channel_id:
+            await message.answer("⚠️ sᴇɴᴅ ᴀ ᴄʜᴀɴɴᴇʟ ɪᴅ, @ᴜsᴇʀɴᴀᴍᴇ, ᴏʀ ғᴏʀᴡᴀʀᴅ ᴀ ᴍᴇssᴀɢᴇ ғʀᴏᴍ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ.")
+            return
     data = await state.get_data()
     plan_name = data.get("editing_plan", "")
     plan = await get_plan(plan_name)
     channels: list[str] = list((plan or {}).get("channels", []) or [])
-    channels.append(link)
+    channels.append(channel_id)
     await update_plan_fields(plan_name, {"channels": channels})
     await state.clear()
     await message.answer(
-        f"✅ ᴄʜᴀɴɴᴇʟ ᴀᴅᴅᴇᴅ. ᴛᴏᴛᴀʟ: {len(channels)}",
+        f"✅ ᴄʜᴀɴɴᴇʟ ᴀᴅᴅᴇᴅ: <b>{channel_label}</b>\nᴛᴏᴛᴀʟ: {len(channels)}",
         parse_mode=ParseMode.HTML,
         reply_markup=admin_panel_keyboard(),
     )
@@ -813,11 +822,18 @@ async def handle_addplan_channels(message: Message, state: FSMContext) -> None:
             reply_markup=admin_panel_keyboard(),
         )
     else:
-        channels.append(text)
+        # Accept forwarded channel message OR manually typed ID/@username
+        if message.forward_from_chat:
+            channel_id = str(message.forward_from_chat.id)
+            channel_label = message.forward_from_chat.title or channel_id
+        else:
+            channel_id = text
+            channel_label = text
+        channels.append(channel_id)
         await state.update_data(channels=channels)
         await message.answer(
-            f"✅ ᴄʜᴀɴɴᴇʟ ᴀᴅᴅᴇᴅ. <i>ᴛᴏᴛᴀʟ: {len(channels)}</i>\n\n"
-            "sᴇɴᴅ ᴀɴᴏᴛʜᴇʀ <b>ᴄʜᴀɴɴᴇʟ ɪᴅ / @ᴜsᴇʀɴᴀᴍᴇ</b> ᴏʀ <code>done</code> ᴛᴏ ғɪɴɪsʜ.\n\n"
+            f"✅ ᴄʜᴀɴɴᴇʟ ᴀᴅᴅᴇᴅ: <b>{channel_label}</b> <i>ᴛᴏᴛᴀʟ: {len(channels)}</i>\n\n"
+            "sᴇɴᴅ ᴀɴᴏᴛʜᴇʀ ᴄʜᴀɴɴᴇʟ ɪᴅ / @ᴜsᴇʀɴᴀᴍᴇ / ғᴏʀᴡᴀʀᴅᴇᴅ ᴍsɢ ᴏʀ <code>done</code> ᴛᴏ ғɪɴɪsʜ.\n\n"
             "<blockquote>⚠️ <i>ʙᴏᴛ ᴍᴜsᴛ ʙᴇ ᴀᴅᴅᴇᴅ ᴀs ᴀɴ <b>ᴀᴅᴍɪɴ</b> ɪɴ ᴇᴀᴄʜ ᴄʜᴀɴɴᴇʟ.</i></blockquote>",
             parse_mode=ParseMode.HTML,
             reply_markup=cancel_keyboard(),
