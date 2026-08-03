@@ -82,10 +82,13 @@ async def cb_buy_category_channel(callback: CallbackQuery) -> None:
         await callback.answer("⚠️ ɴᴏ ᴘʟᴀɴs ᴀᴠᴀɪʟᴀʙʟᴇ ʀɪɢʜᴛ ɴᴏᴡ.", show_alert=True)
         return
 
+    plan_list = "".join(
+        f"<blockquote>✦ <b>{p['display_name']}</b></blockquote>\n"
+        for p in plans
+    )
     text = (
         "<blockquote>◍ <b>sᴇʟᴇᴄᴛ ᴄʜᴀɴɴᴇʟs ғᴏʀ ᴘʀᴇᴍɪᴜᴍ</b></blockquote>\n\n"
-        "<i>➲ ᴄʜᴏᴏsᴇ ᴛʜᴇ ᴄʜᴀɴɴᴇʟs ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ sᴜʙsᴄʀɪʙᴇ ᴛᴏ:</i>\n\n"
-        "<i>ʜɪ ᴛʜᴇʀᴇ! ᴛʜᴇʀᴇ ᴀʀᴇ ǫᴜɪᴛᴇ ᴀ ғᴇᴡ ᴘʀᴇᴍɪᴜᴍ ᴄʜᴀɴɴᴇʟs ᴀᴠᴀɪʟᴀʙʟᴇ - ɢᴇᴛ ɪɴsᴛᴀɴᴛ ᴀᴄᴄᴇss ᴛᴏ ᴇxᴄʟᴜsɪᴠᴇ ᴄᴏɴᴛᴇɴᴛ ᴡɪᴛʜᴏᴜᴛ ᴀᴅs ᴀɴᴅ ᴜɴʟɪᴍɪᴛᴇᴅ ɪɴᴠɪᴛᴇ ʟɪɴᴋs.</i>\n\n"
+        f"{plan_list}\n"
         "<blockquote>➲ <b>ᴛɪᴘ:</b> ᴄʜᴏᴏsᴇ <b>ᴄᴏᴍʙᴏ</b> ᴏʀ <b>ᴍᴜʟᴛɪᴘʟᴇ ᴄʜᴀɴɴᴇʟs</b> ᴛᴏ ɢᴇᴛ ᴜᴘ ᴛᴏ <b>60% ᴏғғ!</b>\n"
         "ᴇᴀʀɴ ᴘʀᴇᴠᴇʀsᴇ ᴘᴏɪɴᴛs ᴏɴ ᴇᴠᴇʀʏ ᴘᴜʀᴄʜᴀsᴇ!</blockquote>"
     )
@@ -246,28 +249,31 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
         await callback.answer("ᴘʟᴀɴ ɴᴏᴛ ғᴏᴜɴᴅ.", show_alert=True)
         return
 
-    # Generate fresh one-time invite links before purchase
-    raw_channels = plan.get("channels", [])
-    invite_links: list[str] = []
-    for ch in raw_channels:
-        # Parse channel ID — numeric strings must be int for Telegram API
-        try:
-            chat_id: int | str = int(str(ch).strip())
-        except ValueError:
-            chat_id = str(ch).strip()
-        try:
-            link_obj = await bot.create_chat_invite_link(chat_id, member_limit=1)
-            invite_links.append(link_obj.invite_link)
-        except Exception as e:
-            logger.warning("Failed to create invite link for channel %s: %s", ch, e)
-            # Fallback: only use stored value if it looks like a valid URL
-            ch_str = str(ch).strip()
-            if ch_str.startswith("t.me"):
-                ch_str = "https://" + ch_str
-            if ch_str.startswith("http"):
-                invite_links.append(ch_str)
+    # Check if this is a renewal (user already has active sub for same plan)
+    existing_sub = await get_active_subscription(user_id)
+    is_renewal = existing_sub and existing_sub.get("plan_name") == plan["name"]
 
-    success = await purchase_subscription(user_id, plan, days, invite_links=invite_links)
+    # Only generate fresh invite links for new purchases
+    invite_links: list[str] = []
+    if not is_renewal:
+        raw_channels = plan.get("channels", [])
+        for ch in raw_channels:
+            try:
+                chat_id: int | str = int(str(ch).strip())
+            except ValueError:
+                chat_id = str(ch).strip()
+            try:
+                link_obj = await bot.create_chat_invite_link(chat_id, member_limit=1)
+                invite_links.append(link_obj.invite_link)
+            except Exception as e:
+                logger.warning("Failed to create invite link for channel %s: %s", ch, e)
+                ch_str = str(ch).strip()
+                if ch_str.startswith("t.me"):
+                    ch_str = "https://" + ch_str
+                if ch_str.startswith("http"):
+                    invite_links.append(ch_str)
+
+    success = await purchase_subscription(user_id, plan, days, invite_links=invite_links if not is_renewal else None)
 
     if success:
         durations = plan.get("durations", [])
@@ -275,9 +281,17 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
         duration_label = tier["label"] if tier else f"{days} ᴅᴀʏs"
         price = tier["price"] if tier else plan.get("price", 0)
 
-        channels = invite_links
-
-        if channels:
+        if is_renewal:
+            # Renewal — show extended duration, no channel link
+            text = (
+                f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴇxᴛᴇɴᴅᴇᴅ!</b></blockquote>\n\n"
+                f"<b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
+                f"<b>ᴀᴅᴅᴇᴅ:</b> {duration_label}\n"
+                f"<b>ᴀᴍᴏᴜɴᴛ ᴘᴀɪᴅ:</b> ₹{price:.0f}\n\n"
+                f"<blockquote>ℹ️ <i>ʏᴏᴜʀ ᴅᴜʀᴀᴛɪᴏɴ ʜᴀs ʙᴇᴇɴ ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ᴇxɪsᴛɪɴɢ sᴜʙsᴄʀɪᴘᴛɪᴏɴ. ʏᴏᴜ ᴀʟʀᴇᴀᴅʏ ʜᴀᴠᴇ ᴄʜᴀɴɴᴇʟ ᴀᴄᴄᴇss.</i></blockquote>"
+            )
+            activated_keyboard = back_main_keyboard()
+        elif invite_links:
             text = (
                 f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!</b></blockquote>\n\n"
                 f"<b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
@@ -285,8 +299,8 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
                 f"<b>ᴀᴍᴏᴜɴᴛ ᴘᴀɪᴅ:</b> ₹{price:.0f}\n\n"
                 f"<blockquote>⚠️ <i>ᴛʜɪs ɪɴᴠɪᴛᴇ ʟɪɴᴋ ᴄᴀɴ ᴏɴʟʏ ʙᴇ ᴊᴏɪɴᴇᴅ ᴏɴᴄᴇ. ᴏɴᴄᴇ ʏᴏᴜ ʜᴀᴠᴇ ᴊᴏɪɴᴇᴅ, ᴛʜᴇ ʟɪɴᴋ ᴡɪʟʟ ᴇxᴘɪʀᴇ ᴀɴᴅ ᴄᴀɴɴᴏᴛ ʙᴇ ᴜsᴇᴅ ᴀɢᴀɪɴ.</i></blockquote>"
             )
+            activated_keyboard = subscription_activated_keyboard(invite_links)
         else:
-            # Bot is not admin in channel — links couldn't be generated
             text = (
                 f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!</b></blockquote>\n\n"
                 f"<b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
@@ -294,13 +308,8 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
                 f"<b>ᴀᴍᴏᴜɴᴛ ᴘᴀɪᴅ:</b> ₹{price:.0f}\n\n"
                 f"<blockquote>📩 <i>ʏᴏᴜʀ ᴄʜᴀɴɴᴇʟ ɪɴᴠɪᴛᴇ ʟɪɴᴋ ᴡɪʟʟ ʙᴇ sᴇɴᴛ ʙʏ ᴀᴅᴍɪɴ sʜᴏʀᴛʟʏ.\nᴘʟᴇᴀsᴇ ᴄᴏɴᴛᴀᴄᴛ sᴜᴘᴘᴏʀᴛ ɪғ ɴᴏᴛ ʀᴇᴄᴇɪᴠᴇᴅ ᴡɪᴛʜɪɴ 5 ᴍɪɴᴜᴛᴇs.</i></blockquote>"
             )
-            # Alert admin to send link manually
-            logger.warning(
-                "Could not generate invite links for plan %s (user %d) — bot not admin in channel(s)",
-                plan['name'], user_id,
-            )
-
-        activated_keyboard = subscription_activated_keyboard(channels) if channels else back_main_keyboard()
+            logger.warning("Could not generate invite links for plan %s (user %d)", plan['name'], user_id)
+            activated_keyboard = back_main_keyboard()
 
         # Notify admin about the purchase
         fu = callback.from_user

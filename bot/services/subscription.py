@@ -165,25 +165,43 @@ async def purchase_subscription(
         return False
 
     now = now_utc()
-    end_date = now + timedelta(days=duration_days)
+
+    # If user already has an active subscription for the same plan, extend it
+    existing = await db.subscriptions.find_one(
+        {"user_id": user_id, "is_active": True, "end_date": {"$gt": now}},
+        {"_id": 0},
+    )
+    is_renewal = existing and existing.get("plan_name") == plan["name"]
+
+    if is_renewal:
+        # Extend from existing end_date
+        base = existing["end_date"]
+        if base.tzinfo is None:
+            base = base.replace(tzinfo=timezone.utc)
+        end_date = base + timedelta(days=duration_days)
+    else:
+        end_date = now + timedelta(days=duration_days)
 
     await db.users.update_one(
         {"user_id": user_id},
         {"$inc": {"wallet_balance": -price}},
     )
+
+    update_fields: dict = {
+        "plan_name": plan["name"],
+        "duration_days": duration_days,
+        "price_paid": price,
+        "start_date": now,
+        "end_date": end_date,
+        "is_active": True,
+    }
+    # Only update channels on first purchase — renewals keep existing channels
+    if not is_renewal:
+        update_fields["channels"] = invite_links if invite_links is not None else plan.get("channels", [])
+
     await db.subscriptions.update_one(
         {"user_id": user_id},
-        {
-            "$set": {
-                "plan_name": plan["name"],
-                "duration_days": duration_days,
-                "price_paid": price,
-                "start_date": now,
-                "end_date": end_date,
-                "is_active": True,
-                "channels": invite_links if invite_links is not None else plan.get("channels", []),
-            }
-        },
+        {"$set": update_fields},
         upsert=True,
     )
 
