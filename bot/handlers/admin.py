@@ -478,6 +478,37 @@ async def cb_admin_plan_ch_add(callback: CallbackQuery, state: FSMContext) -> No
     await callback.answer()
 
 
+async def _check_bot_admin(channel_id: str) -> tuple[bool, str]:
+    """Return (is_ok, error_message). Checks bot is admin with invite+ban perms."""
+    from aiogram.exceptions import TelegramBadRequest
+    try:
+        bot_me = await bot.get_me()
+        member = await bot.get_chat_member(chat_id=channel_id, user_id=bot_me.id)
+        if member.status not in ("administrator", "creator"):
+            return False, (
+                "❌ <b>ʙᴏᴛ ɪs ɴᴏᴛ ᴀɴ ᴀᴅᴍɪɴ</b> ɪɴ ᴛʜᴀᴛ ᴄʜᴀɴɴᴇʟ.\n\n"
+                "ᴘʟᴇᴀsᴇ ᴀᴅᴅ ᴛʜᴇ ʙᴏᴛ ᴀs ᴀᴅᴍɪɴ ᴡɪᴛʜ <b>ɪɴᴠɪᴛᴇ ᴜsᴇʀs</b> ᴀɴᴅ <b>ʙᴀɴ ᴜsᴇʀs</b> ᴘᴇʀᴍɪssɪᴏɴs, ᴛʜᴇɴ ᴛʀʏ ᴀɢᴀɪɴ."
+            )
+        missing = []
+        if not getattr(member, "can_invite_users", False):
+            missing.append("ɪɴᴠɪᴛᴇ ᴜsᴇʀs")
+        if not getattr(member, "can_restrict_members", False):
+            missing.append("ʙᴀɴ ᴜsᴇʀs")
+        if missing:
+            return False, (
+                f"❌ <b>ʙᴏᴛ ɪs ᴀᴅᴍɪɴ ʙᴜᴛ ᴍɪssɪɴɢ ᴘᴇʀᴍɪssɪᴏɴs:</b> {', '.join(missing)}\n\n"
+                "ᴘʟᴇᴀsᴇ ɢʀᴀɴᴛ ᴛʜᴇsᴇ ᴘᴇʀᴍɪssɪᴏɴs ɪɴ ᴄʜᴀɴɴᴇʟ sᴇᴛᴛɪɴɢs ᴀɴᴅ ᴛʀʏ ᴀɢᴀɪɴ."
+            )
+        return True, ""
+    except TelegramBadRequest:
+        return False, (
+            "❌ <b>ᴄʜᴀɴɴᴇʟ ɴᴏᴛ ғᴏᴜɴᴅ</b> ᴏʀ ʙᴏᴛ ʜᴀs ɴᴏ ᴀᴄᴄᴇss.\n\n"
+            "ᴍᴀᴋᴇ sᴜʀᴇ ᴛʜᴇ ʙᴏᴛ ɪs ᴀᴅᴅᴇᴅ ᴛᴏ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ᴀs ᴀᴅᴍɪɴ ᴀɴᴅ ᴛʜᴇ ɪᴅ / @ᴜsᴇʀɴᴀᴍᴇ ɪs ᴄᴏʀʀᴇᴄᴛ."
+        )
+    except Exception as e:
+        return False, f"❌ <b>ᴇʀʀᴏʀ:</b> <code>{e}</code>"
+
+
 @router.message(StateFilter(AdminStates.editplan_ch_add))
 async def handle_editplan_ch_add(message: Message, state: FSMContext) -> None:
     # Accept forwarded channel message OR manually typed ID/@username
@@ -490,6 +521,12 @@ async def handle_editplan_ch_add(message: Message, state: FSMContext) -> None:
         if not channel_id:
             await message.answer("⚠️ sᴇɴᴅ ᴀ ᴄʜᴀɴɴᴇʟ ɪᴅ, @ᴜsᴇʀɴᴀᴍᴇ, ᴏʀ ғᴏʀᴡᴀʀᴅ ᴀ ᴍᴇssᴀɢᴇ ғʀᴏᴍ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ.")
             return
+
+    ok, err = await _check_bot_admin(channel_id)
+    if not ok:
+        await message.answer(err, parse_mode=ParseMode.HTML, reply_markup=cancel_keyboard())
+        return
+
     data = await state.get_data()
     plan_name = data.get("editing_plan", "")
     plan = await get_plan(plan_name)
@@ -829,12 +866,17 @@ async def handle_addplan_channels(message: Message, state: FSMContext) -> None:
         else:
             channel_id = text
             channel_label = text
+
+        ok, err = await _check_bot_admin(channel_id)
+        if not ok:
+            await message.answer(err, parse_mode=ParseMode.HTML, reply_markup=cancel_keyboard())
+            return
+
         channels.append(channel_id)
         await state.update_data(channels=channels)
         await message.answer(
             f"✅ ᴄʜᴀɴɴᴇʟ ᴀᴅᴅᴇᴅ: <b>{channel_label}</b> <i>ᴛᴏᴛᴀʟ: {len(channels)}</i>\n\n"
-            "sᴇɴᴅ ᴀɴᴏᴛʜᴇʀ ᴄʜᴀɴɴᴇʟ ɪᴅ / @ᴜsᴇʀɴᴀᴍᴇ / ғᴏʀᴡᴀʀᴅᴇᴅ ᴍsɢ ᴏʀ <code>done</code> ᴛᴏ ғɪɴɪsʜ.\n\n"
-            "<blockquote>⚠️ <i>ʙᴏᴛ ᴍᴜsᴛ ʙᴇ ᴀᴅᴅᴇᴅ ᴀs ᴀɴ <b>ᴀᴅᴍɪɴ</b> ɪɴ ᴇᴀᴄʜ ᴄʜᴀɴɴᴇʟ.</i></blockquote>",
+            "sᴇɴᴅ ᴀɴᴏᴛʜᴇʀ ᴄʜᴀɴɴᴇʟ ɪᴅ / @ᴜsᴇʀɴᴀᴍᴇ / ғᴏʀᴡᴀʀᴅᴇᴅ ᴍsɢ ᴏʀ <code>done</code> ᴛᴏ ғɪɴɪsʜ.",
             parse_mode=ParseMode.HTML,
             reply_markup=cancel_keyboard(),
         )
