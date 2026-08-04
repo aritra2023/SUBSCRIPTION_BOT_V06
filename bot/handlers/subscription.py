@@ -445,20 +445,15 @@ async def _send_view_plan(user_id: int, first_name: str, message: Message) -> No
     if sub:
         end_date = sub["end_date"]
         remaining = days_remaining(end_date)
-        channels = sub.get("channels", [])
-        channel_links = (
-            "\n".join(f'• <a href="{c}">ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ</a>' for c in channels)
-            if channels else ""
-        )
+        plan_obj = await get_plan(sub.get("plan_name", ""))
+        plan_display = to_small_caps(plan_obj["display_name"]) if plan_obj else to_small_caps(sub.get("plan_name", ""))
         text = (
-            "<blockquote><b>📋 ʏᴏᴜʀ ᴄᴜʀʀᴇɴᴛ ᴘʟᴀɴ</b></blockquote>\n\n"
-            f"<b>ᴘʟᴀɴ:</b> {sub['plan_name'].upper()}\n"
-            f"<b>sᴛᴀᴛᴜs:</b> ✅ ᴀᴄᴛɪᴠᴇ\n"
+            "<blockquote><b>📋 ʏᴏᴜʀ ᴄᴜʀʀᴇɴᴛ ᴘʟᴀɴ</b>\n\n"
+            f"<b>ᴘʟᴀɴ:</b> {plan_display}\n"
+            f"<b>sᴛᴀᴛᴜs:</b> ✔️ ᴀᴄᴛɪᴠᴇ\n"
             f"<b>ᴇxᴘɪʀᴇs:</b> {format_date(end_date)}\n"
-            f"<b>ʀᴇᴍᴀɪɴɪɴɢ:</b> {remaining} ᴅᴀʏ(s)\n"
+            f"<b>ʀᴇᴍᴀɪɴɪɴɢ:</b> {remaining} ᴅᴀʏ(s)</blockquote>"
         )
-        if channel_links:
-            text += f"\n<b>ʏᴏᴜʀ ᴄʜᴀɴɴᴇʟs:</b>\n{channel_links}"
         keyboard = back_main_keyboard()
     else:
         text = (
