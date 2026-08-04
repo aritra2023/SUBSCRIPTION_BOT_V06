@@ -448,11 +448,11 @@ async def _send_view_plan(user_id: int, first_name: str, message: Message) -> No
         plan_obj = await get_plan(sub.get("plan_name", ""))
         plan_display = to_small_caps(plan_obj["display_name"]) if plan_obj else to_small_caps(sub.get("plan_name", ""))
         text = (
-            "<blockquote><b>📋 ʏᴏᴜʀ ᴄᴜʀʀᴇɴᴛ ᴘʟᴀɴ</b>\n\n"
-            f"<b>ᴘʟᴀɴ:</b> {plan_display}\n"
-            f"<b>sᴛᴀᴛᴜs:</b> ✔️ ᴀᴄᴛɪᴠᴇ\n"
-            f"<b>ᴇxᴘɪʀᴇs:</b> {format_date(end_date)}\n"
-            f"<b>ʀᴇᴍᴀɪɴɪɴɢ:</b> {remaining} ᴅᴀʏ(s)</blockquote>"
+            "<blockquote><b>📋 ʏᴏᴜʀ ᴄᴜʀʀᴇɴᴛ ᴘʟᴀɴ</b></blockquote>\n\n"
+            f"<i><b>ᴘʟᴀɴ:</b> {plan_display}</i>\n"
+            f"<i><b>sᴛᴀᴛᴜs:</b> ᴀᴄᴛɪᴠᴇ</i>\n"
+            f"<i><b>ᴇxᴘɪʀᴇs:</b> {format_date(end_date)}</i>\n"
+            f"<i><b>ʀᴇᴍᴀɪɴɪɴɢ:</b> {remaining} ᴅᴀʏ(s)</i>"
         )
         keyboard = back_main_keyboard()
     else:
