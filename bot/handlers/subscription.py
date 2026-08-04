@@ -82,13 +82,8 @@ async def cb_buy_category_channel(callback: CallbackQuery) -> None:
         await callback.answer("⚠️ ɴᴏ ᴘʟᴀɴs ᴀᴠᴀɪʟᴀʙʟᴇ ʀɪɢʜᴛ ɴᴏᴡ.", show_alert=True)
         return
 
-    plan_list = "".join(
-        f"<blockquote>✦ <b>{p['display_name']}</b></blockquote>\n"
-        for p in plans
-    )
     text = (
         "<blockquote>◍ <b>sᴇʟᴇᴄᴛ ᴄʜᴀɴɴᴇʟs ғᴏʀ ᴘʀᴇᴍɪᴜᴍ</b></blockquote>\n\n"
-        f"{plan_list}\n"
         "<blockquote>➲ <b>ᴛɪᴘ:</b> ᴄʜᴏᴏsᴇ <b>ᴄᴏᴍʙᴏ</b> ᴏʀ <b>ᴍᴜʟᴛɪᴘʟᴇ ᴄʜᴀɴɴᴇʟs</b> ᴛᴏ ɢᴇᴛ ᴜᴘ ᴛᴏ <b>60% ᴏғғ!</b>\n"
         "ᴇᴀʀɴ ᴘʀᴇᴠᴇʀsᴇ ᴘᴏɪɴᴛs ᴏɴ ᴇᴠᴇʀʏ ᴘᴜʀᴄʜᴀsᴇ!</blockquote>"
     )
@@ -253,27 +248,26 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
     existing_sub = await get_active_subscription(user_id)
     is_renewal = existing_sub and existing_sub.get("plan_name") == plan["name"]
 
-    # Only generate fresh invite links for new purchases
+    # Always generate fresh invite links (new purchase AND renewal)
     invite_links: list[str] = []
-    if not is_renewal:
-        raw_channels = plan.get("channels", [])
-        for ch in raw_channels:
-            try:
-                chat_id: int | str = int(str(ch).strip())
-            except ValueError:
-                chat_id = str(ch).strip()
-            try:
-                link_obj = await bot.create_chat_invite_link(chat_id, member_limit=1)
-                invite_links.append(link_obj.invite_link)
-            except Exception as e:
-                logger.warning("Failed to create invite link for channel %s: %s", ch, e)
-                ch_str = str(ch).strip()
-                if ch_str.startswith("t.me"):
-                    ch_str = "https://" + ch_str
-                if ch_str.startswith("http"):
-                    invite_links.append(ch_str)
+    raw_channels = plan.get("channels", [])
+    for ch in raw_channels:
+        try:
+            chat_id: int | str = int(str(ch).strip())
+        except ValueError:
+            chat_id = str(ch).strip()
+        try:
+            link_obj = await bot.create_chat_invite_link(chat_id, member_limit=1)
+            invite_links.append(link_obj.invite_link)
+        except Exception as e:
+            logger.warning("Failed to create invite link for channel %s: %s", ch, e)
+            ch_str = str(ch).strip()
+            if ch_str.startswith("t.me"):
+                ch_str = "https://" + ch_str
+            if ch_str.startswith("http"):
+                invite_links.append(ch_str)
 
-    success = await purchase_subscription(user_id, plan, days, invite_links=invite_links if not is_renewal else None)
+    success = await purchase_subscription(user_id, plan, days, invite_links=invite_links)
 
     if success:
         durations = plan.get("durations", [])
@@ -281,14 +275,27 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
         duration_label = tier["label"] if tier else f"{days} ᴅᴀʏs"
         price = tier["price"] if tier else plan.get("price", 0)
 
-        if is_renewal:
-            # Renewal — show extended duration, no channel link
+        user_info = await get_user(user_id)
+        new_balance = user_info.get("wallet_balance", 0.0) if user_info else 0.0
+
+        if is_renewal and invite_links:
             text = (
                 f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴇxᴛᴇɴᴅᴇᴅ!</b></blockquote>\n\n"
                 f"<b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
                 f"<b>ᴀᴅᴅᴇᴅ:</b> {duration_label}\n"
-                f"<b>ᴀᴍᴏᴜɴᴛ ᴘᴀɪᴅ:</b> ₹{price:.0f}\n\n"
-                f"<blockquote>ℹ️ <i>ʏᴏᴜʀ ᴅᴜʀᴀᴛɪᴏɴ ʜᴀs ʙᴇᴇɴ ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ᴇxɪsᴛɪɴɢ sᴜʙsᴄʀɪᴘᴛɪᴏɴ. ʏᴏᴜ ᴀʟʀᴇᴀᴅʏ ʜᴀᴠᴇ ᴄʜᴀɴɴᴇʟ ᴀᴄᴄᴇss.</i></blockquote>"
+                f"<b>ᴀᴍᴏᴜɴᴛ ᴘᴀɪᴅ:</b> ₹{price:.0f}\n"
+                f"<b>ʀᴇᴍᴀɪɴɪɴɢ ʙᴀʟᴀɴᴄᴇ:</b> ₹{new_balance:.2f}\n\n"
+                f"<blockquote>⚠️ <i>ɴᴇᴡ ɪɴᴠɪᴛᴇ ʟɪɴᴋs ɢᴇɴᴇʀᴀᴛᴇᴅ. ᴇᴀᴄʜ ʟɪɴᴋ ᴄᴀɴ ᴏɴʟʏ ʙᴇ ᴜsᴇᴅ ᴏɴᴄᴇ ᴀɴᴅ ᴡɪʟʟ ᴇxᴘɪʀᴇ ᴀғᴛᴇʀ ᴊᴏɪɴɪɴɢ.</i></blockquote>"
+            )
+            activated_keyboard = subscription_activated_keyboard(invite_links)
+        elif is_renewal:
+            text = (
+                f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴇxᴛᴇɴᴅᴇᴅ!</b></blockquote>\n\n"
+                f"<b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
+                f"<b>ᴀᴅᴅᴇᴅ:</b> {duration_label}\n"
+                f"<b>ᴀᴍᴏᴜɴᴛ ᴘᴀɪᴅ:</b> ₹{price:.0f}\n"
+                f"<b>ʀᴇᴍᴀɪɴɪɴɢ ʙᴀʟᴀɴᴄᴇ:</b> ₹{new_balance:.2f}\n\n"
+                f"<blockquote>📩 <i>ᴀᴅᴍɪɴ ᴡɪʟʟ sᴇɴᴅ ʏᴏᴜʀ ɴᴇᴡ ɪɴᴠɪᴛᴇ ʟɪɴᴋ sʜᴏʀᴛʟʏ.</i></blockquote>"
             )
             activated_keyboard = back_main_keyboard()
         elif invite_links:
@@ -296,7 +303,8 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
                 f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!</b></blockquote>\n\n"
                 f"<b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
                 f"<b>ᴅᴜʀᴀᴛɪᴏɴ:</b> {duration_label}\n"
-                f"<b>ᴀᴍᴏᴜɴᴛ ᴘᴀɪᴅ:</b> ₹{price:.0f}\n\n"
+                f"<b>ᴀᴍᴏᴜɴᴛ ᴘᴀɪᴅ:</b> ₹{price:.0f}\n"
+                f"<b>ʀᴇᴍᴀɪɴɪɴɢ ʙᴀʟᴀɴᴄᴇ:</b> ₹{new_balance:.2f}\n\n"
                 f"<blockquote>⚠️ <i>ᴛʜɪs ɪɴᴠɪᴛᴇ ʟɪɴᴋ ᴄᴀɴ ᴏɴʟʏ ʙᴇ ᴊᴏɪɴᴇᴅ ᴏɴᴄᴇ. ᴏɴᴄᴇ ʏᴏᴜ ʜᴀᴠᴇ ᴊᴏɪɴᴇᴅ, ᴛʜᴇ ʟɪɴᴋ ᴡɪʟʟ ᴇxᴘɪʀᴇ ᴀɴᴅ ᴄᴀɴɴᴏᴛ ʙᴇ ᴜsᴇᴅ ᴀɢᴀɪɴ.</i></blockquote>"
             )
             activated_keyboard = subscription_activated_keyboard(invite_links)
@@ -305,7 +313,8 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
                 f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!</b></blockquote>\n\n"
                 f"<b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
                 f"<b>ᴅᴜʀᴀᴛɪᴏɴ:</b> {duration_label}\n"
-                f"<b>ᴀᴍᴏᴜɴᴛ ᴘᴀɪᴅ:</b> ₹{price:.0f}\n\n"
+                f"<b>ᴀᴍᴏᴜɴᴛ ᴘᴀɪᴅ:</b> ₹{price:.0f}\n"
+                f"<b>ʀᴇᴍᴀɪɴɪɴɢ ʙᴀʟᴀɴᴄᴇ:</b> ₹{new_balance:.2f}\n\n"
                 f"<blockquote>📩 <i>ʏᴏᴜʀ ᴄʜᴀɴɴᴇʟ ɪɴᴠɪᴛᴇ ʟɪɴᴋ ᴡɪʟʟ ʙᴇ sᴇɴᴛ ʙʏ ᴀᴅᴍɪɴ sʜᴏʀᴛʟʏ.\nᴘʟᴇᴀsᴇ ᴄᴏɴᴛᴀᴄᴛ sᴜᴘᴘᴏʀᴛ ɪғ ɴᴏᴛ ʀᴇᴄᴇɪᴠᴇᴅ ᴡɪᴛʜɪɴ 5 ᴍɪɴᴜᴛᴇs.</i></blockquote>"
             )
             logger.warning("Could not generate invite links for plan %s (user %d)", plan['name'], user_id)
@@ -315,8 +324,6 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
         fu = callback.from_user
         user_name = fu.first_name if fu else str(user_id)
         username_tag = (f" (@{fu.username})" if fu and fu.username else "")
-        user_info = await get_user(user_id)
-        remaining_balance = user_info.get("wallet_balance", 0.0) if user_info else 0.0
         try:
             await bot.send_message(
                 ADMIN_ID,
@@ -326,7 +333,7 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
                 f"📦 <b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
                 f"⏱ <b>ᴅᴜʀᴀᴛɪᴏɴ:</b> {duration_label}\n"
                 f"💵 <b>ᴘᴀɪᴅ:</b> ₹{price:.0f}\n"
-                f"💼 <b>ʀᴇᴍᴀɪɴɪɴɢ ʙᴀʟᴀɴᴄᴇ:</b> ₹{remaining_balance:.2f}",
+                f"💼 <b>ʀᴇᴍᴀɪɴɪɴɢ ʙᴀʟᴀɴᴄᴇ:</b> ₹{new_balance:.2f}",
                 parse_mode=ParseMode.HTML,
             )
         except Exception:

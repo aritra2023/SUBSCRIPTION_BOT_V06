@@ -340,6 +340,18 @@ async def process_auto_renewals(bot_instance=None) -> list[dict]:
             )
             if bot_instance:
                 await _kick_from_channels(bot_instance, user_id, sub.get("channels", []))
+                plan_display = plan_name or "ʏᴏᴜʀ ᴘʟᴀɴ"
+                try:
+                    await bot_instance.send_message(
+                        user_id,
+                        f"<blockquote><b>⏰ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴇxᴘɪʀᴇᴅ</b></blockquote>\n\n"
+                        f"<b>ᴘʟᴀɴ:</b> {plan_display}\n\n"
+                        f"<blockquote>ℹ️ <i>ʏᴏᴜʀ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇss ʜᴀs ᴇɴᴅᴇᴅ. "
+                        f"ʀᴇɴᴇᴡ ʏᴏᴜʀ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴀɴʏᴛɪᴍᴇ ᴠɪᴀ /start ᴛᴏ ʀᴇɢᴀɪɴ ᴀᴄᴄᴇss.</i></blockquote>",
+                        parse_mode="HTML",
+                    )
+                except Exception:
+                    pass
             continue
 
         plan = await get_plan(plan_name) if plan_name else None
