@@ -108,8 +108,8 @@ async def create_plan(
 
 
 async def seed_default_plans() -> None:
-    existing = await get_active_plans()
-    if existing:
+    db = get_db()
+    if await db.plans.count_documents({"is_active": True}, limit=1):
         return
     await create_plan(
         name="flix_premium",

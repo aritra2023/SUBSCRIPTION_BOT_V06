@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import logging
 
 from aiogram import Router
@@ -8,7 +7,7 @@ from aiogram.enums import ParseMode
 from aiogram.types import CallbackQuery
 
 from keyboards.inline import history_telegraph_keyboard, history_detail_keyboard, main_menu_keyboard
-from services.subscription import get_user_transactions, get_active_subscription, get_setting
+from services.subscription import get_user_transactions, get_setting
 from services.telegraph import create_history_page
 from utils.helpers import format_date, mention_html
 
@@ -50,17 +49,13 @@ async def cb_history(callback: CallbackQuery) -> None:
     user_name = user.first_name if user else "User"
 
     # Step 2 — fetch data + create Telegraph page
-    transactions, active_sub = await asyncio.gather(
-        get_user_transactions(user_id, limit=20),
-        get_active_subscription(user_id),
-    )
+    transactions = await get_user_transactions(user_id, limit=20)
 
     try:
         telegraph_url = await create_history_page(
             user_name=user_name,
             user_id=user_id,
             transactions=transactions,
-            active_sub=active_sub,
         )
         ready_text = (
             "📖 <b>ʜɪsᴛᴏʀʏ ᴘᴀɢᴇ ɪs ʀᴇᴀᴅʏ!</b>\n\n"

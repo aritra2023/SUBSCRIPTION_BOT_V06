@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-import json
 import logging
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 
@@ -45,7 +44,6 @@ def _build_content(
     user_name: str,
     user_id: int,
     transactions: list[dict],
-    active_sub: Optional[dict],
 ) -> list[dict[str, Any]]:
     """Build Telegraph page content nodes with small-caps styling."""
     from utils.helpers import to_small_caps
@@ -104,11 +102,10 @@ async def create_history_page(
     user_name: str,
     user_id: int,
     transactions: list[dict],
-    active_sub: Optional[dict] = None,
 ) -> str:
     """Create a Telegraph page with the user's history and return its URL."""
     token = await _get_or_create_token()
-    content = _build_content(user_name, user_id, transactions, active_sub)
+    content = _build_content(user_name, user_id, transactions)
 
     async with aiohttp.ClientSession() as session:
         async with session.post(

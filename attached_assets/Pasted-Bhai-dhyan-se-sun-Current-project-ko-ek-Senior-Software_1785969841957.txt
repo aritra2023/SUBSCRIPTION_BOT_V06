@@ -1,0 +1,235 @@
+Bhai dhyan se sun.
+
+Current project ko ek Senior Software Engineer ki tarah analyze kar.
+
+Mera main goal hai:
+
+✅ Maximum Performance
+✅ Minimum RAM Usage
+✅ Fast Startup
+✅ Instant Bot Response
+✅ Clean Professional Structure
+✅ Production Ready Code
+✅ Zero Unnecessary Files
+
+Ab ye rules follow kar:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. PROJECT AUDIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Pehle pura project scan kar.
+
+Har file check kar.
+
+Har folder check kar.
+
+Har dependency check kar.
+
+Har asset check kar.
+
+Har package check kar.
+
+Har config check kar.
+
+Uske baad decide kar kya useful hai aur kya useless.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. REMOVE JUNK
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Agar koi bhi file:
+
+- use hi nahi ho rahi
+- sirf placeholder hai
+- demo file hai
+- example file hai
+- test file hai
+- backup file hai
+- duplicate hai
+- generated hai
+- unused images/assets hai
+- unused fonts hai
+- unused icons hai
+- old code hai
+- commented dead code hai
+
+To seedha delete kar.
+
+Mujhe unnecessary files bilkul nahi chahiye.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. ATTACHED ASSETS
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Workspace me jo bhi Attached Assets hain unhe bhi verify kar.
+
+Agar kisi asset ka project me actual use nahi ho raha hai ya sirf storage occupy kar raha hai to use remove kar do.
+
+Agar kisi Attached Asset ko remove karne ke liye meri permission chahiye to pehle mujhe Hinglish me exactly is type ka message bhejna:
+
+"Ye Attached Asset project me use nahi ho raha aur unnecessary storage le raha hai. Isse project thoda heavy aur maintain karna mushkil hota hai. Agar aap Allow karoge to main ise remove kar dunga. Nahi to ise waise hi rehne dunga."
+
+Permission ke bina delete mat karna.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. FILE STRUCTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Mujhe AI generated project nahi chahiye.
+
+Mujhe Senior Developer level ka structure chahiye.
+
+Sirf wahi files honi chahiye jo actually required hain.
+
+Ek feature = ek logical location.
+
+Duplicate folders mat banana.
+
+Random helper folders mat banana.
+
+Extra configs mat banana.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. PERFORMANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Bot ko jitna fast bana sakte ho utna banao.
+
+Startup time reduce karo.
+
+Memory usage reduce karo.
+
+CPU usage reduce karo.
+
+Database queries optimize karo.
+
+Repeated API calls hatao.
+
+Unused imports hatao.
+
+Unused packages uninstall karo.
+
+Heavy libraries avoid karo.
+
+Blocking code hatao.
+
+Proper async use karo.
+
+Har command ka response minimum latency me aana chahiye.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. CLEAN CODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Functions short rakho.
+
+Readable code likho.
+
+Duplicate logic mat rakho.
+
+Unused variables hatao.
+
+Dead code hatao.
+
+Debug code hatao.
+
+Temporary code hatao.
+
+Commented code hatao.
+
+Generated comments hatao.
+
+Sirf meaningful comments rakho.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. DEPENDENCIES
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+requirements.txt ko audit karo.
+
+Jo package use nahi ho raha usse remove karo.
+
+Jo package lightweight alternative se replace ho sakta hai use replace karo.
+
+Extra dependencies bilkul mat rakho.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. DATABASE
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Database queries optimize karo.
+
+Indexes use karo.
+
+Duplicate writes avoid karo.
+
+Duplicate reads avoid karo.
+
+Connection reuse karo.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. FINAL CHECK
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Finish karne se pehle dobara pura project audit karo.
+
+Agar koi unnecessary file milti hai to delete karo.
+
+Agar koi unnecessary asset milta hai to remove karne ki permission maango.
+
+Agar koi unused dependency milti hai to uninstall karo.
+
+Agar koi duplicate function milta hai to merge karo.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. IMPORTANT
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Feature add karne ke liye naye files tabhi banana jab existing structure me possible na ho.
+
+Har nayi file banane se pehle socho:
+
+"Kya existing file me ye kaam ho sakta hai?"
+
+Agar answer YES hai to nayi file mat banao.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. OUTPUT
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+End me:
+
+1. Project Tree dikhao.
+
+2. Kitni files delete hui.
+
+3. Kitne assets remove hue.
+
+4. Kitne packages uninstall hue.
+
+5. Kitni duplicate functions merge hui.
+
+6. Kitna startup improve hua.
+
+7. Estimated RAM reduction.
+
+8. Estimated response speed improvement.
+
+Target:
+
+Production-grade Telegram Bot.
+
+No AI-style structure.
+
+No unnecessary files.
+
+No unnecessary assets.
+
+No unnecessary packages.
+
+Maximum speed.
+
+Maximum optimization.
+
+Maximum maintainability.

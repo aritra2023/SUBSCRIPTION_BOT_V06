@@ -121,7 +121,6 @@ def duration_keyboard(plan_name: str, durations: list[dict], demo_link: str = ""
 
 def subscription_activated_keyboard(
     channels: list[str],
-    joined: set[int] | None = None,
 ) -> InlineKeyboardMarkup:
     """Shown after subscription is activated — direct URL join buttons, red back."""
     builder = InlineKeyboardBuilder()

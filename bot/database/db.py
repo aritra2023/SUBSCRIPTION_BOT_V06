@@ -28,8 +28,17 @@ def get_db() -> motor.motor_asyncio.AsyncIOMotorDatabase:
 async def _create_indexes() -> None:
     db = get_db()
     await db.users.create_index([("user_id", ASCENDING)], unique=True)
-    await db.subscriptions.create_index([("user_id", ASCENDING)])
-    await db.subscriptions.create_index([("end_date", ASCENDING)])
+    # Compound: active subscription lookup by user
+    await db.subscriptions.create_index(
+        [("user_id", ASCENDING), ("is_active", ASCENDING), ("end_date", ASCENDING)]
+    )
+    # Compound: auto-renewal sweep (is_active + end_date)
+    await db.subscriptions.create_index(
+        [("is_active", ASCENDING), ("end_date", ASCENDING)]
+    )
     await db.plans.create_index([("name", ASCENDING)], unique=True)
-    await db.transactions.create_index([("user_id", ASCENDING)])
-    await db.transactions.create_index([("created_at", DESCENDING)])
+    await db.plans.create_index([("is_active", ASCENDING)])
+    # Compound: transaction history by user sorted by date
+    await db.transactions.create_index(
+        [("user_id", ASCENDING), ("created_at", DESCENDING)]
+    )
