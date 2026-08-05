@@ -76,6 +76,8 @@ class AdminStates(StatesGroup):
     editplan_demo_link = State()
     editplan_ch_add = State()
     editplan_price = State()
+    editplan_durations = State()
+    editplan_duration_pricing = State()
 
 
 # ── Admin Panel ───────────────────────────────────────────────────────────────
@@ -649,6 +651,140 @@ async def handle_editplan_price(message: Message, state: FSMContext) -> None:
         parse_mode=ParseMode.HTML,
         reply_markup=admin_panel_keyboard(),
     )
+
+
+# ── Edit Plan — Durations ─────────────────────────────────────────────────────
+
+@router.callback_query(lambda c: c.data and c.data.startswith("admin_plan:edit_durations:"))
+async def cb_admin_plan_edit_durations(callback: CallbackQuery, state: FSMContext) -> None:
+    plan_name = (callback.data or "").split(":", 2)[2]
+    plan = await get_plan(plan_name)
+    if not plan:
+        await callback.answer("ᴘʟᴀɴ ɴᴏᴛ ғᴏᴜɴᴅ.", show_alert=True)
+        return
+    current_days = [d["days"] for d in (plan.get("durations") or [])]
+    await state.update_data(editing_plan=plan_name, selected_durations=current_days)
+    if callback.message:
+        await callback.message.edit_text(
+            f"<blockquote><b>⏱ ᴇᴅɪᴛ ᴅᴜʀᴀᴛɪᴏɴs — {plan['display_name']}</b></blockquote>\n\n"
+            "✅ = ᴄᴜʀʀᴇɴᴛʟʏ ᴀᴄᴛɪᴠᴇ. ᴛᴀᴘ ᴛᴏ ᴛᴏɢɢʟᴇ, ᴛʜᴇɴ ᴘʀᴇss <b>ᴅᴏɴᴇ</b>:",
+            parse_mode=ParseMode.HTML,
+            reply_markup=admin_duration_select_keyboard(current_days),
+        )
+    await state.set_state(AdminStates.editplan_durations)
+    await callback.answer()
+
+
+@router.callback_query(StateFilter(AdminStates.editplan_durations), F.data.startswith("adm_dur:"))
+async def cb_editplan_duration_toggle(callback: CallbackQuery, state: FSMContext) -> None:
+    days = int((callback.data or "").split(":")[1])
+    data = await state.get_data()
+    selected: list[int] = list(data.get("selected_durations", []))
+    if days in selected:
+        selected.remove(days)
+    else:
+        selected.append(days)
+    await state.update_data(selected_durations=selected)
+    if callback.message:
+        await callback.message.edit_reply_markup(reply_markup=admin_duration_select_keyboard(selected))
+    await callback.answer()
+
+
+@router.callback_query(StateFilter(AdminStates.editplan_durations), F.data == "adm_dur_done")
+async def cb_editplan_duration_done(callback: CallbackQuery, state: FSMContext) -> None:
+    data = await state.get_data()
+    selected: list[int] = data.get("selected_durations", [])
+    plan_name: str = data.get("editing_plan", "")
+    if not selected:
+        await callback.answer("⚠️ ᴀᴛ ʟᴇᴀsᴛ ᴏɴᴇ ᴅᴜʀᴀᴛɪᴏɴ sᴇʟᴇᴄᴛ ᴋᴀʀᴏ!", show_alert=True)
+        return
+    plan = await get_plan(plan_name)
+    if not plan:
+        await state.clear()
+        await callback.answer("ᴘʟᴀɴ ɴᴏᴛ ғᴏᴜɴᴅ.", show_alert=True)
+        return
+
+    selected.sort()
+    label_map = {days: label for days, label in DURATION_OPTIONS}
+    existing_prices = {d["days"]: d["price"] for d in (plan.get("durations") or [])}
+
+    # Keep prices for already-existing durations; collect new ones to price
+    new_durations = []
+    to_price = []
+    for d in selected:
+        if d in existing_prices:
+            new_durations.append({"days": d, "label": label_map.get(d, f"{d}d"), "price": existing_prices[d]})
+        else:
+            to_price.append({"days": d, "label": label_map.get(d, f"{d}d")})
+
+    if to_price:
+        # Need prices for newly added durations
+        await state.update_data(
+            new_durations=new_durations,
+            to_price=to_price,
+            to_price_idx=0,
+        )
+        first = to_price[0]
+        if callback.message:
+            await callback.message.edit_text(
+                f"<blockquote><b>💰 ɴᴇᴡ ᴅᴜʀᴀᴛɪᴏɴ — {first['label']}</b></blockquote>\n\n"
+                "ɪs ᴘʀɪᴄᴇ ᴅᴀʟᴏ (₹):",
+                parse_mode=ParseMode.HTML,
+                reply_markup=cancel_keyboard(),
+            )
+        await state.set_state(AdminStates.editplan_duration_pricing)
+    else:
+        # No new durations — save directly
+        await update_plan_fields(plan_name, {"durations": new_durations})
+        await state.clear()
+        if callback.message:
+            await callback.message.edit_text(
+                "✅ <b>ᴅᴜʀᴀᴛɪᴏɴs ᴜᴘᴅᴀᴛᴇᴅ!</b>",
+                parse_mode=ParseMode.HTML,
+                reply_markup=admin_panel_keyboard(),
+            )
+    await callback.answer()
+
+
+@router.message(StateFilter(AdminStates.editplan_duration_pricing), F.text)
+async def handle_editplan_duration_price(message: Message, state: FSMContext) -> None:
+    try:
+        price = float((message.text or "").strip())
+        if price < 0:
+            raise ValueError
+    except ValueError:
+        await message.answer("❌ ᴠᴀʟɪᴅ ᴘʀɪᴄᴇ ᴅᴀʟᴏ (e.g. 299).")
+        return
+
+    data = await state.get_data()
+    plan_name: str = data.get("editing_plan", "")
+    to_price: list[dict] = data.get("to_price", [])
+    new_durations: list[dict] = data.get("new_durations", [])
+    idx: int = data.get("to_price_idx", 0)
+
+    current = to_price[idx]
+    new_durations.append({"days": current["days"], "label": current["label"], "price": price})
+    idx += 1
+
+    if idx < len(to_price):
+        await state.update_data(new_durations=new_durations, to_price_idx=idx)
+        nxt = to_price[idx]
+        await message.answer(
+            f"<blockquote><b>💰 ɴᴇᴡ ᴅᴜʀᴀᴛɪᴏɴ — {nxt['label']}</b></blockquote>\n\n"
+            "ɪs ᴘʀɪᴄᴇ ᴅᴀʟᴏ (₹):",
+            parse_mode=ParseMode.HTML,
+            reply_markup=cancel_keyboard(),
+        )
+    else:
+        # All priced — sort by days and save
+        new_durations.sort(key=lambda d: d["days"])
+        await update_plan_fields(plan_name, {"durations": new_durations})
+        await state.clear()
+        await message.answer(
+            "✅ <b>ᴅᴜʀᴀᴛɪᴏɴs ᴜᴘᴅᴀᴛᴇᴅ!</b>",
+            parse_mode=ParseMode.HTML,
+            reply_markup=admin_panel_keyboard(),
+        )
 
 
 # ── Add Plan — Step 1: Name ───────────────────────────────────────────────────

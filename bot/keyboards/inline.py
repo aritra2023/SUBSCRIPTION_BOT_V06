@@ -301,6 +301,7 @@ def admin_plan_manage_keyboard(plan_name: str) -> InlineKeyboardMarkup:
     )
     builder.row(
         InlineKeyboardButton(text="💰 ᴇᴅɪᴛ ᴘʀɪᴄᴇs", callback_data=f"admin_plan:edit_prices:{plan_name}", style="primary"),
+        InlineKeyboardButton(text="⏱ ᴇᴅɪᴛ ᴅᴜʀᴀᴛɪᴏɴs", callback_data=f"admin_plan:edit_durations:{plan_name}", style="primary"),
     )
     builder.row(
         InlineKeyboardButton(text="🗑 ᴅᴇʟᴇᴛᴇ ᴘʟᴀɴ", callback_data=f"admin_plan:delete:{plan_name}", style="danger"),
