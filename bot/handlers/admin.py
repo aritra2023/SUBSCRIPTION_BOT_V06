@@ -1083,8 +1083,8 @@ async def handle_topup_amount(message: Message, state: FSMContext) -> None:
     try:
         await bot.send_message(
             user_id,
-            f"💰 <b>+₹{amount:.0f} ᴀᴅᴅᴇᴅ ᴛᴏ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ</b>\n"
-            f"<b>ʙᴀʟᴀɴᴄᴇ: ₹{new_balance:.2f}</b>",
+            f"hlw <b>{user_name}</b> there is a great news ❤️\n\n"
+            f"₹<b>{amount:.0f}</b> credited on your wallet ✓",
             parse_mode=ParseMode.HTML,
         )
     except Exception:

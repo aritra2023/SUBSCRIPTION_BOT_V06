@@ -23,7 +23,7 @@ async def get_or_create_user(user_id: int, first_name: str, username: Optional[s
             "last_name": last_name,
             "wallet_balance": 0.0,
             "referral_points": 0,
-            "auto_renew": True,
+            "auto_renew": False,
             "joined_at": now_utc(),
             "is_banned": False,
         }
@@ -353,14 +353,15 @@ async def process_auto_renewals(bot_instance=None) -> list[dict]:
             )
             if bot_instance:
                 await _kick_from_channels(bot_instance, user_id, sub.get("channels", []))
-                plan_display = plan_name or "ʏᴏᴜʀ ᴘʟᴀɴ"
+                _plan_obj = await get_plan(plan_name) if plan_name else None
+                plan_display = _plan_obj["display_name"] if _plan_obj else (plan_name or "Your Plan")
                 try:
                     await bot_instance.send_message(
                         user_id,
-                        f"<blockquote><b>⏰ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴇxᴘɪʀᴇᴅ</b></blockquote>\n\n"
-                        f"<b>ᴘʟᴀɴ:</b> {plan_display}\n\n"
-                        f"<blockquote>ℹ️ <i>ʏᴏᴜʀ ᴘʀᴇᴍɪᴜᴍ ᴀᴄᴄᴇss ʜᴀs ᴇɴᴅᴇᴅ. "
-                        f"ʀᴇɴᴇᴡ ʏᴏᴜʀ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴀɴʏᴛɪᴍᴇ ᴠɪᴀ /start ᴛᴏ ʀᴇɢᴀɪɴ ᴀᴄᴄᴇss.</i></blockquote>",
+                        f"<blockquote><b>⏰ Subscription Expired</b></blockquote>\n\n"
+                        f"<b>Plan:</b> {plan_display}\n\n"
+                        f"<blockquote>ℹ️ <i>Your premium access has ended. "
+                        f"Renew your subscription anytime via /start to regain access.</i></blockquote>",
                         parse_mode="HTML",
                     )
                 except Exception:
