@@ -30,6 +30,7 @@ from keyboards.inline import (
     broadcast_confirm_keyboard,
     cancel_keyboard,
 )
+from utils.helpers import to_small_caps
 from services.subscription import (
     create_plan,
     deduct_wallet,
@@ -1083,8 +1084,8 @@ async def handle_topup_amount(message: Message, state: FSMContext) -> None:
     try:
         await bot.send_message(
             user_id,
-            f"hlw <b>{user_name}</b> there is a great news ❤️\n\n"
-            f"₹<b>{amount:.0f}</b> credited on your wallet ✓",
+            f"💸 <b>₹{amount:.0f} {to_small_caps('credited to your wallet')}</b>\n"
+            f"<b>{to_small_caps('Balance')}: ₹{new_balance:.2f}</b>",
             parse_mode=ParseMode.HTML,
         )
     except Exception:
