@@ -185,14 +185,15 @@ async def purchase_subscription(
     )
     is_renewal = existing is not None
 
+    duration_delta = timedelta(minutes=1) if duration_days == 0 else timedelta(days=duration_days)
     if is_renewal:
         # Extend from existing end_date
         base = existing["end_date"]
         if base.tzinfo is None:
             base = base.replace(tzinfo=timezone.utc)
-        end_date = base + timedelta(days=duration_days)
+        end_date = base + duration_delta
     else:
-        end_date = now + timedelta(days=duration_days)
+        end_date = now + duration_delta
 
     await db.users.update_one(
         {"user_id": user_id},

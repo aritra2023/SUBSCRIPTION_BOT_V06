@@ -8,6 +8,7 @@ from utils.helpers import to_small_caps
 
 # Duration options available for plans (days, display label)
 DURATION_OPTIONS: list[tuple[int, str]] = [
+    (0,     "1 ᴍɪɴ 🧪"),  # TEST ONLY — remove after testing
     (15,    "15 ᴅᴀʏs"),
     (30,    "1 ᴍᴏɴᴛʜ"),
     (90,    "3 ᴍᴏɴᴛʜs"),

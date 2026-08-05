@@ -45,7 +45,7 @@ async def on_shutdown() -> None:
 
 
 async def _auto_renew_loop() -> None:
-    await asyncio.sleep(60)
+    await asyncio.sleep(5)  # TEST: short initial delay
     while True:
         try:
             results = await process_auto_renewals(bot_instance=bot)
@@ -73,7 +73,7 @@ async def _auto_renew_loop() -> None:
                     )
         except Exception as exc:
             logger.error("Auto-renew loop error: %s", exc)
-        await asyncio.sleep(3600)
+        await asyncio.sleep(60)  # TEST: check every 60s instead of 1h
 
 
 async def main() -> None:
