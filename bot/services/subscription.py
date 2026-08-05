@@ -347,13 +347,14 @@ async def process_auto_renewals(bot_instance=None) -> list[dict]:
         sub_duration_days = sub.get("duration_days", 30)
 
         user = await get_user(user_id)
+        _plan_obj = await get_plan(plan_name) if plan_name else None
         if user is None or not user.get("auto_renew", False):
             await db.subscriptions.update_one(
                 {"user_id": user_id}, {"$set": {"is_active": False}}
             )
             if bot_instance:
-                await _kick_from_channels(bot_instance, user_id, sub.get("channels", []))
-                _plan_obj = await get_plan(plan_name) if plan_name else None
+                plan_channel_ids = (_plan_obj or {}).get("channels", [])
+                await _kick_from_channels(bot_instance, user_id, plan_channel_ids)
                 plan_display = _plan_obj["display_name"] if _plan_obj else (plan_name or "Your Plan")
                 try:
                     await bot_instance.send_message(
@@ -401,7 +402,7 @@ async def process_auto_renewals(bot_instance=None) -> list[dict]:
                 {"user_id": user_id}, {"$set": {"is_active": False}}
             )
             if bot_instance:
-                await _kick_from_channels(bot_instance, user_id, sub.get("channels", []))
+                await _kick_from_channels(bot_instance, user_id, plan.get("channels", []))
             results.append({"user_id": user_id, "status": "insufficient_funds", "plan": plan, "price_paid": 0})
             logger.info("Auto-renew failed (low balance) for user %d", user_id)
         else:
