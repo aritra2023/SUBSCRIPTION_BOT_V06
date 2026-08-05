@@ -122,7 +122,7 @@ async def cb_history_close(callback: CallbackQuery) -> None:
     mention = mention_html(user.id, user.first_name)
     text = (
         f"<blockquote expandable><b>ʜɪ ᴛʜᴇʀᴇ,</b> {mention}!</blockquote>\n"
-        f"<blockquote expandable><b>ɪ ᴀᴍ ᴘʀᴇᴍɪᴜᴍ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ʙᴏᴛ ғᴏʀ ғʟɪx ᴠᴇʀsᴇ.</b></blockquote>\n\n"
+        f"<blockquote expandable><b>ɪ ᴀᴍ ᴘʀᴇᴍɪᴜᴍ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ʙᴏᴛ ғᴏʀ ᴘʀᴇᴍɪᴜᴍ ᴠᴇʀsᴇ.</b></blockquote>\n\n"
         f"<blockquote expandable>ɪ ᴄᴀɴ ɢᴇᴛ ʏᴏᴜ ɪɴsᴛᴀɴᴛ ᴀᴄᴄᴇss ᴛᴏ ᴏᴜʀ <b>ᴇxᴄʟᴜsɪᴠᴇ ᴘʀᴇᴍɪᴜᴍ ᴄʜᴀɴɴᴇʟs</b> ʀɪɢʜᴛ ᴀᴡᴀʏ!!</blockquote>\n"
         f"<blockquote expandable><b>― ᴄʟɪᴄᴋ ᴛʜᴇ ʙᴜᴛᴛᴏɴ ᴛᴏ sᴇᴇ ᴏᴜʀ ᴘʟᴀɴs!</b></blockquote>"
     )

@@ -246,7 +246,7 @@ def help_keyboard() -> InlineKeyboardMarkup:
     builder.row(
         InlineKeyboardButton(
             text="ᴡᴀᴛᴄʜ ᴛᴜᴛᴏʀɪᴀʟ",
-            url="https://t.me/FlixVersePremium",
+            url="https://t.me/PremiumVersePremium",
             style="danger",
         )
     )

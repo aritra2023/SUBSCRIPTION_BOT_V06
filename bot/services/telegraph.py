@@ -25,9 +25,9 @@ async def _get_or_create_token() -> str:
         async with session.get(
             f"{_TELEGRAPH_API}/createAccount",
             params={
-                "short_name": "FlixVerse",
-                "author_name": "Flix Verse Premium",
-                "author_url": "https://t.me/FlixVersePremium",
+                "short_name": "PremiumVerse",
+                "author_name": "Premium Verse Premium",
+                "author_url": "https://t.me/PremiumVersePremium",
             },
         ) as resp:
             data = await resp.json()
@@ -92,7 +92,7 @@ def _build_content(
     nodes.append({"tag": "hr"})
     nodes.append({"tag": "p", "children": [
         {"tag": "i", "children": [
-            f"◈ {sc('Flix Verse Premium Bot')}  •  "
+            f"◈ {sc('Premium Verse Premium Bot')}  •  "
             f"{datetime.now(timezone.utc).strftime('%d %b %Y, %H:%M')} UTC"
         ]}
     ]})
@@ -116,8 +116,8 @@ async def create_history_page(
             json={
                 "access_token": token,
                 "title": f"History: {user_name}",
-                "author_name": "Flix Verse Premium",
-                "author_url": "https://t.me/FlixVersePremium",
+                "author_name": "Premium Verse Premium",
+                "author_url": "https://t.me/PremiumVersePremium",
                 "content": content,
                 "return_content": False,
             },

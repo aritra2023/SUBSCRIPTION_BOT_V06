@@ -575,9 +575,9 @@ async def cb_help_close(callback: CallbackQuery) -> None:
 @router.callback_query(lambda c: c.data == "support")
 async def cb_support(callback: CallbackQuery) -> None:
     text = (
-        "<blockquote><b>🛟 sᴜᴘᴘᴏʀᴛ — ғʟɪx ᴠᴇʀsᴇ</b></blockquote>\n\n"
+        "<blockquote><b>🛟 sᴜᴘᴘᴏʀᴛ — ᴘʀᴇᴍɪᴜᴍ ᴠᴇʀsᴇ</b></blockquote>\n\n"
         "ɴᴇᴇᴅ ʜᴇʟᴘ? ᴏᴜʀ sᴜᴘᴘᴏʀᴛ ᴛᴇᴀᴍ ɪs ʜᴇʀᴇ ғᴏʀ ʏᴏᴜ.\n\n"
-        "📩 <b>ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ:</b> @FlixVerseSupport\n"
+        "📩 <b>ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ:</b> @PremiumVerseSupport\n"
         "⏰ <b>ʀᴇsᴘᴏɴsᴇ ᴛɪᴍᴇ:</b> ᴡɪᴛʜɪɴ 24 ʜᴏᴜʀs\n\n"
         "ᴘʟᴇᴀsᴇ ᴅᴇsᴄʀɪʙᴇ ʏᴏᴜʀ ɪssᴜᴇ ᴄʟᴇᴀʀʟʏ ᴡʜᴇɴ ᴄᴏɴᴛᴀᴄᴛɪɴɢ sᴜᴘᴘᴏʀᴛ."
     )
