@@ -130,6 +130,7 @@ async def seed_default_plans() -> None:
 # ── Subscriptions ─────────────────────────────────────────────────────────────
 
 async def get_active_subscription(user_id: int) -> Optional[SubscriptionDoc]:
+    """Returns the first active subscription (for renewal checks)."""
     db = get_db()
     now = now_utc()
     sub = await db.subscriptions.find_one(
@@ -137,6 +138,17 @@ async def get_active_subscription(user_id: int) -> Optional[SubscriptionDoc]:
         {"_id": 0},
     )
     return sub
+
+
+async def get_active_subscriptions(user_id: int) -> list[SubscriptionDoc]:
+    """Returns ALL active subscriptions for a user."""
+    db = get_db()
+    now = now_utc()
+    cursor = db.subscriptions.find(
+        {"user_id": user_id, "is_active": True, "end_date": {"$gt": now}},
+        {"_id": 0},
+    )
+    return await cursor.to_list(length=None)
 
 
 async def purchase_subscription(
@@ -166,12 +178,12 @@ async def purchase_subscription(
 
     now = now_utc()
 
-    # If user already has an active subscription for the same plan, extend it
+    # Check if user already has active sub for this SAME plan → extend it
     existing = await db.subscriptions.find_one(
-        {"user_id": user_id, "is_active": True, "end_date": {"$gt": now}},
+        {"user_id": user_id, "plan_name": plan["name"], "is_active": True, "end_date": {"$gt": now}},
         {"_id": 0},
     )
-    is_renewal = existing and existing.get("plan_name") == plan["name"]
+    is_renewal = existing is not None
 
     if is_renewal:
         # Extend from existing end_date
@@ -188,19 +200,19 @@ async def purchase_subscription(
     )
 
     update_fields: dict = {
+        "user_id": user_id,
         "plan_name": plan["name"],
         "duration_days": duration_days,
         "price_paid": price,
         "start_date": now,
         "end_date": end_date,
         "is_active": True,
+        "channels": invite_links if invite_links is not None else plan.get("channels", []),
     }
-    # Only update channels on first purchase — renewals keep existing channels
-    if not is_renewal:
-        update_fields["channels"] = invite_links if invite_links is not None else plan.get("channels", [])
 
+    # Each plan gets its own document; upsert by (user_id, plan_name)
     await db.subscriptions.update_one(
-        {"user_id": user_id},
+        {"user_id": user_id, "plan_name": plan["name"]},
         {"$set": update_fields},
         upsert=True,
     )

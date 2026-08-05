@@ -23,7 +23,9 @@ from keyboards.inline import (
 from services.subscription import (
     get_active_plans,
     get_active_subscription,
+    get_active_subscriptions,
     get_plan,
+    get_setting,
     get_user,
     mark_channel_joined,
     purchase_subscription,
@@ -438,22 +440,25 @@ async def cb_join_channel(callback: CallbackQuery) -> None:
 
 # ── View Plan ─────────────────────────────────────────────────────────────────
 
-async def _send_view_plan(user_id: int, first_name: str, message: Message) -> None:
-    """Shared logic for /myplan command and view_plan callback."""
-    sub = await get_active_subscription(user_id)
+async def _build_plan_text(user_id: int, first_name: str) -> tuple[str, object]:
+    """Build plan view text and keyboard for a user."""
+    subs = await get_active_subscriptions(user_id)
 
-    if sub:
-        end_date = sub["end_date"]
-        remaining = days_remaining(end_date)
-        plan_obj = await get_plan(sub.get("plan_name", ""))
-        plan_display = to_small_caps(plan_obj["display_name"]) if plan_obj else to_small_caps(sub.get("plan_name", ""))
-        text = (
-            "<blockquote><b>📋 ʏᴏᴜʀ ᴄᴜʀʀᴇɴᴛ ᴘʟᴀɴ</b></blockquote>\n\n"
-            f"<i><b>ᴘʟᴀɴ:</b> {plan_display}</i>\n"
-            f"<i><b>sᴛᴀᴛᴜs:</b> ᴀᴄᴛɪᴠᴇ</i>\n"
-            f"<i><b>ᴇxᴘɪʀᴇs:</b> {format_date(end_date)}</i>\n"
-            f"<i><b>ʀᴇᴍᴀɪɴɪɴɢ:</b> {remaining} ᴅᴀʏ(s)</i>"
-        )
+    if subs:
+        parts = ["<blockquote><b>📋 ʏᴏᴜʀ ᴀᴄᴛɪᴠᴇ ᴘʟᴀɴs</b></blockquote>\n"]
+        for sub in subs:
+            end_date = sub["end_date"]
+            remaining = days_remaining(end_date)
+            plan_obj = await get_plan(sub.get("plan_name", ""))
+            plan_display = to_small_caps(plan_obj["display_name"]) if plan_obj else to_small_caps(sub.get("plan_name", ""))
+            parts.append(
+                f"\n<i><b>ᴘʟᴀɴ:</b> {plan_display}</i>\n"
+                f"<i><b>sᴛᴀᴛᴜs:</b> ᴀᴄᴛɪᴠᴇ</i>\n"
+                f"<i><b>ᴇxᴘɪʀᴇs:</b> {format_date(end_date)}</i>\n"
+                f"<i><b>ʀᴇᴍᴀɪɴɪɴɢ:</b> {remaining} ᴅᴀʏ(s)</i>\n"
+                "─────────────────"
+            )
+        text = "\n".join(parts)
         keyboard = back_main_keyboard()
     else:
         text = (
@@ -463,6 +468,12 @@ async def _send_view_plan(user_id: int, first_name: str, message: Message) -> No
         )
         keyboard = no_plan_keyboard()
 
+    return text, keyboard
+
+
+async def _send_view_plan(user_id: int, first_name: str, message: Message) -> None:
+    """Edit existing bot message (callback path) to show plan view."""
+    text, keyboard = await _build_plan_text(user_id, first_name)
     try:
         if message.photo:
             await message.edit_caption(
@@ -481,7 +492,23 @@ async def cmd_myplan(message: Message) -> None:
     user = message.from_user
     if user is None:
         return
-    await _send_view_plan(user.id, user.first_name, message)
+    text, keyboard = await _build_plan_text(user.id, user.first_name)
+    banner_file_id = await get_setting("banner_file_id")
+    # Delete the /myplan command message
+    try:
+        await message.delete()
+    except Exception:
+        pass
+    # Send fresh photo message (matches /start look)
+    if banner_file_id:
+        await message.answer_photo(
+            photo=banner_file_id,
+            caption=text,
+            parse_mode=ParseMode.HTML,
+            reply_markup=keyboard,
+        )
+    else:
+        await message.answer(text=text, parse_mode=ParseMode.HTML, reply_markup=keyboard)
 
 
 @router.callback_query(lambda c: c.data == "view_plan")
