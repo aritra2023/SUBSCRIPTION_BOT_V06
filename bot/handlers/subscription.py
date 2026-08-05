@@ -445,18 +445,19 @@ async def _build_plan_text(user_id: int, first_name: str) -> tuple[str, object]:
     subs = await get_active_subscriptions(user_id)
 
     if subs:
-        parts = ["<blockquote><b>📋 ʏᴏᴜʀ ᴀᴄᴛɪᴠᴇ ᴘʟᴀɴs</b></blockquote>\n"]
+        parts = ["<blockquote><b>📋 ʏᴏᴜʀ ᴀᴄᴛɪᴠᴇ ᴘʟᴀɴs</b></blockquote>"]
         for sub in subs:
             end_date = sub["end_date"]
             remaining = days_remaining(end_date)
             plan_obj = await get_plan(sub.get("plan_name", ""))
             plan_display = to_small_caps(plan_obj["display_name"]) if plan_obj else to_small_caps(sub.get("plan_name", ""))
             parts.append(
-                f"\n<i><b>ᴘʟᴀɴ:</b> {plan_display}</i>\n"
+                f"<blockquote>"
+                f"<i><b>ᴘʟᴀɴ:</b> {plan_display}</i>\n"
                 f"<i><b>sᴛᴀᴛᴜs:</b> ᴀᴄᴛɪᴠᴇ</i>\n"
                 f"<i><b>ᴇxᴘɪʀᴇs:</b> {format_date(end_date)}</i>\n"
-                f"<i><b>ʀᴇᴍᴀɪɴɪɴɢ:</b> {remaining} ᴅᴀʏ(s)</i>\n"
-                "─────────────────"
+                f"<i><b>ʀᴇᴍᴀɪɴɪɴɢ:</b> {remaining} ᴅᴀʏ(s)</i>"
+                f"</blockquote>"
             )
         text = "\n".join(parts)
         keyboard = back_main_keyboard()
