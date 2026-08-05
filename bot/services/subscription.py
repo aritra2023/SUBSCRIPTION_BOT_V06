@@ -6,6 +6,7 @@ from typing import Optional
 
 from database.db import get_db
 from database.models import PlanDoc, SubscriptionDoc, TransactionDoc, UserDoc, now_utc
+from utils.helpers import to_small_caps
 
 logger = logging.getLogger(__name__)
 
@@ -359,10 +360,9 @@ async def process_auto_renewals(bot_instance=None) -> list[dict]:
                 try:
                     await bot_instance.send_message(
                         user_id,
-                        f"<blockquote><b>⏰ Subscription Expired</b></blockquote>\n\n"
-                        f"<b>Plan:</b> {plan_display}\n\n"
-                        f"<blockquote>ℹ️ <i>Your premium access has ended. "
-                        f"Renew your subscription anytime via /start to regain access.</i></blockquote>",
+                        f"<blockquote><b>⏰ {to_small_caps('Subscription Expired')}</b></blockquote>\n\n"
+                        f"<b>{to_small_caps('Plan')}:</b> {to_small_caps(plan_display)}\n\n"
+                        f"<blockquote>ℹ️ <i>{to_small_caps('Your premium access has ended. Renew your subscription anytime via')} /start {to_small_caps('to regain access.')} </i></blockquote>",
                         parse_mode="HTML",
                     )
                 except Exception:
