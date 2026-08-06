@@ -229,7 +229,7 @@ async def purchase_subscription(
         "status": "completed",
     }
     await db.transactions.insert_one(dict(txn))
-    logger.info("User %d purchased plan %s (%d days)", user_id, plan["name"], duration_days)
+    logger.info("User %d purchased plan %s (%d mins)", user_id, plan["name"], duration_minutes)
     return True
 
 
