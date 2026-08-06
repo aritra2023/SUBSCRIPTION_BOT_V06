@@ -1,67 +1,56 @@
 # Flix Verse Premium Bot
 
-A production-grade Telegram bot for managing Flix Verse premium subscriptions.
+A production-grade Telegram bot for managing **Flix Verse** premium subscriptions, built with Python/aiogram and MongoDB.
+
+## How to run
+
+The bot is configured as the **"Flix Verse Telegram Bot"** workflow, which runs:
+
+```
+cd bot && python main.py
+```
+
+Dependencies are installed via pip from `bot/requirements.txt`.
+
+## Required secrets
+
+Set these in Replit Secrets before starting the bot:
+
+| Secret      | Description                              |
+|-------------|------------------------------------------|
+| `BOT_TOKEN` | Telegram bot token from @BotFather       |
+| `ADMIN_ID`  | Your Telegram numeric user ID            |
+| `MONGO_URI` | MongoDB connection string (e.g. Atlas)   |
 
 ## Stack
 
-- **Python 3.11+**
+- **Python 3.11** — runtime
 - **aiogram 3.x** — async Telegram Bot framework
 - **Motor** — async MongoDB driver
 - **python-dotenv** — environment variable loading
 
-## How to Run
-
-```bash
-cd bot && python main.py
-```
-
-The workflow **Flix Verse Telegram Bot** runs this automatically.
-
-## Required Secrets
-
-| Secret | Description |
-|--------|-------------|
-| `BOT_TOKEN` | Telegram bot token from BotFather |
-| `ADMIN_ID` | Telegram numeric user ID of the admin |
-| `MONGO_URI` | MongoDB connection string (e.g. `mongodb+srv://...`) |
-
-## Project Structure
+## Project structure
 
 ```
 bot/
-├── handlers/          # Telegram update handlers
-│   ├── start.py       # /start command & main menu
-│   ├── subscription.py # Buy, view plans, help, support
-│   ├── wallet.py      # Wallet balance & auto-renew toggle
-│   ├── history.py     # Transaction history (Telegraph page)
-│   └── admin.py       # Admin panel
-├── keyboards/
-│   └── inline.py      # All inline keyboards
-├── services/
-│   ├── subscription.py # Business logic (users, plans, wallet)
-│   └── telegraph.py   # Telegraph history page generation
-├── database/
-│   ├── db.py          # MongoDB connection & indexes
-│   └── models.py      # TypedDict models
-├── utils/
-│   └── helpers.py     # Shared utilities (text formatting, welcome text)
-├── filters/
-│   └── admin.py       # Admin-only filter
-├── config.py          # Environment config
-├── loader.py          # Bot & dispatcher instances
-└── main.py            # Entry point + auto-renew loop
+├── handlers/       # Telegram update handlers (start, subscription, wallet, history, admin)
+├── keyboards/      # Inline keyboard definitions
+├── filters/        # Admin-only filter
+├── services/       # Business logic (subscription, telegraph)
+├── database/       # MongoDB connection & models
+├── utils/          # Helper utilities
+├── config.py       # Reads secrets from environment
+├── loader.py       # Bot & dispatcher instances
+└── main.py         # Entry point
 ```
 
-## Admin Commands
+## Admin commands
 
-| Command | Description |
-|---------|-------------|
-| `/admin` | Open the admin panel |
-| `/addplan` | Add a new subscription plan |
-| `/topup` | Top up a user's wallet |
-| `/penalty` | Deduct a penalty from a user's wallet |
+| Command      | Description                        |
+|--------------|------------------------------------|
+| `/admin`     | Open the admin panel               |
+| `/addplan`   | Add a new subscription plan        |
+| `/topup`     | Top up a user's wallet balance     |
+| `/penalty`   | Deduct penalty from a user wallet  |
 
 ## User preferences
-
-- Keep existing Python/aiogram/Motor stack — do not migrate or restructure
-- Minimal changes only; no unnecessary files or packages
