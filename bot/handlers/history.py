@@ -9,7 +9,7 @@ from aiogram.types import CallbackQuery
 from keyboards.inline import history_telegraph_keyboard, history_detail_keyboard, main_menu_keyboard
 from services.subscription import get_user_transactions, get_setting
 from services.telegraph import create_history_page
-from utils.helpers import format_date, mention_html
+from utils.helpers import build_welcome_text, format_date
 
 logger = logging.getLogger(__name__)
 router = Router(name="history")
@@ -114,13 +114,7 @@ async def cb_history_close(callback: CallbackQuery) -> None:
         await callback.answer()
         return
 
-    mention = mention_html(user.id, user.first_name)
-    text = (
-        f"<blockquote expandable><b>ʜɪ ᴛʜᴇʀᴇ,</b> {mention}!</blockquote>\n"
-        f"<blockquote expandable><b>ɪ ᴀᴍ ᴘʀᴇᴍɪᴜᴍ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ʙᴏᴛ ғᴏʀ ᴘʀᴇᴍɪᴜᴍ ᴠᴇʀsᴇ.</b></blockquote>\n\n"
-        f"<blockquote expandable>ɪ ᴄᴀɴ ɢᴇᴛ ʏᴏᴜ ɪɴsᴛᴀɴᴛ ᴀᴄᴄᴇss ᴛᴏ ᴏᴜʀ <b>ᴇxᴄʟᴜsɪᴠᴇ ᴘʀᴇᴍɪᴜᴍ ᴄʜᴀɴɴᴇʟs</b> ʀɪɢʜᴛ ᴀᴡᴀʏ!!</blockquote>\n"
-        f"<blockquote expandable><b>― ᴄʟɪᴄᴋ ᴛʜᴇ ʙᴜᴛᴛᴏɴ ᴛᴏ sᴇᴇ ᴏᴜʀ ᴘʟᴀɴs!</b></blockquote>"
-    )
+    text = build_welcome_text(user.id, user.first_name)
     banner_file_id = await get_setting("banner_file_id")
 
     try:

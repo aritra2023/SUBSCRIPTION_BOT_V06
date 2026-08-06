@@ -7,7 +7,7 @@ from typing import Any
 import aiohttp
 
 from services.subscription import get_setting, set_setting
-from utils.helpers import format_date
+from utils.helpers import format_date, to_small_caps
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,6 @@ def _build_content(
     transactions: list[dict],
 ) -> list[dict[str, Any]]:
     """Build Telegraph page content nodes with small-caps styling."""
-    from utils.helpers import to_small_caps
     nodes: list[dict[str, Any]] = []
 
     sc = to_small_caps  # shorthand

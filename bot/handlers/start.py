@@ -10,20 +10,10 @@ from aiogram.enums import ParseMode
 
 from keyboards.inline import main_menu_keyboard
 from services.subscription import get_or_create_user, get_setting
-from utils.helpers import mention_html, to_small_caps
+from utils.helpers import build_welcome_text, to_small_caps
 
 logger = logging.getLogger(__name__)
 router = Router(name="start")
-
-
-def _build_welcome_text(user_id: int, first_name: str) -> str:
-    mention = mention_html(user_id, first_name)
-    return (
-        f"<blockquote expandable><b>ʜɪ ᴛʜᴇʀᴇ,</b> {mention}!</blockquote>\n"
-        f"<blockquote expandable><b>ɪ ᴀᴍ ᴘʀᴇᴍɪᴜᴍ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ʙᴏᴛ ғᴏʀ ᴘʀᴇᴍɪᴜᴍ ᴠᴇʀsᴇ.</b></blockquote>\n\n"
-        f"<blockquote expandable>ɪ ᴄᴀɴ ɢᴇᴛ ʏᴏᴜ ɪɴsᴛᴀɴᴛ ᴀᴄᴄᴇss ᴛᴏ ᴏᴜʀ <b>ᴇxᴄʟᴜsɪᴠᴇ ᴘʀᴇᴍɪᴜᴍ ᴄʜᴀɴɴᴇʟs</b> ʀɪɢʜᴛ ᴀᴡᴀʏ!!</blockquote>\n"
-        f"<blockquote expandable><b>― ᴄʟɪᴄᴋ ᴛʜᴇ ʙᴜᴛᴛᴏɴ ᴛᴏ sᴇᴇ ᴏᴜʀ ᴘʟᴀɴs!</b></blockquote>"
-    )
 
 
 @router.message(CommandStart())
@@ -39,7 +29,7 @@ async def cmd_start(message: Message) -> None:
         last_name=user.last_name,
     )
 
-    text = _build_welcome_text(user.id, user.first_name)
+    text = build_welcome_text(user.id, user.first_name)
     keyboard = main_menu_keyboard()
     banner_file_id = await get_setting("banner_file_id")
 
@@ -64,7 +54,7 @@ async def cb_back_main(callback: CallbackQuery) -> None:
     if user is None:
         return
 
-    text = _build_welcome_text(user.id, user.first_name)
+    text = build_welcome_text(user.id, user.first_name)
     keyboard = main_menu_keyboard()
     banner_file_id = await get_setting("banner_file_id")
 
