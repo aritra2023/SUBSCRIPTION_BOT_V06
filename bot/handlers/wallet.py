@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from aiogram import Router
+from aiogram.enums import ParseMode
 from aiogram.types import CallbackQuery
 
+from config import ADMIN_ID
 from database.db import get_db
-from keyboards.inline import wallet_keyboard
+from keyboards.inline import add_balance_keyboard, gift_card_keyboard, wallet_keyboard
 from services.subscription import get_user, get_wallet_stats
 from utils.helpers import to_small_caps
 
@@ -79,9 +81,76 @@ async def cb_toggle_auto_renew(callback: CallbackQuery) -> None:
     await callback.answer("ᴀᴜᴛᴏ-ʀᴇɴᴇᴡ " + ("ᴏɴ ✅" if new_val else "ᴏғғ ❌"))
 
 
+# ── Add Balance — Payment Method Selection ────────────────────────────────────
+
 @router.callback_query(lambda c: c.data == "add_balance")
 async def cb_add_balance(callback: CallbackQuery) -> None:
+    text = (
+        "<blockquote><b>➲ sᴇʟᴇᴄᴛ ᴘᴀʏᴍᴇɴᴛ ᴍᴇᴛʜᴏᴅ</b></blockquote>\n\n"
+        "ᴄʜᴏᴏsᴇ ʜᴏᴡ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ʀᴇᴄʜᴀʀɢᴇ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ:\n\n"
+        "⚡ <b>ᴜᴘɪ</b> — ɪɴsᴛᴀɴᴛ, ғᴀsᴛᴇsᴛ ᴏᴘᴛɪᴏɴ\n"
+        "₿ <b>ᴄʀʏᴘᴛᴏ</b> — ʙɪᴛᴄᴏɪɴ, USDT ᴀɴᴅ ᴍᴏʀᴇ\n"
+        "🎁 <b>ᴀᴍᴀᴢᴏɴ ɢɪғᴛ ᴄᴀʀᴅ</b> — ʀᴇᴅᴇᴇᴍ ʏᴏᴜʀ ɢɪғᴛ ᴄᴀʀᴅ"
+    )
+    try:
+        if callback.message and callback.message.photo:
+            await callback.message.edit_caption(
+                caption=text,
+                parse_mode=ParseMode.HTML,
+                reply_markup=add_balance_keyboard(),
+            )
+        elif callback.message:
+            await callback.message.edit_text(
+                text=text,
+                parse_mode=ParseMode.HTML,
+                reply_markup=add_balance_keyboard(),
+            )
+    except Exception:
+        pass
+    await callback.answer()
+
+
+@router.callback_query(lambda c: c.data == "recharge_upi")
+async def cb_recharge_upi(callback: CallbackQuery) -> None:
     await callback.answer(
-        "ᴛᴏ ᴀᴅᴅ ʙᴀʟᴀɴᴄᴇ, ᴘʟᴇᴀsᴇ ᴄᴏɴᴛᴀᴄᴛ ᴛʜᴇ ᴀᴅᴍɪɴ ᴏʀ ᴜsᴇ ᴛʜᴇ ᴘᴀʏᴍᴇɴᴛ ʟɪɴᴋ.",
+        "⚡ ᴜᴘɪ ᴘᴀʏᴍᴇɴᴛ ᴄᴏᴍɪɴɢ sᴏᴏɴ!\nᴘʟᴇᴀsᴇ ᴄʜᴇᴄᴋ ʙᴀᴄᴋ ʟᴀᴛᴇʀ.",
         show_alert=True,
     )
+
+
+@router.callback_query(lambda c: c.data == "recharge_crypto")
+async def cb_recharge_crypto(callback: CallbackQuery) -> None:
+    await callback.answer(
+        "₿ ᴄʀʏᴘᴛᴏ ᴘᴀʏᴍᴇɴᴛ ᴄᴏᴍɪɴɢ sᴏᴏɴ!\nᴘʟᴇᴀsᴇ ᴄʜᴇᴄᴋ ʙᴀᴄᴋ ʟᴀᴛᴇʀ.",
+        show_alert=True,
+    )
+
+
+@router.callback_query(lambda c: c.data == "recharge_gift_card")
+async def cb_recharge_gift_card(callback: CallbackQuery) -> None:
+    text = (
+        "<blockquote><b>🎁 ᴀᴍᴀᴢᴏɴ ɢɪғᴛ ᴄᴀʀᴅ ʀᴇᴄʜᴀʀɢᴇ</b></blockquote>\n\n"
+        "<b>ʜᴏᴡ ᴛᴏ ɢᴇᴛ ᴀɴ ᴀᴍᴀᴢᴏɴ ɢɪғᴛ ᴄᴀʀᴅ:</b>\n\n"
+        "1️⃣ ᴠɪsɪᴛ <b>amazon.in</b> ᴏʀ ᴏᴘᴇɴ ᴛʜᴇ ᴀᴍᴀᴢᴏɴ ᴀᴘᴘ\n"
+        "2️⃣ sᴇᴀʀᴄʜ <b>\"Amazon Pay Gift Card\"</b>\n"
+        "3️⃣ sᴇʟᴇᴄᴛ ᴛʜᴇ ᴀᴍᴏᴜɴᴛ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ᴀᴅᴅ\n"
+        "4️⃣ ᴄʜᴏᴏsᴇ <b>\"Email\"</b> ᴅᴇʟɪᴠᴇʀʏ ᴀɴᴅ ᴄᴏᴍᴘʟᴇᴛᴇ ᴘᴀʏᴍᴇɴᴛ\n"
+        "5️⃣ ʏᴏᴜ ᴡɪʟʟ ʀᴇᴄᴇɪᴠᴇ ᴀ <b>16-ᴅɪɢɪᴛ ᴄᴏᴅᴇ</b> ᴠɪᴀ ᴇᴍᴀɪʟ\n\n"
+        "<blockquote>➲ sᴇɴᴅ ᴛʜᴇ <b>ɢɪғᴛ ᴄᴀʀᴅ ᴄᴏᴅᴇ</b> ᴛᴏ ᴀᴅᴍɪɴ ᴀɴᴅ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ ᴡɪʟʟ ʙᴇ ᴛᴏᴘᴘᴇᴅ ᴜᴘ ᴍᴀɴᴜᴀʟʟʏ.</blockquote>"
+    )
+    try:
+        if callback.message and callback.message.photo:
+            await callback.message.edit_caption(
+                caption=text,
+                parse_mode=ParseMode.HTML,
+                reply_markup=gift_card_keyboard(ADMIN_ID),
+            )
+        elif callback.message:
+            await callback.message.edit_text(
+                text=text,
+                parse_mode=ParseMode.HTML,
+                reply_markup=gift_card_keyboard(ADMIN_ID),
+            )
+    except Exception:
+        pass
+    await callback.answer()

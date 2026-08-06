@@ -123,13 +123,14 @@ def duration_keyboard(plan_name: str, durations: list[dict], demo_link: str = ""
 def subscription_activated_keyboard(
     channels: list[str],
 ) -> InlineKeyboardMarkup:
-    """Shown after subscription is activated — direct URL join buttons, red back."""
+    """Shown after subscription is activated — direct URL join buttons (green), red back."""
     builder = InlineKeyboardBuilder()
     for i, link in enumerate(channels):
         builder.row(
             InlineKeyboardButton(
                 text="➲ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ",
                 url=link,
+                style="success",
             )
         )
     builder.row(
@@ -138,6 +139,52 @@ def subscription_activated_keyboard(
             callback_data="back_main",
             style="danger",
         ),
+    )
+    return builder.as_markup()
+
+
+def add_balance_keyboard() -> InlineKeyboardMarkup:
+    """Recharge wallet — 3 payment options."""
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(
+            text="⚡ ᴜᴘɪ  (ғᴀsᴛᴇsᴛ)",
+            callback_data="recharge_upi",
+            style="success",
+        )
+    )
+    builder.row(
+        InlineKeyboardButton(
+            text="₿ ᴄʀʏᴘᴛᴏ",
+            callback_data="recharge_crypto",
+            style="primary",
+        )
+    )
+    builder.row(
+        InlineKeyboardButton(
+            text="🎁 ᴀᴍᴀᴢᴏɴ ɢɪғᴛ ᴄᴀʀᴅ",
+            callback_data="recharge_gift_card",
+            style="primary",
+        )
+    )
+    builder.row(
+        InlineKeyboardButton(text="« ʙᴀᴄᴋ", callback_data="wallet", style="danger"),
+    )
+    return builder.as_markup()
+
+
+def gift_card_keyboard(admin_id: int) -> InlineKeyboardMarkup:
+    """Shown on the Gift Card instructions screen."""
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(
+            text="➲ ᴄᴏɴᴛᴀᴄᴛ ᴀᴅᴍɪɴ",
+            url=f"tg://user?id={admin_id}",
+            style="primary",
+        )
+    )
+    builder.row(
+        InlineKeyboardButton(text="« ʙᴀᴄᴋ", callback_data="add_balance", style="danger"),
     )
     return builder.as_markup()
 
