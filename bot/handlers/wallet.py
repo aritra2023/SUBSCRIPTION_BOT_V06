@@ -127,7 +127,11 @@ async def cb_recharge_crypto(callback: CallbackQuery) -> None:
 async def cb_recharge_gift_card(callback: CallbackQuery) -> None:
     text = (
         "<blockquote><b>ᴀᴍᴀᴢᴏɴ ɢɪғᴛ ᴄᴀʀᴅ ʀᴇᴄʜᴀʀɢᴇ</b></blockquote>\n\n"
-        "➲ sᴇɴᴅ ʏᴏᴜʀ <b>16-ᴅɪɢɪᴛ ɢɪғᴛ ᴄᴀʀᴅ ᴄᴏᴅᴇ</b> ᴛᴏ ᴀᴅᴍɪɴ.\n\n"
+        "1. ᴏᴘᴇɴ <b>Amazon.in</b>\n"
+        "2. sᴇᴀʀᴄʜ <b>Amazon Pay Gift Card</b>\n"
+        "3. sᴇʟᴇᴄᴛ ᴀᴍᴏᴜɴᴛ ᴀɴᴅ ʙᴜʏ\n"
+        "4. ʏᴏᴜ ᴡɪʟʟ ɢᴇᴛ ᴀ <b>16-ᴅɪɢɪᴛ ᴄᴏᴅᴇ</b>\n\n"
+        "➲ sᴇɴᴅ ᴛʜᴀᴛ ᴄᴏᴅᴇ ᴛᴏ ᴀᴅᴍɪɴ.\n\n"
         "<blockquote>ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ ᴡɪʟʟ ʙᴇ ʀᴇᴄʜᴀʀɢᴇᴅ ɪɴsᴛᴀɴᴛʟʏ. ✅</blockquote>"
     )
     try:
