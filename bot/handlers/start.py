@@ -4,6 +4,7 @@ import logging
 
 from aiogram import Router
 from aiogram.filters import CommandStart, Command
+from config import ADMIN_ID
 from aiogram.types import Message, CallbackQuery
 from aiogram.enums import ParseMode
 
@@ -95,4 +96,6 @@ _ADMIN_ONLY_MSG = (
 
 @router.message(Command("admin", "addplan", "topup", "penalty"))
 async def cmd_admin_only_fallback(message: Message) -> None:
+    if message.from_user and message.from_user.id == ADMIN_ID:
+        return
     await message.answer(_ADMIN_ONLY_MSG, parse_mode=ParseMode.HTML)
