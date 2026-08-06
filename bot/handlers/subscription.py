@@ -251,26 +251,10 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
     existing_sub = await get_active_subscription(user_id)
     is_renewal = existing_sub and existing_sub.get("plan_name") == plan["name"]
 
-    # Always generate fresh invite links (new purchase AND renewal)
-    invite_links: list[str] = []
     raw_channels = plan.get("channels", [])
-    for ch in raw_channels:
-        try:
-            chat_id: int | str = int(str(ch).strip())
-        except ValueError:
-            chat_id = str(ch).strip()
-        try:
-            link_obj = await bot.create_chat_invite_link(chat_id, member_limit=1)
-            invite_links.append(link_obj.invite_link)
-        except Exception as e:
-            logger.warning("Failed to create invite link for channel %s: %s", ch, e)
-            ch_str = str(ch).strip()
-            if ch_str.startswith("t.me"):
-                ch_str = "https://" + ch_str
-            if ch_str.startswith("http"):
-                invite_links.append(ch_str)
 
-    success = await purchase_subscription(user_id, plan, mins, invite_links=invite_links)
+    # Links are generated on-demand when user taps Join Channel, not pre-generated here
+    success = await purchase_subscription(user_id, plan, mins)
 
     if success:
         durations = plan.get("durations", [])
@@ -281,16 +265,17 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
         user_info = await get_user(user_id)
         new_balance = user_info.get("wallet_balance", 0.0) if user_info else 0.0
 
-        if is_renewal and invite_links:
+        channel_count = len(raw_channels)
+        if is_renewal and channel_count:
             text = (
                 f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴇxᴛᴇɴᴅᴇᴅ!</b></blockquote>\n\n"
                 f"<b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
                 f"<b>ᴀᴅᴅᴇᴅ:</b> {duration_label}\n"
                 f"<b>ᴀᴍᴏᴜɴᴛ ᴘᴀɪᴅ:</b> ₹{price:.0f}\n"
                 f"<b>ʀᴇᴍᴀɪɴɪɴɢ ʙᴀʟᴀɴᴄᴇ:</b> ₹{new_balance:.2f}\n\n"
-                f"<blockquote>⚠️ <i>ɴᴇᴡ ɪɴᴠɪᴛᴇ ʟɪɴᴋs ɢᴇɴᴇʀᴀᴛᴇᴅ. ᴇᴀᴄʜ ʟɪɴᴋ ᴄᴀɴ ᴏɴʟʏ ʙᴇ ᴜsᴇᴅ ᴏɴᴄᴇ ᴀɴᴅ ᴡɪʟʟ ᴇxᴘɪʀᴇ ᴀғᴛᴇʀ ᴊᴏɪɴɪɴɢ.</i></blockquote>"
+                f"<blockquote>⚠️ <i>ᴛᴀᴘ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ ᴛᴏ ɢᴇᴛ ᴀ ғʀᴇsʜ ɪɴᴠɪᴛᴇ ʟɪɴᴋ.</i></blockquote>"
             )
-            activated_keyboard = subscription_activated_keyboard(invite_links)
+            activated_keyboard = subscription_activated_keyboard(channel_count)
         elif is_renewal:
             text = (
                 f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴇxᴛᴇɴᴅᴇᴅ!</b></blockquote>\n\n"
@@ -301,16 +286,16 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
                 f"<blockquote>📩 <i>ᴀᴅᴍɪɴ ᴡɪʟʟ sᴇɴᴅ ʏᴏᴜʀ ɴᴇᴡ ɪɴᴠɪᴛᴇ ʟɪɴᴋ sʜᴏʀᴛʟʏ.</i></blockquote>"
             )
             activated_keyboard = back_main_keyboard()
-        elif invite_links:
+        elif channel_count:
             text = (
                 f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!</b></blockquote>\n\n"
                 f"<b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
                 f"<b>ᴅᴜʀᴀᴛɪᴏɴ:</b> {duration_label}\n"
                 f"<b>ᴀᴍᴏᴜɴᴛ ᴘᴀɪᴅ:</b> ₹{price:.0f}\n"
                 f"<b>ʀᴇᴍᴀɪɴɪɴɢ ʙᴀʟᴀɴᴄᴇ:</b> ₹{new_balance:.2f}\n\n"
-                f"<blockquote>⚠️ <i>ᴛʜɪs ɪɴᴠɪᴛᴇ ʟɪɴᴋ ᴄᴀɴ ᴏɴʟʏ ʙᴇ ᴊᴏɪɴᴇᴅ ᴏɴᴄᴇ. ᴏɴᴄᴇ ʏᴏᴜ ʜᴀᴠᴇ ᴊᴏɪɴᴇᴅ, ᴛʜᴇ ʟɪɴᴋ ᴡɪʟʟ ᴇxᴘɪʀᴇ ᴀɴᴅ ᴄᴀɴɴᴏᴛ ʙᴇ ᴜsᴇᴅ ᴀɢᴀɪɴ.</i></blockquote>"
+                f"<blockquote>⚠️ <i>ᴛᴀᴘ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ — ᴀ ғʀᴇsʜ ʟɪɴᴋ ɪs ɢᴇɴᴇʀᴀᴛᴇᴅ ᴊᴜsᴛ ғᴏʀ ʏᴏᴜ ᴡʜᴇɴ ʏᴏᴜ ᴛᴀᴘ.</i></blockquote>"
             )
-            activated_keyboard = subscription_activated_keyboard(invite_links)
+            activated_keyboard = subscription_activated_keyboard(channel_count)
         else:
             text = (
                 f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!</b></blockquote>\n\n"
@@ -320,7 +305,6 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
                 f"<b>ʀᴇᴍᴀɪɴɪɴɢ ʙᴀʟᴀɴᴄᴇ:</b> ₹{new_balance:.2f}\n\n"
                 f"<blockquote>📩 <i>ʏᴏᴜʀ ᴄʜᴀɴɴᴇʟ ɪɴᴠɪᴛᴇ ʟɪɴᴋ ᴡɪʟʟ ʙᴇ sᴇɴᴛ ʙʏ ᴀᴅᴍɪɴ sʜᴏʀᴛʟʏ.\nᴘʟᴇᴀsᴇ ᴄᴏɴᴛᴀᴄᴛ sᴜᴘᴘᴏʀᴛ ɪғ ɴᴏᴛ ʀᴇᴄᴇɪᴠᴇᴅ ᴡɪᴛʜɪɴ 5 ᴍɪɴᴜᴛᴇs.</i></blockquote>"
             )
-            logger.warning("Could not generate invite links for plan %s (user %d)", plan['name'], user_id)
             activated_keyboard = back_main_keyboard()
 
         # Notify admin about the purchase

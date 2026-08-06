@@ -121,15 +121,18 @@ def duration_keyboard(plan_name: str, durations: list[dict], demo_link: str = ""
 
 
 def subscription_activated_keyboard(
-    channels: list[str],
+    channel_count: int,
 ) -> InlineKeyboardMarkup:
-    """Shown after subscription is activated — direct URL join buttons (green), red back."""
+    """Shown after subscription is activated — on-demand join callbacks (green), red back.
+    Links are generated fresh when the user taps, not pre-generated at purchase time.
+    """
     builder = InlineKeyboardBuilder()
-    for i, link in enumerate(channels):
+    for i in range(channel_count):
+        label = f"➲ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ {i + 1}" if channel_count > 1 else "➲ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ"
         builder.row(
             InlineKeyboardButton(
-                text="➲ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ",
-                url=link,
+                text=label,
+                callback_data=f"join_ch:{i}",
                 style="success",
             )
         )
