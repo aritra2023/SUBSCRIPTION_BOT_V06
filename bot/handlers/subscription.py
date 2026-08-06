@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import datetime, timedelta, timezone
 
 from aiogram import Router
 from aiogram.enums import ParseMode
@@ -253,7 +254,6 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
 
     raw_channels = plan.get("channels", [])
 
-    # Links are generated on-demand when user taps Join Channel, not pre-generated here
     success = await purchase_subscription(user_id, plan, mins)
 
     if success:
@@ -265,45 +265,41 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
         user_info = await get_user(user_id)
         new_balance = user_info.get("wallet_balance", 0.0) if user_info else 0.0
 
-        channel_count = len(raw_channels)
-        if is_renewal and channel_count:
+        # Generate invite links now — expire in 24 h, no member_limit so they
+        # cannot be "consumed" by Telegram's link-preview fetcher.
+        invite_links: list[str] = []
+        link_expire = datetime.now(timezone.utc) + timedelta(hours=24)
+        for ch in raw_channels:
+            try:
+                chat_id: int | str = int(str(ch).strip())
+            except ValueError:
+                chat_id = str(ch).strip()
+            try:
+                link_obj = await bot.create_chat_invite_link(chat_id, expire_date=link_expire)
+                invite_links.append(link_obj.invite_link)
+            except Exception as e:
+                logger.warning("Failed to create invite link for %s: %s", ch, e)
+
+        action = "ᴇxᴛᴇɴᴅᴇᴅ" if is_renewal else "ᴀᴄᴛɪᴠᴀᴛᴇᴅ"
+        dur_line = f"<b>ᴀᴅᴅᴇᴅ:</b> {duration_label}" if is_renewal else f"<b>ᴅᴜʀᴀᴛɪᴏɴ:</b> {duration_label}"
+        if invite_links:
             text = (
-                f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴇxᴛᴇɴᴅᴇᴅ!</b></blockquote>\n\n"
+                f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ {action}!</b></blockquote>\n\n"
                 f"<b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
-                f"<b>ᴀᴅᴅᴇᴅ:</b> {duration_label}\n"
+                f"{dur_line}\n"
                 f"<b>ᴀᴍᴏᴜɴᴛ ᴘᴀɪᴅ:</b> ₹{price:.0f}\n"
                 f"<b>ʀᴇᴍᴀɪɴɪɴɢ ʙᴀʟᴀɴᴄᴇ:</b> ₹{new_balance:.2f}\n\n"
-                f"<blockquote>⚠️ <i>ᴛᴀᴘ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ ᴛᴏ ɢᴇᴛ ᴀ ғʀᴇsʜ ɪɴᴠɪᴛᴇ ʟɪɴᴋ.</i></blockquote>"
+                f"<blockquote>⚠️ <i>ᴊᴏɪɴ ʟɪɴᴋ ᴠᴀʟɪᴅ ғᴏʀ 24 ʜᴏᴜʀs.</i></blockquote>"
             )
-            activated_keyboard = subscription_activated_keyboard(channel_count)
-        elif is_renewal:
-            text = (
-                f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴇxᴛᴇɴᴅᴇᴅ!</b></blockquote>\n\n"
-                f"<b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
-                f"<b>ᴀᴅᴅᴇᴅ:</b> {duration_label}\n"
-                f"<b>ᴀᴍᴏᴜɴᴛ ᴘᴀɪᴅ:</b> ₹{price:.0f}\n"
-                f"<b>ʀᴇᴍᴀɪɴɪɴɢ ʙᴀʟᴀɴᴄᴇ:</b> ₹{new_balance:.2f}\n\n"
-                f"<blockquote>📩 <i>ᴀᴅᴍɪɴ ᴡɪʟʟ sᴇɴᴅ ʏᴏᴜʀ ɴᴇᴡ ɪɴᴠɪᴛᴇ ʟɪɴᴋ sʜᴏʀᴛʟʏ.</i></blockquote>"
-            )
-            activated_keyboard = back_main_keyboard()
-        elif channel_count:
-            text = (
-                f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!</b></blockquote>\n\n"
-                f"<b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
-                f"<b>ᴅᴜʀᴀᴛɪᴏɴ:</b> {duration_label}\n"
-                f"<b>ᴀᴍᴏᴜɴᴛ ᴘᴀɪᴅ:</b> ₹{price:.0f}\n"
-                f"<b>ʀᴇᴍᴀɪɴɪɴɢ ʙᴀʟᴀɴᴄᴇ:</b> ₹{new_balance:.2f}\n\n"
-                f"<blockquote>⚠️ <i>ᴛᴀᴘ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ — ᴀ ғʀᴇsʜ ʟɪɴᴋ ɪs ɢᴇɴᴇʀᴀᴛᴇᴅ ᴊᴜsᴛ ғᴏʀ ʏᴏᴜ ᴡʜᴇɴ ʏᴏᴜ ᴛᴀᴘ.</i></blockquote>"
-            )
-            activated_keyboard = subscription_activated_keyboard(channel_count)
+            activated_keyboard = subscription_activated_keyboard(invite_links)
         else:
             text = (
-                f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!</b></blockquote>\n\n"
+                f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ {action}!</b></blockquote>\n\n"
                 f"<b>ᴘʟᴀɴ:</b> {plan['display_name']}\n"
-                f"<b>ᴅᴜʀᴀᴛɪᴏɴ:</b> {duration_label}\n"
+                f"{dur_line}\n"
                 f"<b>ᴀᴍᴏᴜɴᴛ ᴘᴀɪᴅ:</b> ₹{price:.0f}\n"
                 f"<b>ʀᴇᴍᴀɪɴɪɴɢ ʙᴀʟᴀɴᴄᴇ:</b> ₹{new_balance:.2f}\n\n"
-                f"<blockquote>📩 <i>ʏᴏᴜʀ ᴄʜᴀɴɴᴇʟ ɪɴᴠɪᴛᴇ ʟɪɴᴋ ᴡɪʟʟ ʙᴇ sᴇɴᴛ ʙʏ ᴀᴅᴍɪɴ sʜᴏʀᴛʟʏ.\nᴘʟᴇᴀsᴇ ᴄᴏɴᴛᴀᴄᴛ sᴜᴘᴘᴏʀᴛ ɪғ ɴᴏᴛ ʀᴇᴄᴇɪᴠᴇᴅ ᴡɪᴛʜɪɴ 5 ᴍɪɴᴜᴛᴇs.</i></blockquote>"
+                f"<blockquote>📩 <i>ɪɴᴠɪᴛᴇ ʟɪɴᴋ ᴡɪʟʟ ʙᴇ sᴇɴᴛ ʙʏ ᴀᴅᴍɪɴ sʜᴏʀᴛʟʏ.</i></blockquote>"
             )
             activated_keyboard = back_main_keyboard()
 
@@ -385,38 +381,36 @@ async def cb_join_channel(callback: CallbackQuery) -> None:
                 chat_id_gen: int | str = int(str(raw_ch).strip())
             except ValueError:
                 chat_id_gen = str(raw_ch).strip()
-            link_obj = await bot.create_chat_invite_link(chat_id_gen, member_limit=1)
+            link_expire = datetime.now(timezone.utc) + timedelta(hours=24)
+            link_obj = await bot.create_chat_invite_link(chat_id_gen, expire_date=link_expire)
             link = link_obj.invite_link
         except Exception as e:
-            logger.error("Could not generate fresh invite link for channel %s: %s", raw_ch, e)
+            logger.error("Could not generate invite link for channel %s: %s", raw_ch, e)
 
     if not link:
         await callback.answer(
-            "❌ ʟɪɴᴋ ɢᴇɴᴇʀᴀᴛɪᴏɴ ғᴀɪʟᴇᴅ.\n\n"
-            "ᴍᴀᴋᴇ sᴜʀᴇ ᴛʜᴇ ʙᴏᴛ ɪs ᴀᴅᴍɪɴ ɪɴ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ᴡɪᴛʜ ɪɴᴠɪᴛᴇ ᴘᴇʀᴍɪssɪᴏɴ.",
+            "❌ ʟɪɴᴋ ɢᴇɴᴇʀᴀᴛɪᴏɴ ғᴀɪʟᴇᴅ.\n\nᴍᴀᴋᴇ sᴜʀᴇ ᴛʜᴇ ʙᴏᴛ ɪs ᴀᴅᴍɪɴ ɪɴ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ ᴡɪᴛʜ ɪɴᴠɪᴛᴇ ᴘᴇʀᴍɪssɪᴏɴ.",
             show_alert=True,
         )
         return
 
     await mark_channel_joined(user_id, idx)
 
-    # Show link as a URL button — NOT as text in the message body.
-    # Telegram fetches link previews from message text, which consumes
-    # member_limit=1 invite links before the user can tap them.
-    # URL buttons are never previewed, so the link stays valid.
-    new_text = "<blockquote><b>✓ ʟɪɴᴋ ʀᴇᴀᴅʏ!</b></blockquote>\n\n<i>ᴛᴀᴘ ᴛʜᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ᴊᴏɪɴ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ.</i>"
+    # URL button — Telegram never fetches previews for URL buttons,
+    # so the invite link cannot be consumed before the user taps it.
     from aiogram.utils.keyboard import InlineKeyboardBuilder as IKB
     from aiogram.types import InlineKeyboardButton as IKBtn
     done_kb = IKB()
     done_kb.row(IKBtn(text="➲ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ", url=link))
     done_kb.row(IKBtn(text="« ʙᴀᴄᴋ ᴛᴏ ᴍᴇɴᴜ", callback_data="back_main"))
+    new_text = "<blockquote><b>✓ ʟɪɴᴋ ʀᴇᴀᴅʏ — ᴛᴀᴘ ʙᴇʟᴏᴡ ᴛᴏ ᴊᴏɪɴ</b></blockquote>"
     try:
         if callback.message and callback.message.photo:
             await callback.message.edit_caption(caption=new_text, parse_mode=ParseMode.HTML, reply_markup=done_kb.as_markup())
         elif callback.message:
             await callback.message.edit_text(text=new_text, parse_mode=ParseMode.HTML, reply_markup=done_kb.as_markup())
     except Exception as e:
-        logger.warning("Could not edit message with link: %s", e)
+        logger.warning("Could not edit message: %s", e)
         await bot.send_message(user_id, new_text, parse_mode=ParseMode.HTML, reply_markup=done_kb.as_markup())
 
     await callback.answer()
