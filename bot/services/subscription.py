@@ -119,9 +119,9 @@ async def seed_default_plans() -> None:
         demo_link="",
         payment_proof_required=True,
         durations=[
-            {"days": 30,  "label": "1 ᴍᴏɴᴛʜ",   "price": 299.0},
-            {"days": 90,  "label": "3 ᴍᴏɴᴛʜs",  "price": 799.0},
-            {"days": 180, "label": "6 ᴍᴏɴᴛʜs",  "price": 1499.0},
+            {"minutes": 43200,  "label": "1 ᴍᴏɴᴛʜ",  "price": 299.0},
+            {"minutes": 129600, "label": "3 ᴍᴏɴᴛʜs", "price": 799.0},
+            {"minutes": 259200, "label": "6 ᴍᴏɴᴛʜs", "price": 1499.0},
         ],
         channels=[],
     )
@@ -155,7 +155,7 @@ async def get_active_subscriptions(user_id: int) -> list[SubscriptionDoc]:
 async def purchase_subscription(
     user_id: int,
     plan: PlanDoc,
-    duration_days: int,
+    duration_minutes: int,
     invite_links: list[str] | None = None,
 ) -> bool:
     db = get_db()
@@ -165,10 +165,10 @@ async def purchase_subscription(
 
     # Find price for this duration tier
     durations = plan.get("durations") or []
-    tier = next((d for d in durations if d["days"] == duration_days), None)
+    tier = next((d for d in durations if d["minutes"] == duration_minutes), None)
     if tier:
         price = tier["price"]
-    elif duration_days == plan.get("duration_days"):
+    elif duration_minutes == plan.get("duration_minutes"):
         price = plan.get("price", 0.0)
     else:
         return False
@@ -186,7 +186,7 @@ async def purchase_subscription(
     )
     is_renewal = existing is not None
 
-    duration_delta = timedelta(minutes=1) if duration_days == 0 else timedelta(days=duration_days)
+    duration_delta = timedelta(minutes=duration_minutes)
     if is_renewal:
         # Extend from existing end_date
         base = existing["end_date"]
@@ -204,7 +204,7 @@ async def purchase_subscription(
     update_fields: dict = {
         "user_id": user_id,
         "plan_name": plan["name"],
-        "duration_days": duration_days,
+        "duration_minutes": duration_minutes,
         "price_paid": price,
         "start_date": now,
         "end_date": end_date,
@@ -345,7 +345,7 @@ async def process_auto_renewals(bot_instance=None) -> list[dict]:
     for sub in expired:
         user_id = sub["user_id"]
         plan_name = sub.get("plan_name")
-        sub_duration_days = sub.get("duration_days", 30)
+        sub_duration_mins = sub.get("duration_minutes", 43200)
 
         user = await get_user(user_id)
         _plan_obj = await get_plan(plan_name) if plan_name else None
@@ -379,16 +379,16 @@ async def process_auto_renewals(bot_instance=None) -> list[dict]:
 
         # Find price for same duration tier
         durations = plan.get("durations") or []
-        tier = next((d for d in durations if d["days"] == sub_duration_days), None)
+        tier = next((d for d in durations if d["minutes"] == sub_duration_mins), None)
         if tier:
             price = tier["price"]
-        elif sub_duration_days == plan.get("duration_days"):
+        elif sub_duration_mins == plan.get("duration_minutes"):
             price = plan.get("price", 0.0)
         elif durations:
             # Fallback: cheapest tier
             tier = min(durations, key=lambda d: d["price"])
             price = tier["price"]
-            sub_duration_days = tier["days"]
+            sub_duration_mins = tier["minutes"]
         else:
             await db.subscriptions.update_one(
                 {"user_id": user_id}, {"$set": {"is_active": False}}
@@ -406,7 +406,7 @@ async def process_auto_renewals(bot_instance=None) -> list[dict]:
             results.append({"user_id": user_id, "status": "insufficient_funds", "plan": plan, "price_paid": 0})
             logger.info("Auto-renew failed (low balance) for user %d", user_id)
         else:
-            end_date = now + timedelta(days=sub_duration_days)
+            end_date = now + timedelta(minutes=sub_duration_mins)
             await db.users.update_one(
                 {"user_id": user_id}, {"$inc": {"wallet_balance": -price}}
             )
@@ -415,7 +415,7 @@ async def process_auto_renewals(bot_instance=None) -> list[dict]:
                 {
                     "$set": {
                         "plan_name": plan["name"],
-                        "duration_days": sub_duration_days,
+                        "duration_minutes": sub_duration_mins,
                         "price_paid": price,
                         "start_date": now,
                         "end_date": end_date,

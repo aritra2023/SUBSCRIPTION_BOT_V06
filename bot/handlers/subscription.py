@@ -30,7 +30,7 @@ from services.subscription import (
     mark_channel_joined,
     purchase_subscription,
 )
-from utils.helpers import format_date, days_remaining, to_small_caps
+from utils.helpers import format_date, days_remaining, to_small_caps, format_duration_mins
 
 logger = logging.getLogger(__name__)
 router = Router(name="subscription")
@@ -119,8 +119,9 @@ async def cb_plan_select(callback: CallbackQuery) -> None:
         return
 
     durations = plan.get("durations", [])
-    regular = [d for d in durations if d.get("days", 0) < 36500]
-    lifetime = next((d for d in durations if d.get("days", 0) >= 36500), None)
+    _LIFETIME_MINS = 52560000
+    regular = [d for d in durations if d.get("minutes", 0) < _LIFETIME_MINS]
+    lifetime = next((d for d in durations if d.get("minutes", 0) >= _LIFETIME_MINS), None)
 
     # Header — plan name
     plan_name_sc = to_small_caps(plan['display_name'])
@@ -147,7 +148,7 @@ async def cb_plan_select(callback: CallbackQuery) -> None:
     if durations:
         keyboard = duration_keyboard(plan_name, durations, demo_link=demo_link)
     else:
-        keyboard = confirm_plan_keyboard(plan_name, plan.get("duration_days", 30))
+        keyboard = confirm_plan_keyboard(plan_name, plan.get("duration_minutes", 43200))
 
     try:
         if callback.message and callback.message.photo:
@@ -168,8 +169,8 @@ async def cb_plan_select(callback: CallbackQuery) -> None:
 
 @router.callback_query(lambda c: c.data and c.data.startswith("plan_duration:"))
 async def cb_plan_duration(callback: CallbackQuery) -> None:
-    _, plan_name, days_str = (callback.data or "").split(":", 2)  # type: ignore[union-attr]
-    days = int(days_str)
+    _, plan_name, mins_str = (callback.data or "").split(":", 2)  # type: ignore[union-attr]
+    mins = int(mins_str)
     plan = await get_plan(plan_name)
 
     if not plan:
@@ -177,7 +178,7 @@ async def cb_plan_duration(callback: CallbackQuery) -> None:
         return
 
     durations = plan.get("durations", [])
-    tier = next((d for d in durations if d["days"] == days), None)
+    tier = next((d for d in durations if d["minutes"] == mins), None)
     if not tier:
         await callback.answer("ᴅᴜʀᴀᴛɪᴏɴ ɴᴏᴛ ғᴏᴜɴᴅ.", show_alert=True)
         return
@@ -219,13 +220,13 @@ async def cb_plan_duration(callback: CallbackQuery) -> None:
             await callback.message.edit_caption(
                 caption=text,
                 parse_mode=ParseMode.HTML,
-                reply_markup=confirm_plan_keyboard(plan_name, days, insufficient=insufficient),
+                reply_markup=confirm_plan_keyboard(plan_name, mins, insufficient=insufficient),
             )
         elif callback.message:
             await callback.message.edit_text(
                 text=text,
                 parse_mode=ParseMode.HTML,
-                reply_markup=confirm_plan_keyboard(plan_name, days, insufficient=insufficient),
+                reply_markup=confirm_plan_keyboard(plan_name, mins, insufficient=insufficient),
             )
     except Exception:
         pass
@@ -237,8 +238,8 @@ async def cb_plan_duration(callback: CallbackQuery) -> None:
 
 @router.callback_query(lambda c: c.data and c.data.startswith("plan_confirm:"))
 async def cb_plan_confirm(callback: CallbackQuery) -> None:
-    _, plan_name, days_str = (callback.data or "").split(":", 2)  # type: ignore[union-attr]
-    days = int(days_str)
+    _, plan_name, mins_str = (callback.data or "").split(":", 2)  # type: ignore[union-attr]
+    mins = int(mins_str)
     plan = await get_plan(plan_name)
     user_id = callback.from_user.id if callback.from_user else 0
 
@@ -269,12 +270,12 @@ async def cb_plan_confirm(callback: CallbackQuery) -> None:
             if ch_str.startswith("http"):
                 invite_links.append(ch_str)
 
-    success = await purchase_subscription(user_id, plan, days, invite_links=invite_links)
+    success = await purchase_subscription(user_id, plan, mins, invite_links=invite_links)
 
     if success:
         durations = plan.get("durations", [])
-        tier = next((d for d in durations if d["days"] == days), None)
-        duration_label = tier["label"] if tier else f"{days} ᴅᴀʏs"
+        tier = next((d for d in durations if d["minutes"] == mins), None)
+        duration_label = tier["label"] if tier else format_duration_mins(mins)
         price = tier["price"] if tier else plan.get("price", 0)
 
         user_info = await get_user(user_id)

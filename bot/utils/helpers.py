@@ -32,3 +32,19 @@ def days_remaining(end_date: datetime) -> int:
 
 def mention_html(user_id: int, name: str) -> str:
     return f'<a href="tg://user?id={user_id}">{to_small_caps(name)}</a>'
+
+
+def format_duration_mins(minutes: int) -> str:
+    """Convert a duration in minutes to a human-readable small-caps label."""
+    if minutes < 60:
+        unit = "ᴍɪɴ" if minutes == 1 else "ᴍɪɴs"
+        return f"{minutes} {unit}"
+    if minutes < 1440:
+        hrs = minutes / 60
+        hrs_display = int(hrs) if hrs == int(hrs) else round(hrs, 1)
+        unit = "ʜʀ" if hrs_display == 1 else "ʜʀs"
+        return f"{hrs_display} {unit}"
+    days = minutes / 1440
+    days_display = int(days) if days == int(days) else round(days, 1)
+    unit = "ᴅᴀʏ" if days_display == 1 else "ᴅᴀʏs"
+    return f"{days_display} {unit}"

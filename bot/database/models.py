@@ -18,7 +18,7 @@ class UserDoc(TypedDict, total=False):
 
 
 class DurationTier(TypedDict):
-    days: int
+    minutes: int
     label: str
     price: float
 
@@ -39,7 +39,7 @@ class PlanDoc(TypedDict, total=False):
 class SubscriptionDoc(TypedDict, total=False):
     user_id: int
     plan_name: str
-    duration_days: int
+    duration_minutes: int
     price_paid: float
     start_date: datetime
     end_date: datetime

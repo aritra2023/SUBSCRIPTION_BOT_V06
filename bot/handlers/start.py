@@ -3,13 +3,13 @@ from __future__ import annotations
 import logging
 
 from aiogram import Router
-from aiogram.filters import CommandStart
+from aiogram.filters import CommandStart, Command
 from aiogram.types import Message, CallbackQuery
 from aiogram.enums import ParseMode
 
 from keyboards.inline import main_menu_keyboard
 from services.subscription import get_or_create_user, get_setting
-from utils.helpers import mention_html
+from utils.helpers import mention_html, to_small_caps
 
 logger = logging.getLogger(__name__)
 router = Router(name="start")
@@ -84,3 +84,15 @@ async def cb_back_main(callback: CallbackQuery) -> None:
         pass
 
     await callback.answer()
+
+
+# ── Admin command fallback for non-admins ─────────────────────────────────────
+
+_ADMIN_ONLY_MSG = (
+    f"<blockquote><b>🔒 {to_small_caps('Admin Only')}</b></blockquote>\n\n"
+    f"{to_small_caps('This command is restricted to admins only.')}"
+)
+
+@router.message(Command("admin", "addplan", "topup", "penalty"))
+async def cmd_admin_only_fallback(message: Message) -> None:
+    await message.answer(_ADMIN_ONLY_MSG, parse_mode=ParseMode.HTML)

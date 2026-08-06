@@ -3,18 +3,18 @@ from __future__ import annotations
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from utils.helpers import to_small_caps
+from utils.helpers import to_small_caps, format_duration_mins
 
+_LIFETIME_MINS = 52560000  # 36500 days in minutes
 
-# Duration options available for plans (days, display label)
+# Duration options available for plans (minutes, display label)
 DURATION_OPTIONS: list[tuple[int, str]] = [
-    (0,     "1 ᴍɪɴ 🧪"),  # TEST ONLY — remove after testing
-    (15,    "15 ᴅᴀʏs"),
-    (30,    "1 ᴍᴏɴᴛʜ"),
-    (90,    "3 ᴍᴏɴᴛʜs"),
-    (180,   "6 ᴍᴏɴᴛʜs"),
-    (365,   "12 ᴍᴏɴᴛʜs"),
-    (36500, "ʟɪғᴇᴛɪᴍᴇ"),
+    (21600,    "15 ᴅᴀʏs"),
+    (43200,    "1 ᴍᴏɴᴛʜ"),
+    (129600,   "3 ᴍᴏɴᴛʜs"),
+    (259200,   "6 ᴍᴏɴᴛʜs"),
+    (525600,   "12 ᴍᴏɴᴛʜs"),
+    (52560000, "ʟɪғᴇᴛɪᴍᴇ"),
 ]
 
 
@@ -103,7 +103,7 @@ def duration_keyboard(plan_name: str, durations: list[dict], demo_link: str = ""
     buttons = [
         InlineKeyboardButton(
             text=tier["label"],
-            callback_data=f"plan_duration:{plan_name}:{tier['days']}",
+            callback_data=f"plan_duration:{plan_name}:{tier['minutes']}",
             style="success",
         )
         for tier in durations
@@ -394,17 +394,32 @@ def cancel_keyboard() -> InlineKeyboardMarkup:
 def admin_duration_select_keyboard(selected: list[int]) -> InlineKeyboardMarkup:
     """Multi-select keyboard for admin to choose which duration tiers to offer."""
     builder = InlineKeyboardBuilder()
+    predefined_mins = {mins for mins, _ in DURATION_OPTIONS}
 
-    for days, label in DURATION_OPTIONS:
-        check = "✅" if days in selected else "☑️"
+    for mins, label in DURATION_OPTIONS:
+        check = "✅" if mins in selected else "☑️"
         builder.row(
             InlineKeyboardButton(
                 text=f"{check} {label}",
-                callback_data=f"adm_dur:{days}",
+                callback_data=f"adm_dur:{mins}",
                 style="primary",
             )
         )
 
+    # Show custom durations already added (tap to remove)
+    for mins in selected:
+        if mins not in predefined_mins:
+            builder.row(
+                InlineKeyboardButton(
+                    text=f"✅ {format_duration_mins(mins)} (ᴄᴜsᴛᴏᴍ) ✖",
+                    callback_data=f"adm_dur:{mins}",
+                    style="primary",
+                )
+            )
+
+    builder.row(
+        InlineKeyboardButton(text="➕ ᴄᴜsᴛᴏᴍ ᴅᴜʀᴀᴛɪᴏɴ", callback_data="adm_dur_custom", style="primary"),
+    )
     builder.row(
         InlineKeyboardButton(text="✅ ᴅᴏɴᴇ", callback_data="adm_dur_done", style="success"),
         InlineKeyboardButton(text="✖ ᴄᴀɴᴄᴇʟ", callback_data="admin_cancel", style="danger"),
