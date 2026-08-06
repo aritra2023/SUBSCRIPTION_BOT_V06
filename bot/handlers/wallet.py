@@ -127,12 +127,12 @@ async def cb_recharge_crypto(callback: CallbackQuery) -> None:
 async def cb_recharge_gift_card(callback: CallbackQuery) -> None:
     text = (
         "<blockquote><b>ᴀᴍᴀᴢᴏɴ ɢɪғᴛ ᴄᴀʀᴅ ʀᴇᴄʜᴀʀɢᴇ</b></blockquote>\n\n"
-        "➲ ᴏᴘᴇɴ <b>Amazon.in</b>\n"
+        "<blockquote>➲ ᴏᴘᴇɴ <b>Amazon.in</b>\n"
         "➲ sᴇᴀʀᴄʜ <b>Amazon Pay Gift Card</b>\n"
         "➲ sᴇʟᴇᴄᴛ ᴀᴍᴏᴜɴᴛ ᴀɴᴅ ʙᴜʏ\n"
-        "➲ ʏᴏᴜ ᴡɪʟʟ ɢᴇᴛ ᴀ <b>16-ᴅɪɢɪᴛ ᴄᴏᴅᴇ</b>\n\n"
-        "➲ sᴇɴᴅ ᴛʜᴀᴛ ᴄᴏᴅᴇ ᴛᴏ ᴀᴅᴍɪɴ.\n\n"
-        "<blockquote>ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ ᴡɪʟʟ ʙᴇ ʀᴇᴄʜᴀʀɢᴇᴅ ɪɴsᴛᴀɴᴛʟʏ. ✓</blockquote>"
+        "➲ ʏᴏᴜ ᴡɪʟʟ ɢᴇᴛ ᴀ <b>16-ᴅɪɢɪᴛ ᴄᴏᴅᴇ</b>\n"
+        "➲ sᴇɴᴅ ᴛʜᴀᴛ ᴄᴏᴅᴇ ᴛᴏ ᴀᴅᴍɪɴ.</blockquote>\n\n"
+        "ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ ᴡɪʟʟ ʙᴇ ʀᴇᴄʜᴀʀɢᴇᴅ ɪɴsᴛᴀɴᴛʟʏ. ✓"
     )
     try:
         if callback.message and callback.message.photo:
