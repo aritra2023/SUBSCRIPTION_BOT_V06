@@ -670,7 +670,7 @@ async def cb_admin_plan_edit_durations(callback: CallbackQuery, state: FSMContex
             f"<blockquote><b>⏱ ᴇᴅɪᴛ ᴅᴜʀᴀᴛɪᴏɴs — {plan['display_name']}</b></blockquote>\n\n"
             "✅ = ᴄᴜʀʀᴇɴᴛʟʏ ᴀᴄᴛɪᴠᴇ. ᴛᴀᴘ ᴛᴏ ᴛᴏɢɢʟᴇ, ᴛʜᴇɴ ᴘʀᴇss <b>ᴅᴏɴᴇ</b>:",
             parse_mode=ParseMode.HTML,
-            reply_markup=admin_duration_select_keyboard(current_days),
+            reply_markup=admin_duration_select_keyboard(current_mins),
         )
     await state.set_state(AdminStates.editplan_durations)
     await callback.answer()
