@@ -398,18 +398,18 @@ async def cb_join_channel(callback: CallbackQuery) -> None:
         )
         return
 
-    # Edit the current message to show the link inline
-    joined_set.add(idx)
     await mark_channel_joined(user_id, idx)
 
-    new_text = (
-        f"<blockquote><b>✓ sᴜʙsᴄʀɪᴘᴛɪᴏɴ ᴀᴄᴛɪᴠᴀᴛᴇᴅ!</b></blockquote>\n\n"
-        f"🔗 <b>ᴄʜᴀɴɴᴇʟ ʟɪɴᴋ:</b>\n{link}\n\n"
-        f"<i>ᴛᴀᴘ ᴛʜᴇ ʟɪɴᴋ ᴀʙᴏᴠᴇ ᴛᴏ ᴊᴏɪɴ.</i>"
-    )
+    # Show link as a URL button — NOT as text in the message body.
+    # Telegram fetches link previews from message text, which consumes
+    # member_limit=1 invite links before the user can tap them.
+    # URL buttons are never previewed, so the link stays valid.
+    new_text = "<blockquote><b>✓ ʟɪɴᴋ ʀᴇᴀᴅʏ!</b></blockquote>\n\n<i>ᴛᴀᴘ ᴛʜᴇ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ᴊᴏɪɴ ᴛʜᴇ ᴄʜᴀɴɴᴇʟ.</i>"
     from aiogram.utils.keyboard import InlineKeyboardBuilder as IKB
+    from aiogram.types import InlineKeyboardButton as IKBtn
     done_kb = IKB()
-    done_kb.button(text="« ʙᴀᴄᴋ ᴛᴏ ᴍᴇɴᴜ", callback_data="back_main")
+    done_kb.row(IKBtn(text="➲ ᴊᴏɪɴ ᴄʜᴀɴɴᴇʟ", url=link))
+    done_kb.row(IKBtn(text="« ʙᴀᴄᴋ ᴛᴏ ᴍᴇɴᴜ", callback_data="back_main"))
     try:
         if callback.message and callback.message.photo:
             await callback.message.edit_caption(caption=new_text, parse_mode=ParseMode.HTML, reply_markup=done_kb.as_markup())
@@ -417,8 +417,7 @@ async def cb_join_channel(callback: CallbackQuery) -> None:
             await callback.message.edit_text(text=new_text, parse_mode=ParseMode.HTML, reply_markup=done_kb.as_markup())
     except Exception as e:
         logger.warning("Could not edit message with link: %s", e)
-        # Fallback: send as new message
-        await bot.send_message(user_id, f"🔗 <b>ᴄʜᴀɴɴᴇʟ ʟɪɴᴋ:</b>\n{link}", parse_mode=ParseMode.HTML)
+        await bot.send_message(user_id, new_text, parse_mode=ParseMode.HTML, reply_markup=done_kb.as_markup())
 
     await callback.answer()
 
