@@ -85,13 +85,7 @@ async def cb_toggle_auto_renew(callback: CallbackQuery) -> None:
 
 @router.callback_query(lambda c: c.data == "add_balance")
 async def cb_add_balance(callback: CallbackQuery) -> None:
-    text = (
-        "<blockquote><b>➲ sᴇʟᴇᴄᴛ ᴘᴀʏᴍᴇɴᴛ ᴍᴇᴛʜᴏᴅ</b></blockquote>\n\n"
-        "ᴄʜᴏᴏsᴇ ʜᴏᴡ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ʀᴇᴄʜᴀʀɢᴇ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ:\n\n"
-        "⚡ <b>ᴜᴘɪ</b> — ɪɴsᴛᴀɴᴛ, ғᴀsᴛᴇsᴛ ᴏᴘᴛɪᴏɴ\n"
-        "₿ <b>ᴄʀʏᴘᴛᴏ</b> — ʙɪᴛᴄᴏɪɴ, USDT ᴀɴᴅ ᴍᴏʀᴇ\n"
-        "🎁 <b>ᴀᴍᴀᴢᴏɴ ɢɪғᴛ ᴄᴀʀᴅ</b> — ʀᴇᴅᴇᴇᴍ ʏᴏᴜʀ ɢɪғᴛ ᴄᴀʀᴅ"
-    )
+    text = "<blockquote><b>➲ sᴇʟᴇᴄᴛ ᴘᴀʏᴍᴇɴᴛ ᴍᴇᴛʜᴏᴅ</b></blockquote>"
     try:
         if callback.message and callback.message.photo:
             await callback.message.edit_caption(
@@ -130,9 +124,8 @@ async def cb_recharge_crypto(callback: CallbackQuery) -> None:
 async def cb_recharge_gift_card(callback: CallbackQuery) -> None:
     text = (
         "<blockquote><b>ᴀᴍᴀᴢᴏɴ ɢɪғᴛ ᴄᴀʀᴅ ʀᴇᴄʜᴀʀɢᴇ</b></blockquote>\n\n"
-        "➲ ᴀᴍᴀᴢᴏɴ ɢɪғᴛ ᴄᴀʀᴅ ᴋᴀ <b>16-ᴅɪɢɪᴛ ᴄᴏᴅᴇ</b> ʟᴇᴋᴇ\n"
-        "ɴᴇᴇᴄʜᴇ ᴅɪʏᴇ ʙᴜᴛᴛᴏɴ sᴇ ᴀᴅᴍɪɴ ᴋᴏ sᴇɴᴅ ᴋᴀʀᴏ.\n\n"
-        "<blockquote>ᴀᴅᴍɪɴ ᴛᴜʀᴀɴᴛ ᴛᴜᴍʜᴀʀᴀ ᴡᴀʟʟᴇᴛ ʀᴇᴄʜᴀʀɢᴇ ᴋᴀʀ ᴅᴇɢᴀ. ✅</blockquote>"
+        "➲ sᴇɴᴅ ʏᴏᴜʀ <b>16-ᴅɪɢɪᴛ ɢɪғᴛ ᴄᴀʀᴅ ᴄᴏᴅᴇ</b> ᴛᴏ ᴀᴅᴍɪɴ.\n\n"
+        "<blockquote>ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ ᴡɪʟʟ ʙᴇ ʀᴇᴄʜᴀʀɢᴇᴅ ɪɴsᴛᴀɴᴛʟʏ. ✅</blockquote>"
     )
     try:
         if callback.message and callback.message.photo:
