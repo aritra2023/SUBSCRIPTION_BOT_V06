@@ -394,8 +394,6 @@ def cancel_keyboard() -> InlineKeyboardMarkup:
 def admin_duration_select_keyboard(selected: list[int]) -> InlineKeyboardMarkup:
     """Multi-select keyboard for admin to choose which duration tiers to offer."""
     builder = InlineKeyboardBuilder()
-    predefined_mins = {mins for mins, _ in DURATION_OPTIONS}
-
     for mins, label in DURATION_OPTIONS:
         check = "✅" if mins in selected else "☑️"
         builder.row(
@@ -406,20 +404,6 @@ def admin_duration_select_keyboard(selected: list[int]) -> InlineKeyboardMarkup:
             )
         )
 
-    # Show custom durations already added (tap to remove)
-    for mins in selected:
-        if mins not in predefined_mins:
-            builder.row(
-                InlineKeyboardButton(
-                    text=f"✅ {format_duration_mins(mins)} (ᴄᴜsᴛᴏᴍ) ✖",
-                    callback_data=f"adm_dur:{mins}",
-                    style="primary",
-                )
-            )
-
-    builder.row(
-        InlineKeyboardButton(text="➕ ᴄᴜsᴛᴏᴍ ᴅᴜʀᴀᴛɪᴏɴ", callback_data="adm_dur_custom", style="primary"),
-    )
     builder.row(
         InlineKeyboardButton(text="✅ ᴅᴏɴᴇ", callback_data="adm_dur_done", style="success"),
         InlineKeyboardButton(text="✖ ᴄᴀɴᴄᴇʟ", callback_data="admin_cancel", style="danger"),

@@ -69,7 +69,6 @@ class AdminStates(StatesGroup):
     addplan_demo_link = State()
     addplan_payment_proof = State()
     addplan_durations = State()
-    addplan_custom_dur = State()
     addplan_pricing = State()
     addplan_channels = State()
     # Edit plan flow
@@ -79,7 +78,6 @@ class AdminStates(StatesGroup):
     editplan_ch_add = State()
     editplan_price = State()
     editplan_durations = State()
-    editplan_custom_dur = State()
     editplan_duration_pricing = State()
 
 
@@ -693,42 +691,6 @@ async def cb_editplan_duration_toggle(callback: CallbackQuery, state: FSMContext
     await callback.answer()
 
 
-@router.callback_query(StateFilter(AdminStates.editplan_durations), F.data == "adm_dur_custom")
-async def cb_editplan_custom_dur(callback: CallbackQuery, state: FSMContext) -> None:
-    if callback.message:
-        await callback.message.edit_text(
-            "<blockquote><b>➕ ᴄᴜsᴛᴏᴍ ᴅᴜʀᴀᴛɪᴏɴ</b></blockquote>\n\n"
-            "ᴅᴜʀᴀᴛɪᴏɴ <b>ᴍɪɴᴜᴛᴇs</b> ᴍᴇɪɴ ᴅᴀʟᴏ:\n\n"
-            "<i>ᴇ.ɢ. 60 = 1 ʜʀ · 1440 = 1 ᴅᴀʏ · 10080 = 7 ᴅᴀʏs</i>",
-            parse_mode=ParseMode.HTML,
-            reply_markup=cancel_keyboard(),
-        )
-    await state.set_state(AdminStates.editplan_custom_dur)
-    await callback.answer()
-
-
-@router.message(StateFilter(AdminStates.editplan_custom_dur), F.text)
-async def handle_editplan_custom_dur(message: Message, state: FSMContext) -> None:
-    try:
-        mins = int((message.text or "").strip())
-        if mins <= 0:
-            raise ValueError
-    except ValueError:
-        await message.answer("❌ ᴠᴀʟɪᴅ ɴᴜᴍʙᴇʀ ᴅᴀʟᴏ (ᴍɪɴᴜᴛᴇs ᴍᴇɪɴ, e.g. 60).")
-        return
-    data = await state.get_data()
-    selected: list[int] = list(data.get("selected_durations", []))
-    if mins not in selected:
-        selected.append(mins)
-    await state.update_data(selected_durations=selected)
-    await state.set_state(AdminStates.editplan_durations)
-    await message.answer(
-        f"✅ <b>{format_duration_mins(mins)}</b> ᴀᴅᴅᴇᴅ!\n\nᴀᴜʀ ᴀᴅᴅ ᴋᴀʀᴏ ʏᴀ <b>ᴅᴏɴᴇ</b> ᴅᴀʙᴀᴏ:",
-        parse_mode=ParseMode.HTML,
-        reply_markup=admin_duration_select_keyboard(selected),
-    )
-
-
 @router.callback_query(StateFilter(AdminStates.editplan_durations), F.data == "adm_dur_done")
 async def cb_editplan_duration_done(callback: CallbackQuery, state: FSMContext) -> None:
     data = await state.get_data()
@@ -932,42 +894,6 @@ async def cb_addplan_duration_toggle(callback: CallbackQuery, state: FSMContext)
     if callback.message:
         await callback.message.edit_reply_markup(reply_markup=admin_duration_select_keyboard(selected))
     await callback.answer()
-
-
-@router.callback_query(StateFilter(AdminStates.addplan_durations), F.data == "adm_dur_custom")
-async def cb_addplan_custom_dur(callback: CallbackQuery, state: FSMContext) -> None:
-    if callback.message:
-        await callback.message.edit_text(
-            "<blockquote><b>➕ ᴄᴜsᴛᴏᴍ ᴅᴜʀᴀᴛɪᴏɴ</b></blockquote>\n\n"
-            "ᴅᴜʀᴀᴛɪᴏɴ <b>ᴍɪɴᴜᴛᴇs</b> ᴍᴇɪɴ ᴅᴀʟᴏ:\n\n"
-            "<i>ᴇ.ɢ. 60 = 1 ʜʀ · 1440 = 1 ᴅᴀʏ · 10080 = 7 ᴅᴀʏs</i>",
-            parse_mode=ParseMode.HTML,
-            reply_markup=cancel_keyboard(),
-        )
-    await state.set_state(AdminStates.addplan_custom_dur)
-    await callback.answer()
-
-
-@router.message(StateFilter(AdminStates.addplan_custom_dur), F.text)
-async def handle_addplan_custom_dur(message: Message, state: FSMContext) -> None:
-    try:
-        mins = int((message.text or "").strip())
-        if mins <= 0:
-            raise ValueError
-    except ValueError:
-        await message.answer("❌ ᴠᴀʟɪᴅ ɴᴜᴍʙᴇʀ ᴅᴀʟᴏ (ᴍɪɴᴜᴛᴇs ᴍᴇɪɴ, e.g. 60).")
-        return
-    data = await state.get_data()
-    selected: list[int] = list(data.get("selected_durations", []))
-    if mins not in selected:
-        selected.append(mins)
-    await state.update_data(selected_durations=selected)
-    await state.set_state(AdminStates.addplan_durations)
-    await message.answer(
-        f"✅ <b>{format_duration_mins(mins)}</b> ᴀᴅᴅᴇᴅ!\n\nᴀᴜʀ ᴀᴅᴅ ᴋᴀʀᴏ ʏᴀ <b>ᴅᴏɴᴇ</b> ᴅᴀʙᴀᴏ:",
-        parse_mode=ParseMode.HTML,
-        reply_markup=admin_duration_select_keyboard(selected),
-    )
 
 
 @router.callback_query(StateFilter(AdminStates.addplan_durations), F.data == "adm_dur_done")
