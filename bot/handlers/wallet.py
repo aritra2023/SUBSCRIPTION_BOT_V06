@@ -85,7 +85,10 @@ async def cb_toggle_auto_renew(callback: CallbackQuery) -> None:
 
 @router.callback_query(lambda c: c.data == "add_balance")
 async def cb_add_balance(callback: CallbackQuery) -> None:
-    text = "<blockquote><b>➲ sᴇʟᴇᴄᴛ ᴘᴀʏᴍᴇɴᴛ ᴍᴇᴛʜᴏᴅ</b></blockquote>"
+    text = (
+        "<blockquote><b>➲ sᴇʟᴇᴄᴛ ᴘᴀʏᴍᴇɴᴛ ᴍᴇᴛʜᴏᴅ</b></blockquote>\n\n"
+        "ᴄʜᴏᴏsᴇ ʜᴏᴡ ʏᴏᴜ ᴡᴀɴᴛ ᴛᴏ ʀᴇᴄʜᴀʀɢᴇ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ:"
+    )
     try:
         if callback.message and callback.message.photo:
             await callback.message.edit_caption(
