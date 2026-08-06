@@ -29,19 +29,19 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
         )
     )
     builder.row(
-        InlineKeyboardButton(
-            text="➲ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ",
-            callback_data="wallet",
-            style="danger",
-        )
-    )
-    builder.row(
         InlineKeyboardButton(text="• ᴠɪᴇᴡ ᴘʟᴀɴ •", callback_data="view_plan", style="primary"),
         InlineKeyboardButton(text="• ʜᴇʟᴘ •", callback_data="help", style="primary"),
     )
     builder.row(
         InlineKeyboardButton(text="• ʜɪsᴛᴏʀʏ •", callback_data="history", style="primary"),
         InlineKeyboardButton(text="• sᴜᴘᴘᴏʀᴛ •", callback_data="support", style="primary"),
+    )
+    builder.row(
+        InlineKeyboardButton(
+            text="➲ ʏᴏᴜʀ ᴡᴀʟʟᴇᴛ",
+            callback_data="wallet",
+            style="danger",
+        )
     )
 
     return builder.as_markup()
@@ -148,21 +148,21 @@ def add_balance_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(
         InlineKeyboardButton(
-            text="➲ ₹ ᴜᴘɪ  [ ғᴀsᴛᴇsᴛ ⚡]",
+            text="₹ ᴜᴘɪ  [ ғᴀsᴛᴇsᴛ ⚡]",
             callback_data="recharge_upi",
             style="success",
         )
     )
     builder.row(
         InlineKeyboardButton(
-            text="➲ ₿ ᴄʀʏᴘᴛᴏ",
+            text="₿ ᴄʀʏᴘᴛᴏ",
             callback_data="recharge_crypto",
             style="primary",
         )
     )
     builder.row(
         InlineKeyboardButton(
-            text="➲ ᴀᴍᴀᴢᴏɴ ɢɪғᴛ ᴄᴀʀᴅ",
+            text="ᴀᴍᴀᴢᴏɴ ɢɪғᴛ ᴄᴀʀᴅ",
             callback_data="recharge_gift_card",
             style="primary",
         )
