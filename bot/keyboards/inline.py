@@ -148,7 +148,7 @@ def add_balance_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(
         InlineKeyboardButton(
-            text="📱 ᴜᴘɪ — PhonePe / GPay / Paytm",
+            text="ᴜᴘɪ  [ғᴀsᴛᴇsᴛ]",
             callback_data="recharge_upi",
             style="success",
         )
