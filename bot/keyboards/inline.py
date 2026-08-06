@@ -148,7 +148,7 @@ def add_balance_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(
         InlineKeyboardButton(
-            text="⚡ ᴜᴘɪ  (ғᴀsᴛᴇsᴛ)",
+            text="📱 ᴜᴘɪ — PhonePe / GPay / Paytm",
             callback_data="recharge_upi",
             style="success",
         )
@@ -162,7 +162,7 @@ def add_balance_keyboard() -> InlineKeyboardMarkup:
     )
     builder.row(
         InlineKeyboardButton(
-            text="🎁 ᴀᴍᴀᴢᴏɴ ɢɪғᴛ ᴄᴀʀᴅ",
+            text="ᴀᴍᴀᴢᴏɴ ɢɪғᴛ ᴄᴀʀᴅ",
             callback_data="recharge_gift_card",
             style="primary",
         )
@@ -220,7 +220,7 @@ def wallet_keyboard(auto_renew: bool = True) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
 
     builder.row(
-        InlineKeyboardButton(text="➲ ᴀᴅᴅ ʙᴀʟᴀɴᴄᴇ", callback_data="add_balance", style="primary")
+        InlineKeyboardButton(text="➲ ᴀᴅᴅ ʙᴀʟᴀɴᴄᴇ", callback_data="add_balance", style="success")
     )
     renew_label = "ᴏɴ" if auto_renew else "ᴏғғ"
     renew_style = "success" if auto_renew else "danger"
